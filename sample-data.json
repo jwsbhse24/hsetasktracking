@@ -1,0 +1,56 @@
+{
+  "users": [
+    { "id": 1, "username": "admin", "password": "admin123", "role": "admin", "name": "System Administrator", "dept": "IT/Admin" },
+    { "id": 2, "username": "oshcoord", "password": "osh123", "role": "osh_coordinator", "name": "Ahmad Fadzli", "dept": "HSE" },
+    { "id": 3, "username": "hseagm", "password": "agm123", "role": "hse_agm", "name": "Dato' Rashid Malik", "dept": "HSE Management" }
+  ],
+  "training": [
+    { "id": "TR-001", "employeeName": "Ahmad Fadzli", "employeeId": "EMP-001", "department": "HSE", "trainingName": "Safety Officer Refresher", "trainingDate": "2024-01-15", "expiryDate": "2026-01-15", "status": "Valid", "evidence": "cert_001.pdf", "remarks": "Annual renewal required", "hours": 8 },
+    { "id": "TR-002", "employeeName": "Siti Norzila", "employeeId": "EMP-002", "department": "Operations", "trainingName": "CHRA Certified Assessor", "trainingDate": "2023-06-20", "expiryDate": "2025-06-20", "status": "Expired", "evidence": "cert_002.pdf", "remarks": "Renewal overdue", "hours": 16 },
+    { "id": "TR-003", "employeeName": "Rajendran Kumar", "employeeId": "EMP-003", "department": "Maintenance", "trainingName": "PTW Authorised Person", "trainingDate": "2024-09-10", "expiryDate": "2025-06-15", "status": "Expiring Soon", "evidence": "cert_003.pdf", "remarks": "Book refresher", "hours": 8 },
+    { "id": "TR-004", "employeeName": "Lim Mei Ling", "employeeId": "EMP-004", "department": "Lab", "trainingName": "Chemical Handling", "trainingDate": "2024-03-01", "expiryDate": "2026-03-01", "status": "Valid", "evidence": "cert_004.pdf", "remarks": "", "hours": 4 },
+    { "id": "TR-005", "employeeName": "Mohd Hafiz", "employeeId": "EMP-005", "department": "Operations", "trainingName": "First Aid & CPR", "trainingDate": "2023-11-10", "expiryDate": "2025-11-10", "status": "Valid", "evidence": "cert_005.pdf", "remarks": "", "hours": 8 },
+    { "id": "TR-006", "employeeName": "Noraini Bt Hassan", "employeeId": "EMP-006", "department": "Admin", "trainingName": "Fire Safety Warden", "trainingDate": "2024-02-14", "expiryDate": "2025-05-01", "status": "Expiring Soon", "evidence": "cert_006.pdf", "remarks": "Schedule refresher", "hours": 4 }
+  ],
+  "issues": [
+    { "id": "ISS-001", "category": "Unsafe Condition", "description": "Oil spill near pump station P-03, slipping hazard", "riskLevel": "High", "location": "Pump Station P-03", "pic": "Ahmad Fadzli", "dateReported": "2025-04-10", "dueDate": "2025-04-17", "status": "Overdue", "evidence": "", "verification": "" },
+    { "id": "ISS-002", "category": "Near Miss", "description": "Forklift narrowly missed pedestrian at gate 2", "riskLevel": "Critical", "location": "Gate 2 / Logistics Area", "pic": "Rajendran Kumar", "dateReported": "2025-04-20", "dueDate": "2025-04-27", "status": "In Progress", "evidence": "photo_002.jpg", "verification": "" },
+    { "id": "ISS-003", "category": "Unsafe Act", "description": "Worker found not wearing PPE in chemical dosing area", "riskLevel": "Medium", "location": "Chemical Dosing Room", "pic": "Siti Norzila", "dateReported": "2025-05-01", "dueDate": "2025-05-08", "status": "Pending Verification", "evidence": "photo_003.jpg", "verification": "Action taken, retrained" },
+    { "id": "ISS-004", "category": "Fire Extinguisher", "description": "CO2 extinguisher at control room expired", "riskLevel": "High", "location": "Control Room", "pic": "Mohd Hafiz", "dateReported": "2025-04-28", "dueDate": "2025-05-05", "status": "Closed", "evidence": "cert_fe_001.pdf", "verification": "Replaced on 05/05/2025" },
+    { "id": "ISS-005", "category": "Housekeeping", "description": "Blocked emergency exit at warehouse section B", "riskLevel": "High", "location": "Warehouse B", "pic": "Lim Mei Ling", "dateReported": "2025-05-03", "dueDate": "2025-05-10", "status": "Open", "evidence": "", "verification": "" },
+    { "id": "ISS-006", "category": "LEV Inspection", "description": "LEV unit at chemical mixing station overdue for inspection", "riskLevel": "Medium", "location": "Chemical Mixing Station", "pic": "Ahmad Fadzli", "dateReported": "2025-04-15", "dueDate": "2025-04-30", "status": "Overdue", "evidence": "", "verification": "" }
+  ],
+  "capa": [
+    { "id": "CAPA-001", "isoStandard": "ISO 45001", "findingType": "NCR", "description": "No documented procedure for confined space entry at WTP-2", "rootCause": "Process gap – SOP not updated post-expansion", "correctiveAction": "Develop and approve CS Entry SOP, conduct toolbox talk", "pic": "Ahmad Fadzli", "dueDate": "2025-05-15", "status": "In Progress", "verification": "", "evidence": "" },
+    { "id": "CAPA-002", "isoStandard": "ISO 9001", "findingType": "OFI", "description": "Customer complaint response time exceeds 5-day target", "rootCause": "Manual tracking system, no escalation trigger", "correctiveAction": "Implement digital complaint tracker with auto-escalation", "pic": "Lim Mei Ling", "dueDate": "2025-06-01", "status": "Open", "verification": "", "evidence": "" },
+    { "id": "CAPA-003", "isoStandard": "ISO 37001", "findingType": "NCR", "description": "Gift register not maintained for Q1 2025", "rootCause": "Responsibility not assigned after staff resignation", "correctiveAction": "Reassign custodian, back-fill Q1 entries, schedule quarterly review", "pic": "Noraini Bt Hassan", "dueDate": "2025-04-30", "status": "Overdue", "verification": "", "evidence": "" },
+    { "id": "CAPA-004", "isoStandard": "ISO 39001", "findingType": "NCR", "description": "Driver fatigue monitoring programme not documented", "rootCause": "Policy awareness gap among transport supervisors", "correctiveAction": "Develop fatigue management SOP, mandatory training for drivers", "pic": "Rajendran Kumar", "dueDate": "2025-05-20", "status": "In Progress", "verification": "", "evidence": "" },
+    { "id": "CAPA-005", "isoStandard": "ISO 45001", "findingType": "MRM Action", "description": "Risk register not updated following process change at WTP-1", "rootCause": "MOC process not linked to risk register update", "correctiveAction": "Update risk register, revise MOC procedure", "pic": "Ahmad Fadzli", "dueDate": "2025-05-30", "status": "Open", "verification": "", "evidence": "" },
+    { "id": "CAPA-006", "isoStandard": "ISO 9001", "findingType": "Audit Finding", "description": "Calibration records for flow meters incomplete", "rootCause": "Calibration schedule not tracked in CMMS", "correctiveAction": "Integrate calibration schedule into CMMS, assign custodian", "pic": "Mohd Hafiz", "dueDate": "2025-04-15", "status": "Closed", "verification": "Verified by QA Mgr 20/04/2025", "evidence": "calib_records.pdf" }
+  ],
+  "compliance": [
+    { "id": "CMP-001", "item": "JKKP 6 – Boiler Registration", "authority": "DOSH", "referenceNo": "JKKP6/2023/001", "expiryDate": "2025-12-31", "pic": "Ahmad Fadzli", "status": "Valid", "reminderAlert": "30 days", "evidence": "jkkp6_cert.pdf", "remarks": "" },
+    { "id": "CMP-002", "item": "JKKP 8 – Pressure Vessel", "authority": "DOSH", "referenceNo": "JKKP8/2024/003", "expiryDate": "2025-05-30", "pic": "Rajendran Kumar", "status": "Expiring Soon", "reminderAlert": "30 days", "evidence": "jkkp8_cert.pdf", "remarks": "Renewal submitted" },
+    { "id": "CMP-003", "item": "JKKP 12 – Machinery Registration", "authority": "DOSH", "referenceNo": "JKKP12/2023/007", "expiryDate": "2026-03-15", "pic": "Mohd Hafiz", "status": "Valid", "reminderAlert": "60 days", "evidence": "jkkp12_cert.pdf", "remarks": "" },
+    { "id": "CMP-004", "item": "Competent Fitter (CF) – Renewal", "authority": "DOSH", "referenceNo": "CF/2022/0041", "expiryDate": "2025-04-10", "pic": "Rajendran Kumar", "status": "Expired", "reminderAlert": "30 days", "evidence": "", "remarks": "Renewal overdue – action required" },
+    { "id": "CMP-005", "item": "CHRA Report", "authority": "DOSH", "referenceNo": "CHRA/2023/WTP01", "expiryDate": "2026-01-20", "pic": "Siti Norzila", "status": "Valid", "reminderAlert": "60 days", "evidence": "chra_report.pdf", "remarks": "" },
+    { "id": "CMP-006", "item": "Noise Risk Assessment (NRA)", "authority": "DOSH", "referenceNo": "NRA/2022/008", "expiryDate": "2025-06-20", "pic": "Ahmad Fadzli", "status": "Expiring Soon", "reminderAlert": "30 days", "evidence": "nra_report.pdf", "remarks": "Schedule renewal assessment" },
+    { "id": "CMP-007", "item": "CIMAH NRA Renewal", "authority": "DOSH", "referenceNo": "CIMAH/2023/002", "expiryDate": "2026-05-01", "pic": "Siti Norzila", "status": "Valid", "reminderAlert": "90 days", "evidence": "cimah_nra.pdf", "remarks": "" },
+    { "id": "CMP-008", "item": "Site Registration – WTP Main", "authority": "DOSH", "referenceNo": "SR/2020/WTP01", "expiryDate": "2027-01-01", "pic": "Ahmad Fadzli", "status": "Valid", "reminderAlert": "90 days", "evidence": "site_reg.pdf", "remarks": "" }
+  ],
+  "shc": [
+    { "id": "SHC-001", "meetingDate": "2025-04-07", "agenda": "Q1 HSE Performance Review; CAPA Update; Training Status", "attendance": "85", "issueRaised": "Emergency evacuation drill not conducted in Q1", "actionRequired": "Schedule drill before end of April 2025", "pic": "Ahmad Fadzli", "dueDate": "2025-04-30", "status": "Closed", "verification": "Drill conducted 28/04/2025" },
+    { "id": "SHC-002", "meetingDate": "2025-04-07", "agenda": "Q1 HSE Performance Review", "attendance": "85", "issueRaised": "First aid kit at pump station P-03 incomplete", "actionRequired": "Replenish first aid kit contents per checklist", "pic": "Rajendran Kumar", "dueDate": "2025-04-14", "status": "Overdue", "verification": "" },
+    { "id": "SHC-003", "meetingDate": "2025-05-05", "agenda": "Monthly Safety Walkthrough; Compliance Update", "attendance": "90", "issueRaised": "No emergency contact list posted at gate house", "actionRequired": "Print and laminate emergency contact list, post at gate", "pic": "Noraini Bt Hassan", "dueDate": "2025-05-12", "status": "In Progress", "verification": "" },
+    { "id": "SHC-004", "meetingDate": "2025-05-05", "agenda": "Monthly Safety Walkthrough", "attendance": "90", "issueRaised": "Safety signage at chemical store faded and unclear", "actionRequired": "Replace safety signage – GHS labels and warning signs", "pic": "Siti Norzila", "dueDate": "2025-05-19", "status": "Open", "verification": "" }
+  ],
+  "trendData": {
+    "months": ["Nov", "Dec", "Jan", "Feb", "Mar", "Apr", "May"],
+    "capaOpen": [12, 10, 9, 11, 8, 7, 6],
+    "capaClosed": [3, 5, 4, 6, 5, 7, 4],
+    "issuesReported": [8, 6, 10, 7, 9, 11, 6],
+    "issuesClosed": [5, 6, 7, 6, 8, 8, 4],
+    "trainingCompliance": [72, 75, 78, 80, 82, 85, 83],
+    "incidents": [1, 0, 2, 1, 0, 1, 0]
+  }
+}

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Login — OI/HSE Governance System</title>
+<link rel="stylesheet" href="style.css"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+</head>
+<body>
+<div class="login-page">
+  <div class="login-bg-grid"></div>
+  <div class="login-bg-glow"></div>
+  <div class="login-bg-glow2"></div>
+
+  <div class="login-card">
+    <div class="login-logo">🏭</div>
+    <div class="login-title">OI/HSE Governance</div>
+    <div class="login-subtitle">INTEGRATED COMPLIANCE & SAFETY MONITORING SYSTEM</div>
+
+    <!-- Quick role select -->
+    <p style="font-size:11px;color:var(--text-muted);text-align:center;margin-bottom:8px;font-family:var(--font-mono);">QUICK SELECT ROLE</p>
+    <div class="role-cards">
+      <div class="role-card" onclick="quickLogin('admin','admin123','admin')">
+        <div class="role-card-icon">🔐</div>
+        <div class="role-card-label">ADMIN</div>
+      </div>
+      <div class="role-card" onclick="quickLogin('oshcoord','osh123','osh_coordinator')">
+        <div class="role-card-icon">🦺</div>
+        <div class="role-card-label">OSH COORD</div>
+      </div>
+      <div class="role-card" onclick="quickLogin('hseagm','agm123','hse_agm')">
+        <div class="role-card-icon">👔</div>
+        <div class="role-card-label">HSE AGM</div>
+      </div>
+    </div>
+
+    <div style="text-align:center;color:var(--text-muted);font-size:11px;margin:10px 0 18px;font-family:var(--font-mono);">— OR ENTER CREDENTIALS —</div>
+
+    <div class="form-group">
+      <label class="form-label">Username</label>
+      <input type="text" id="loginUser" class="form-control-sys" placeholder="Enter username" autocomplete="username"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Password</label>
+      <input type="password" id="loginPass" class="form-control-sys" placeholder="Enter password" autocomplete="current-password"/>
+    </div>
+    <button class="btn-sys btn-primary-sys" style="width:100%;justify-content:center;margin-top:4px;" onclick="doLogin()">
+      <i class="fa-solid fa-arrow-right-to-bracket"></i> Sign In
+    </button>
+    <div class="login-err" id="loginErr"><i class="fa-solid fa-circle-exclamation"></i> Invalid credentials. Please try again.</div>
+
+    <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border);font-size:11px;color:var(--text-muted);text-align:center;font-family:var(--font-mono);">
+      <div>Admin: admin / admin123</div>
+      <div>OSH Coordinator: oshcoord / osh123</div>
+      <div>HSE AGM: hseagm / agm123</div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Load users from localStorage or seed from sample
+  function getUsers() {
+    const stored = localStorage.getItem('hse_users');
+    if (stored) return JSON.parse(stored);
+    // Default users
+    const defaults = [
+      { id:1, username:'admin', password:'admin123', role:'admin', name:'System Administrator', dept:'IT/Admin' },
+      { id:2, username:'oshcoord', password:'osh123', role:'osh_coordinator', name:'Ahmad Fadzli', dept:'HSE' },
+      { id:3, username:'hseagm', password:'agm123', role:'hse_agm', name:"Dato' Rashid Malik", dept:'HSE Management' }
+    ];
+    localStorage.setItem('hse_users', JSON.stringify(defaults));
+    return defaults;
+  }
+
+  function quickLogin(user, pass, role) {
+    document.getElementById('loginUser').value = user;
+    document.getElementById('loginPass').value = pass;
+    doLogin();
+  }
+
+  function doLogin() {
+    const uname = document.getElementById('loginUser').value.trim();
+    const pass  = document.getElementById('loginPass').value.trim();
+    const users = getUsers();
+    const match = users.find(u => u.username === uname && u.password === pass);
+    if (match) {
+      sessionStorage.setItem('hse_current_user', JSON.stringify(match));
+      window.location.href = 'index.html';
+    } else {
+      document.getElementById('loginErr').style.display = 'block';
+    }
+  }
+
+  // Enter key
+  document.addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+
+  // If already logged in, redirect
+  if (sessionStorage.getItem('hse_current_user')) {
+    window.location.href = 'index.html';
+  }
+</script>
+</body>
+</html>

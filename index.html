@@ -1,0 +1,2715 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>OI/HSE Governance & Compliance Monitoring System</title>
+<link rel="stylesheet" href="style.css"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+</head>
+<body>
+
+<!-- Sidebar Overlay (mobile) -->
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+<div class="app-wrapper">
+<!-- ═══════════════════════════════════════
+     SIDEBAR
+═══════════════════════════════════════ -->
+<nav id="sidebar">
+  <!-- Brand -->
+  <div class="sidebar-brand">
+    <div class="brand-logo">
+      <div class="brand-icon">🏭</div>
+      <div class="brand-text">
+        <div class="brand-title">OI/HSE System</div>
+        <div class="brand-sub">Governance Platform</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Logged-in user -->
+  <div class="sidebar-user">
+    <div class="user-avatar" id="sidebar-avatar">A</div>
+    <div>
+      <div class="user-info-name" id="sidebar-name">Loading…</div>
+      <div class="user-info-role" id="sidebar-role">—</div>
+    </div>
+  </div>
+
+  <!-- Navigation -->
+  <nav class="sidebar-nav">
+    <div class="nav-section-title">Task Tracking</div>
+    <a class="nav-item" data-page="alltasks" onclick="navigate('alltasks')">
+      <span class="nav-icon"><i class="fa-solid fa-list-check"></i></span> All Tasks
+      <span class="nav-badge" id="nav-badge-alltasks" style="display:none">0</span>
+    </a>
+    <a class="nav-item" data-page="mytasks" onclick="navigate('mytasks')">
+      <span class="nav-icon"><i class="fa-solid fa-user-check"></i></span> My Tasks
+      <span class="nav-badge" id="nav-badge-mytasks" style="display:none">0</span>
+    </a>
+
+    <div class="nav-section-title">Main</div>
+    <a class="nav-item active" data-page="dashboard" onclick="navigate('dashboard')">
+      <span class="nav-icon"><i class="fa-solid fa-gauge-high"></i></span> Dashboard
+    </a>
+
+    <div class="nav-section-title">HSE Operations</div>
+    <a class="nav-item" data-page="training" onclick="navigate('training')">
+      <span class="nav-icon"><i class="fa-solid fa-graduation-cap"></i></span> Training Monitoring
+      <span class="nav-badge" id="nav-badge-training">0</span>
+    </a>
+    <a class="nav-item" data-page="issues" onclick="navigate('issues')">
+      <span class="nav-icon"><i class="fa-solid fa-triangle-exclamation"></i></span> Safety Issues
+      <span class="nav-badge" id="nav-badge-issues">0</span>
+    </a>
+
+    <div class="nav-section-title">Governance</div>
+    <a class="nav-item" data-page="capa" onclick="navigate('capa')">
+      <span class="nav-icon"><i class="fa-solid fa-diagram-next"></i></span> CAPA & ISO
+      <span class="nav-badge" id="nav-badge-capa">0</span>
+    </a>
+    <a class="nav-item" data-page="compliance" onclick="navigate('compliance')">
+      <span class="nav-icon"><i class="fa-solid fa-shield-halved"></i></span> Compliance
+      <span class="nav-badge" id="nav-badge-cmp">0</span>
+    </a>
+    <a class="nav-item" data-page="shc" onclick="navigate('shc')">
+      <span class="nav-icon"><i class="fa-solid fa-people-group"></i></span> SHC Governance
+    </a>
+
+    <div class="nav-section-title">Equipment</div>
+    <a class="nav-item" data-page="cf" onclick="navigate('cf')">
+      <span class="nav-icon"><i class="fa-solid fa-certificate"></i></span> CF Status Tracker
+      <span class="nav-badge" id="nav-badge-cf" style="display:none">!</span>
+    </a>
+
+    <div class="nav-section-title">Reporting</div>
+    <a class="nav-item" data-page="reports" onclick="navigate('reports')">
+      <span class="nav-icon"><i class="fa-solid fa-file-chart-column"></i></span> Reports
+    </a>
+
+    <div class="nav-section-title">System</div>
+    <a class="nav-item" onclick="doLogout()">
+      <span class="nav-icon"><i class="fa-solid fa-arrow-right-from-bracket"></i></span> Logout
+    </a>
+  </nav>
+</nav>
+
+<!-- ═══════════════════════════════════════
+     MAIN CONTENT
+═══════════════════════════════════════ -->
+<div id="main-content">
+
+  <!-- Top Bar -->
+  <header id="topbar">
+    <button class="sidebar-toggle" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
+    <div>
+      <div class="topbar-title" id="topbar-title">Dashboard Overview</div>
+      <div class="topbar-subtitle" id="topbar-subtitle">Integrated OI/HSE Governance Platform</div>
+    </div>
+    <div class="topbar-search">
+      <i class="fa-solid fa-magnifying-glass search-icon"></i>
+      <input type="text" id="global-search" placeholder="Search records…" onkeydown="if(event.key==='Enter')doGlobalSearch(this.value)"/>
+    </div>
+    <!-- Notif -->
+    <div style="position:relative">
+      <div class="topbar-btn" onclick="toggleNotifPanel()" title="Alerts">
+        <i class="fa-solid fa-bell"></i>
+        <span class="notif-dot" id="notif-dot"></span>
+      </div>
+      <!-- Notification Panel -->
+      <div class="notif-panel" id="notif-panel">
+        <div class="notif-panel-header">
+          <span>🔔 Active Alerts</span>
+          <span id="notif-count" style="background:var(--danger);color:#fff;padding:2px 8px;border-radius:10px;font-size:11px">0</span>
+        </div>
+        <div class="notif-list" id="notif-list"></div>
+      </div>
+    </div>
+    <!-- Dark mode -->
+    <div class="topbar-btn" id="darkmode-btn" onclick="toggleDarkMode()" title="Toggle Theme">
+      <i class="fa-solid fa-sun"></i>
+    </div>
+  </header>
+
+  <!-- ═══════════ PAGE VIEWS ═══════════ -->
+  <div class="page-content">
+
+    <!-- ─────── DASHBOARD ─────── -->
+    <div id="page-dashboard" class="page-view active">
+      <div class="module-header">
+        <div>
+          <div class="module-title">Dashboard Overview</div>
+          <div class="module-subtitle">Real-time OI/HSE task monitoring — Water Treatment Plant</div>
+        </div>
+        <div class="module-actions">
+          <button class="btn-sys btn-outline" onclick="navigate('alltasks')"><i class="fa-solid fa-list-check"></i> All Tasks</button>
+          <button class="btn-sys btn-outline" onclick="navigate('mytasks')"><i class="fa-solid fa-user-check"></i> My Tasks</button>
+          <button class="btn-sys btn-outline" onclick="navigate('reports')"><i class="fa-solid fa-file-export"></i> Report</button>
+          <button class="btn-sys btn-primary-sys" onclick="navigate('issues');openIssueModal()"><i class="fa-solid fa-plus"></i> Report Issue</button>
+        </div>
+      </div>
+
+      <!-- KPI Cards -->
+      <div class="kpi-grid">
+        <div class="kpi-card kpi-blue">
+          <div class="kpi-label">Total Open Actions</div>
+          <div class="kpi-value" id="kpi-open">—</div>
+          <div class="kpi-meta">Issues + CAPA + SHC</div>
+          <div class="kpi-icon"><i class="fa-solid fa-list-check"></i></div>
+        </div>
+        <div class="kpi-card kpi-red">
+          <div class="kpi-label">Overdue Actions</div>
+          <div class="kpi-value" id="kpi-overdue">—</div>
+          <div class="kpi-meta">Past due date</div>
+          <div class="kpi-icon"><i class="fa-solid fa-clock-rotate-left"></i></div>
+        </div>
+        <div class="kpi-card kpi-teal">
+          <div class="kpi-label">CAPA Closure</div>
+          <div class="kpi-value" id="kpi-capa">—</div>
+          <div class="kpi-meta">Closure rate</div>
+          <div class="kpi-icon"><i class="fa-solid fa-circle-check"></i></div>
+        </div>
+        <div class="kpi-card kpi-green">
+          <div class="kpi-label">Training Compliance</div>
+          <div class="kpi-value" id="kpi-training">—</div>
+          <div class="kpi-meta">Valid certificates</div>
+          <div class="kpi-icon"><i class="fa-solid fa-graduation-cap"></i></div>
+        </div>
+        <div class="kpi-card kpi-yellow">
+          <div class="kpi-label">Compliance Alerts</div>
+          <div class="kpi-value" id="kpi-compliance">—</div>
+          <div class="kpi-meta">Expiring / Expired</div>
+          <div class="kpi-icon"><i class="fa-solid fa-shield-halved"></i></div>
+        </div>
+        <div class="kpi-card kpi-red">
+          <div class="kpi-label">Critical Issues</div>
+          <div class="kpi-value" id="kpi-critical">—</div>
+          <div class="kpi-meta">Unresolved high risk</div>
+          <div class="kpi-icon"><i class="fa-solid fa-skull-crossbones"></i></div>
+        </div>
+        <div class="kpi-card kpi-purple">
+          <div class="kpi-label">SHC Outstanding</div>
+          <div class="kpi-value" id="kpi-shc">—</div>
+          <div class="kpi-meta">Open SHC actions</div>
+          <div class="kpi-icon"><i class="fa-solid fa-people-group"></i></div>
+        </div>
+        <div class="kpi-card kpi-yellow">
+          <div class="kpi-label">Expiry Upcoming</div>
+          <div class="kpi-value" id="kpi-upcoming">—</div>
+          <div class="kpi-meta">Within 30 days</div>
+          <div class="kpi-icon"><i class="fa-solid fa-calendar-xmark"></i></div>
+        </div>
+      </div>
+
+      <!-- Charts Row -->
+      <div class="grid-2" style="margin-bottom:20px">
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title"><i class="fa-solid fa-chart-bar panel-title-icon"></i> CAPA Open vs Closed Trend</div>
+          </div>
+          <div class="panel-body">
+            <div class="chart-container" style="height:200px"><canvas id="chartCapa"></canvas></div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title"><i class="fa-solid fa-chart-line panel-title-icon"></i> Safety Issues Trend</div>
+          </div>
+          <div class="panel-body">
+            <div class="chart-container" style="height:200px"><canvas id="chartIssues"></canvas></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid-2" style="margin-bottom:20px">
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title"><i class="fa-solid fa-chart-pie panel-title-icon"></i> Compliance Status</div>
+          </div>
+          <div class="panel-body">
+            <div class="chart-container" style="height:180px"><canvas id="chartCompliance"></canvas></div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title"><i class="fa-solid fa-chart-area panel-title-icon"></i> Training Compliance Trend</div>
+          </div>
+          <div class="panel-body">
+            <div class="chart-container" style="height:180px"><canvas id="chartTraining"></canvas></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom Row -->
+      <div class="grid-2">
+        <!-- Recent Issues -->
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title"><i class="fa-solid fa-triangle-exclamation panel-title-icon"></i> Recent Safety Issues</div>
+            <button class="btn-sys btn-outline btn-sm" onclick="navigate('issues')">View All</button>
+          </div>
+          <div class="panel-body" style="padding:0">
+            <div class="tbl-wrapper">
+              <table class="sys-table">
+                <thead><tr><th>ID</th><th>Category</th><th>Description</th><th>Risk</th><th>Status</th><th>Aging</th></tr></thead>
+                <tbody id="dash-issues-tbl"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <!-- Alerts Feed -->
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title"><i class="fa-solid fa-bell panel-title-icon"></i> Active Alerts</div>
+            <span id="dash-alert-count" style="font-size:11px;color:var(--danger);font-family:var(--font-mono)"></span>
+          </div>
+          <div class="panel-body" id="dash-alerts" style="max-height:340px;overflow-y:auto"></div>
+        </div>
+      </div>
+
+      <!-- Recent CAPA -->
+      <div class="panel" style="margin-top:0">
+        <div class="panel-header">
+          <div class="panel-title"><i class="fa-solid fa-diagram-next panel-title-icon"></i> Recent CAPA & ISO Actions</div>
+          <button class="btn-sys btn-outline btn-sm" onclick="navigate('capa')">View All</button>
+        </div>
+        <div class="panel-body" style="padding:0">
+          <div class="tbl-wrapper">
+            <table class="sys-table">
+              <thead><tr><th>ID</th><th>Standard</th><th>Description</th><th>Status</th><th>PIC</th></tr></thead>
+              <tbody id="dash-capa-tbl"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div><!-- /dashboard -->
+
+    <!-- ─────── ALL TASKS ─────── -->
+    <!-- ─────── ALL TASKS (Daily Task Board) ─────── -->
+    <div id="page-alltasks" class="page-view">
+      <div class="module-header">
+        <div>
+          <div class="module-title"><i class="fa-solid fa-list-check" style="color:var(--accent)"></i> Task Board</div>
+          <div class="module-subtitle">All open tasks across the HSE team — updated live from every module</div>
+        </div>
+        <div class="module-actions">
+          <button class="btn-sys btn-outline" onclick="exportAllTasksExcel()"><i class="fa-solid fa-file-excel"></i> Export</button>
+          <button class="btn-sys btn-outline" onclick="atFilter={module:'',status:'',pic:'',search:''};document.getElementById('at-search').value='';document.getElementById('at-f-module').value='';document.getElementById('at-f-status').value='';document.getElementById('at-f-pic').value='';renderAllTasks()"><i class="fa-solid fa-xmark"></i> Clear</button>
+        </div>
+      </div>
+
+      <!-- 4 simple summary boxes -->
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px">
+
+        <div style="background:var(--bg-card);border:1px solid var(--border);border-top:3px solid var(--danger);border-radius:var(--radius-lg);padding:16px;cursor:pointer;transition:all .2s"
+             onclick="atFilter.status='Overdue';document.getElementById('at-f-status').value='Overdue';renderAllTasks()">
+          <div style="font-size:11px;color:var(--text-muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em">Overdue</div>
+          <div style="font-family:var(--font-head);font-size:36px;font-weight:800;color:var(--danger);line-height:1" id="at-kpi-overdue">—</div>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:4px">Need attention now</div>
+        </div>
+
+        <div style="background:var(--bg-card);border:1px solid var(--border);border-top:3px solid var(--accent);border-radius:var(--radius-lg);padding:16px;cursor:pointer;transition:all .2s"
+             onclick="atFilter.status='Open';document.getElementById('at-f-status').value='Open';renderAllTasks()">
+          <div style="font-size:11px;color:var(--text-muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em">Not Started</div>
+          <div style="font-family:var(--font-head);font-size:36px;font-weight:800;color:var(--accent);line-height:1" id="at-kpi-open">—</div>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:4px">Waiting to begin</div>
+        </div>
+
+        <div style="background:var(--bg-card);border:1px solid var(--border);border-top:3px solid var(--warning);border-radius:var(--radius-lg);padding:16px;cursor:pointer;transition:all .2s"
+             onclick="atFilter.status='In Progress';document.getElementById('at-f-status').value='In Progress';renderAllTasks()">
+          <div style="font-size:11px;color:var(--text-muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em">In Progress</div>
+          <div style="font-family:var(--font-head);font-size:36px;font-weight:800;color:var(--warning);line-height:1" id="at-kpi-inprog">—</div>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:4px">Being worked on</div>
+        </div>
+
+        <div style="background:var(--bg-card);border:1px solid var(--border);border-top:3px solid var(--success);border-radius:var(--radius-lg);padding:16px;cursor:pointer;transition:all .2s"
+             onclick="atFilter.status='Closed';document.getElementById('at-f-status').value='Closed';renderAllTasks()">
+          <div style="font-size:11px;color:var(--text-muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em">Done</div>
+          <div style="font-family:var(--font-head);font-size:36px;font-weight:800;color:var(--success);line-height:1" id="at-kpi-closed">—</div>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:4px">Completed</div>
+        </div>
+      </div>
+
+      <!-- Hidden KPI elements (still needed by JS) -->
+      <span id="at-kpi-total" style="display:none"></span>
+      <span id="at-kpi-pending" style="display:none"></span>
+      <span id="at-kpi-critical" style="display:none"></span>
+      <span id="at-kpi-week" style="display:none"></span>
+
+      <!-- Overdue banner -->
+      <div id="at-overdue-alert" style="display:none;background:rgba(224,60,49,.08);border:1px solid rgba(224,60,49,.3);border-radius:var(--radius);padding:12px 16px;margin-bottom:14px;align-items:center;gap:12px">
+        <i class="fa-solid fa-circle-exclamation" style="color:var(--danger);font-size:18px;flex-shrink:0"></i>
+        <div style="flex:1;font-size:13px"><strong id="at-overdue-n" style="color:var(--danger)">0</strong> tasks are past their due date. Please update or close them.</div>
+        <button class="btn-sys btn-danger-outline btn-sm" onclick="atFilter.status='Overdue';document.getElementById('at-f-status').value='Overdue';renderAllTasks()">Show overdue only</button>
+      </div>
+
+      <!-- Simple filters -->
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:center">
+        <input type="text" id="at-search" placeholder="🔍  Search by task, person, keyword…"
+               oninput="atFilter.search=this.value;renderAllTasks()"
+               style="flex:1;min-width:200px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);color:var(--text-primary);font-family:var(--font-body);font-size:13px;padding:8px 12px;outline:none"/>
+
+        <select id="at-f-status" onchange="atFilter.status=this.value;renderAllTasks()"
+                style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);color:var(--text-primary);font-size:12.5px;padding:8px 12px;outline:none">
+          <option value="">All Status</option>
+          <option>Overdue</option>
+          <option>Open</option>
+          <option>In Progress</option>
+          <option>Pending Verification</option>
+          <option>Closed</option>
+        </select>
+
+        <select id="at-f-module" onchange="atFilter.module=this.value;renderAllTasks()"
+                style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);color:var(--text-primary);font-size:12.5px;padding:8px 12px;outline:none">
+          <option value="">All Areas</option>
+          <option value="Issue">Safety Issues</option>
+          <option value="CAPA">CAPA</option>
+          <option value="SHC">SHC</option>
+          <option value="Compliance">Compliance</option>
+          <option value="Training">Training</option>
+          <option value="CF">CF Register</option>
+        </select>
+
+        <select id="at-f-pic" onchange="atFilter.pic=this.value;renderAllTasks()"
+                style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);color:var(--text-primary);font-size:12.5px;padding:8px 12px;outline:none">
+          <option value="">All People</option>
+        </select>
+
+        <span style="font-size:12px;color:var(--text-muted)" id="at-rcnt"></span>
+      </div>
+
+      <!-- Task list — clean card-style rows -->
+      <div id="at-task-list"></div>
+
+    </div><!-- /alltasks -->
+
+    <!-- ─────── MY TASKS ─────── -->
+    <div id="page-mytasks" class="page-view">
+      <div class="module-header">
+        <div>
+          <div class="module-title"><i class="fa-solid fa-user-check" style="color:var(--accent2)"></i> My Tasks</div>
+          <div class="module-subtitle" id="mytasks-subtitle">Your personal task list — everything assigned to you</div>
+        </div>
+        <div class="module-actions">
+          <button class="btn-sys btn-outline" onclick="exportMyTasksExcel()"><i class="fa-solid fa-file-excel"></i> Export</button>
+        </div>
+      </div>
+
+      <!-- 3 simple summary boxes -->
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px">
+        <div style="background:var(--bg-card);border:1px solid var(--border);border-top:3px solid var(--danger);border-radius:var(--radius-lg);padding:16px">
+          <div style="font-size:11px;color:var(--text-muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em">Overdue</div>
+          <div style="font-family:var(--font-head);font-size:36px;font-weight:800;color:var(--danger);line-height:1" id="mt-kpi-overdue">—</div>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:4px">Past due date</div>
+        </div>
+        <div style="background:var(--bg-card);border:1px solid var(--border);border-top:3px solid var(--warning);border-radius:var(--radius-lg);padding:16px">
+          <div style="font-size:11px;color:var(--text-muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em">Still Open</div>
+          <div style="font-family:var(--font-head);font-size:36px;font-weight:800;color:var(--warning);line-height:1" id="mt-kpi-open">—</div>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:4px">To do</div>
+        </div>
+        <div style="background:var(--bg-card);border:1px solid var(--border);border-top:3px solid var(--success);border-radius:var(--radius-lg);padding:16px">
+          <div style="font-size:11px;color:var(--text-muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em">Done</div>
+          <div style="font-family:var(--font-head);font-size:36px;font-weight:800;color:var(--success);line-height:1" id="mt-kpi-closed">—</div>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:4px">Completed</div>
+        </div>
+      </div>
+
+      <!-- Hidden elements still needed by JS -->
+      <span id="mt-kpi-total" style="display:none"></span>
+      <span id="mt-kpi-inprog" style="display:none"></span>
+      <span id="mt-kpi-week" style="display:none"></span>
+
+      <!-- Overdue alert -->
+      <div id="mt-overdue-alert" style="display:none;background:rgba(224,60,49,.08);border:1px solid rgba(224,60,49,.3);border-radius:var(--radius);padding:12px 16px;margin-bottom:16px;align-items:center;gap:12px">
+        <i class="fa-solid fa-circle-exclamation" style="color:var(--danger);font-size:18px;flex-shrink:0"></i>
+        <div style="font-size:13px">You have <strong id="mt-overdue-n" style="color:var(--danger)">0</strong> overdue tasks. Please update or close them.</div>
+      </div>
+
+      <!-- My task cards grouped by area -->
+      <div id="mt-groups"></div>
+
+    </div><!-- /mytasks -->
+
+
+
+    <!-- ─────── TRAINING ─────── -->
+    <div id="page-training" class="page-view">
+      <div class="module-header">
+        <div>
+          <div class="module-title"><i class="fa-solid fa-graduation-cap" style="color:var(--accent)"></i> HSE Training Monitoring</div>
+          <div class="module-subtitle">Training matrix · By site · By training name · JWSB statutory renewal tracker</div>
+        </div>
+        <div class="module-actions" id="tr-action-btns">
+          <button class="btn-sys btn-outline" onclick="exportTrainingExcel()"><i class="fa-solid fa-file-excel"></i> Export</button>
+          <button class="btn-sys btn-primary-sys" onclick="openTrainingModal()" id="btn-add-training"><i class="fa-solid fa-plus"></i> Add Record</button>
+        </div>
+      </div>
+
+      <!-- Shared KPI row -->
+      <div class="kpi-grid">
+        <div class="kpi-card kpi-blue"><div class="kpi-label">Total Records</div><div class="kpi-value" id="tr-kpi-total">—</div><div class="kpi-icon"><i class="fa-solid fa-users"></i></div></div>
+        <div class="kpi-card kpi-green"><div class="kpi-label">Valid</div><div class="kpi-value" id="tr-kpi-valid">—</div><div class="kpi-icon"><i class="fa-solid fa-circle-check"></i></div></div>
+        <div class="kpi-card kpi-yellow"><div class="kpi-label">Expiring Soon</div><div class="kpi-value" id="tr-kpi-expiring">—</div><div class="kpi-icon"><i class="fa-solid fa-clock"></i></div></div>
+        <div class="kpi-card kpi-red"><div class="kpi-label">Expired</div><div class="kpi-value" id="tr-kpi-expired">—</div><div class="kpi-icon"><i class="fa-solid fa-xmark"></i></div></div>
+        <div class="kpi-card kpi-teal"><div class="kpi-label">Training Hours</div><div class="kpi-value" id="tr-kpi-hours">—</div><div class="kpi-icon"><i class="fa-solid fa-clock-rotate-left"></i></div></div>
+        <div class="kpi-card kpi-purple"><div class="kpi-label">Compliance %</div><div class="kpi-value" id="tr-kpi-pct">—</div><div class="kpi-icon"><i class="fa-solid fa-percent"></i></div></div>
+      </div>
+
+      <!-- ── Tab bar ── -->
+      <div style="display:flex;gap:0;border-bottom:2px solid var(--border);margin-bottom:18px;overflow-x:auto;">
+        <button class="tr-tab" id="tr-tab-matrix"  onclick="switchTrainingTab('matrix')"
+          style="background:none;border:none;padding:10px 18px;cursor:pointer;font-family:var(--font-head);font-size:13px;font-weight:700;color:var(--accent);border-bottom:2px solid var(--accent);margin-bottom:-2px;letter-spacing:0.04em;white-space:nowrap">
+          <i class="fa-solid fa-table"></i> Training Matrix
+        </button>
+        <button class="tr-tab" id="tr-tab-site"    onclick="switchTrainingTab('site')"
+          style="background:none;border:none;padding:10px 18px;cursor:pointer;font-family:var(--font-head);font-size:13px;font-weight:600;color:var(--text-muted);border-bottom:2px solid transparent;margin-bottom:-2px;letter-spacing:0.04em;white-space:nowrap">
+          <i class="fa-solid fa-location-dot"></i> By Site / WTP
+        </button>
+        <button class="tr-tab" id="tr-tab-name"    onclick="switchTrainingTab('name')"
+          style="background:none;border:none;padding:10px 18px;cursor:pointer;font-family:var(--font-head);font-size:13px;font-weight:600;color:var(--text-muted);border-bottom:2px solid transparent;margin-bottom:-2px;letter-spacing:0.04em;white-space:nowrap">
+          <i class="fa-solid fa-list-check"></i> By Training Name
+        </button>
+        <button class="tr-tab" id="tr-tab-jwsb"    onclick="switchTrainingTab('jwsb')"
+          style="background:none;border:none;padding:10px 18px;cursor:pointer;font-family:var(--font-head);font-size:13px;font-weight:600;color:var(--text-muted);border-bottom:2px solid transparent;margin-bottom:-2px;letter-spacing:0.04em;white-space:nowrap">
+          <i class="fa-solid fa-shield-halved"></i> JWSB Renewal Tracker
+        </button>
+      </div>
+
+      <!-- ═══════════════════════════════════
+           TAB 1 — TRAINING MATRIX (all records)
+      ═══════════════════════════════════ -->
+      <div id="tr-panel-matrix" class="tr-panel">
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title"><i class="fa-solid fa-table panel-title-icon"></i> Training Matrix — All Records</div>
+            <div class="filter-bar" style="margin-bottom:0">
+              <input type="text" placeholder="Search…" oninput="trFilter.search=this.value;renderTrainingTable()"/>
+              <select onchange="trFilter.dept=this.value;renderTrainingTable()">
+                <option value="">All Departments</option>
+                <option>HSE</option><option>Operations</option><option>Maintenance</option><option>Lab</option><option>Admin</option>
+              </select>
+              <select onchange="trFilter.status=this.value;renderTrainingTable()">
+                <option value="">All Status</option>
+                <option>Valid</option><option>Expiring Soon</option><option>Expired</option>
+              </select>
+            </div>
+          </div>
+          <div class="tbl-wrapper">
+            <table class="sys-table">
+              <thead>
+                <tr>
+                  <th>ID</th><th>Employee</th><th>Dept / Site</th><th>Training Name</th>
+                  <th>Date Trained</th><th>Expiry</th><th>Hours</th><th>Status</th><th>Aging</th><th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="tr-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══════════════════════════════════
+           TAB 2 — BY SITE / WTP
+      ═══════════════════════════════════ -->
+      <div id="tr-panel-site" class="tr-panel" style="display:none">
+
+        <!-- Site filter + search -->
+        <div class="filter-bar" style="margin-bottom:14px">
+          <select id="site-filter-site" onchange="renderBySite()" style="min-width:180px">
+            <option value="">All Sites / WTPs</option>
+            <option>Head Office</option>
+            <option>Moyog WTP</option><option>Kasigui WTP</option>
+            <option>Papar WTP</option><option>Telibong WTP</option><option>Telibong 2 WTP</option>
+            <option>Tamparuli &amp; Tuaran WTP</option><option>KKIP Warehouse</option>
+            <option>HSE</option><option>Operations</option><option>Maintenance</option><option>Lab</option><option>Admin</option>
+          </select>
+          <select id="site-filter-status" onchange="renderBySite()">
+            <option value="">All Status</option>
+            <option>Valid</option><option>Expiring Soon</option><option>Expired</option>
+          </select>
+          <input type="text" id="site-search" placeholder="Search employee or training…" oninput="renderBySite()" style="flex:1"/>
+          <button class="btn-sys btn-outline btn-sm" onclick="document.getElementById('site-filter-site').value='';document.getElementById('site-filter-status').value='';document.getElementById('site-search').value='';renderBySite()">
+            <i class="fa-solid fa-xmark"></i> Reset
+          </button>
+          <span style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted)" id="site-rcnt"></span>
+        </div>
+
+        <!-- Site summary cards (rendered by JS) -->
+        <div id="site-summary-cards" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-bottom:16px"></div>
+
+        <!-- Site grouped table -->
+        <div id="site-groups"></div>
+      </div>
+
+      <!-- ═══════════════════════════════════
+           TAB 3 — BY TRAINING NAME
+      ═══════════════════════════════════ -->
+      <div id="tr-panel-name" class="tr-panel" style="display:none">
+
+        <div class="filter-bar" style="margin-bottom:14px">
+          <select id="name-filter-training" onchange="renderByName()" style="min-width:220px">
+            <option value="">All Training Types</option>
+          </select>
+          <select id="name-filter-status" onchange="renderByName()">
+            <option value="">All Status</option>
+            <option>Valid</option><option>Expiring Soon</option><option>Expired</option>
+          </select>
+          <input type="text" id="name-search" placeholder="Search employee or site…" oninput="renderByName()" style="flex:1"/>
+          <button class="btn-sys btn-outline btn-sm" onclick="document.getElementById('name-filter-training').value='';document.getElementById('name-filter-status').value='';document.getElementById('name-search').value='';renderByName()">
+            <i class="fa-solid fa-xmark"></i> Reset
+          </button>
+          <span style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted)" id="name-rcnt"></span>
+        </div>
+
+        <!-- Training name summary cards (rendered by JS) -->
+        <div id="name-summary-cards" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;margin-bottom:16px"></div>
+
+        <!-- Training name grouped table -->
+        <div id="name-groups"></div>
+      </div>
+
+      <!-- ═══════════════════════════════════
+           TAB 4 — JWSB STATUTORY RENEWAL TRACKER
+      ═══════════════════════════════════ -->
+      <div id="tr-panel-jwsb" class="tr-panel" style="display:none">
+
+        <!-- JWSB header banner -->
+        <div style="background:linear-gradient(135deg,#0a1628,#0d1f3c);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px 18px;margin-bottom:14px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+          <div style="width:38px;height:38px;border-radius:8px;background:linear-gradient(135deg,#00d4aa,#0099ff);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;color:#000;flex-shrink:0">JW</div>
+          <div>
+            <div style="font-family:var(--font-head);font-size:17px;font-weight:800">JWSB Safety Training Renewal Tracker</div>
+            <div style="font-size:11px;color:var(--text-muted);font-family:var(--font-mono)">Jetama Water Sdn. Bhd. · SHE Division · Status auto-calculated from today's date</div>
+          </div>
+          <div style="margin-left:auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <span style="background:var(--bg-card);border:1px solid var(--border);border-radius:6px;padding:4px 12px;font-family:var(--font-mono);font-size:11px;color:var(--accent2)" id="jwsb-date-badge">—</span>
+            <button class="btn-sys btn-success-outline btn-sm" onclick="jwsbShowExportModal()"><i class="fa-solid fa-file-excel"></i> Export</button>
+          </div>
+        </div>
+
+        <!-- View sub-toggle: flat list vs by-site vs by-training -->
+        <div style="display:flex;gap:8px;margin-bottom:12px;align-items:center;flex-wrap:wrap">
+          <span style="font-size:11px;color:var(--text-muted);font-family:var(--font-mono)">VIEW:</span>
+          <button id="jwsb-view-all-btn"  onclick="setJwsbView('all')"  class="btn-sys btn-primary-sys btn-sm">All Staff</button>
+          <button id="jwsb-view-site-btn" onclick="setJwsbView('site')" class="btn-sys btn-outline btn-sm"><i class="fa-solid fa-location-dot"></i> By Site</button>
+          <button id="jwsb-view-trn-btn"  onclick="setJwsbView('trn')"  class="btn-sys btn-outline btn-sm"><i class="fa-solid fa-list-check"></i> By Training</button>
+        </div>
+
+        <!-- JWSB Summary cards -->
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">
+          <div onclick="jwsbFilterStat('')"            style="flex:1;min-width:80px;background:var(--bg-card2);border:1px solid var(--border);border-top:3px solid var(--accent);border-radius:var(--radius);padding:8px 12px;cursor:pointer;transition:all .2s" class="jwsb-sc sc-all">
+            <div style="font-family:var(--font-head);font-size:24px;font-weight:800;color:var(--accent)" id="jwsb-n-all">0</div><div style="font-size:9px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px">Total Staff</div>
+          </div>
+          <div onclick="jwsbFilterStat('EXPIRED')"     style="flex:1;min-width:80px;background:var(--bg-card2);border:1px solid var(--border);border-top:3px solid #ef4444;border-radius:var(--radius);padding:8px 12px;cursor:pointer;transition:all .2s" class="jwsb-sc sc-exp">
+            <div style="font-family:var(--font-head);font-size:24px;font-weight:800;color:#ef4444" id="jwsb-n-exp">0</div><div style="font-size:9px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px">Expired</div>
+          </div>
+          <div onclick="jwsbFilterStat('DUE THIS YEAR')" style="flex:1;min-width:80px;background:var(--bg-card2);border:1px solid var(--border);border-top:3px solid #f97316;border-radius:var(--radius);padding:8px 12px;cursor:pointer;transition:all .2s" class="jwsb-sc sc-dun">
+            <div style="font-family:var(--font-head);font-size:24px;font-weight:800;color:#f97316" id="jwsb-n-dun">0</div><div style="font-size:9px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px">Due This Year</div>
+          </div>
+          <div onclick="jwsbFilterStat('DUE NEXT YEAR')" style="flex:1;min-width:80px;background:var(--bg-card2);border:1px solid var(--border);border-top:3px solid #eab308;border-radius:var(--radius);padding:8px 12px;cursor:pointer;transition:all .2s" class="jwsb-sc sc-dnx">
+            <div style="font-family:var(--font-head);font-size:24px;font-weight:800;color:#eab308" id="jwsb-n-dnx">0</div><div style="font-size:9px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px">Due Next Year</div>
+          </div>
+          <div onclick="jwsbFilterStat('VALID')"       style="flex:1;min-width:80px;background:var(--bg-card2);border:1px solid var(--border);border-top:3px solid #22c55e;border-radius:var(--radius);padding:8px 12px;cursor:pointer;transition:all .2s" class="jwsb-sc sc-val">
+            <div style="font-family:var(--font-head);font-size:24px;font-weight:800;color:#22c55e" id="jwsb-n-val">0</div><div style="font-size:9px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px">Valid</div>
+          </div>
+          <div onclick="jwsbFilterStat('NOT TRAINED')" style="flex:1;min-width:80px;background:var(--bg-card2);border:1px solid var(--border);border-top:3px solid #8b5cf6;border-radius:var(--radius);padding:8px 12px;cursor:pointer;transition:all .2s" class="jwsb-sc sc-non">
+            <div style="font-family:var(--font-head);font-size:24px;font-weight:800;color:#8b5cf6" id="jwsb-n-non">0</div><div style="font-size:9px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px">Not Trained</div>
+          </div>
+        </div>
+
+        <!-- Critical alert -->
+        <div id="jwsb-alert-box" style="display:none;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.3);border-radius:var(--radius);padding:10px 14px;margin-bottom:12px;align-items:center;gap:10px;font-size:12px">
+          <i class="fa-solid fa-triangle-exclamation" style="color:#ef4444;font-size:16px"></i>
+          <div><strong id="jwsb-alert-n" style="color:#ef4444">0</strong> staff have <strong style="color:#ef4444">EXPIRED or DUE THIS YEAR</strong> certifications requiring immediate action.</div>
+        </div>
+
+        <!-- Search / filter bar -->
+        <div class="filter-bar" style="margin-bottom:12px">
+          <input type="text" id="jwsb-srch" placeholder="Search name, WTP, designation…" oninput="jwsbApplyFilters()" style="flex:1;min-width:180px"/>
+          <select id="jwsb-fWTP" onchange="jwsbApplyFilters()">
+            <option value="">All WTPs</option>
+            <option>Head Office</option><option>Moyog WTP</option><option>Kasigui WTP</option>
+            <option>Papar WTP</option><option>Telibong WTP</option><option>Telibong 2 WTP</option>
+            <option>Tamparuli &amp; Tuaran WTP</option><option>KKIP Warehouse</option>
+          </select>
+          <select id="jwsb-fTrn" onchange="jwsbApplyFilters()">
+            <option value="">All Training</option>
+            <option value="aesp">AESP / AGT</option>
+            <option value="fa">First Aid &amp; CPR</option>
+            <option value="chem">Safe Chemical Handling</option>
+            <option value="hear">Hearing Conservation</option>
+          </select>
+          <select id="jwsb-fStat" onchange="jwsbActiveStat='';jwsbApplyFilters()">
+            <option value="">All Status</option>
+            <option>EXPIRED</option><option>DUE THIS YEAR</option>
+            <option>DUE NEXT YEAR</option><option>VALID</option><option>NOT TRAINED</option>
+          </select>
+          <button class="btn-sys btn-outline btn-sm" onclick="jwsbResetAll()"><i class="fa-solid fa-xmark"></i> Reset</button>
+          <span style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted)" id="jwsb-rcnt">— staff</span>
+        </div>
+
+        <!-- Dynamic render area (flat list, by-site groups, or by-training groups) -->
+        <div id="jwsb-render-area">
+          <!-- All-staff flat table -->
+          <div id="jwsb-view-all">
+            <div class="panel" style="padding:0">
+              <div class="tbl-wrapper">
+                <table class="sys-table" style="min-width:1100px">
+                  <thead>
+                    <tr>
+                      <th colspan="5" style="text-align:center;background:var(--bg-dark);color:var(--text-muted)">STAFF INFORMATION</th>
+                      <th colspan="3" style="text-align:center;background:rgba(0,212,170,.07);color:#00d4aa">AESP / AGT · 3 Yrs</th>
+                      <th colspan="3" style="text-align:center;background:rgba(0,153,255,.07);color:#0099ff">FIRST AID &amp; CPR · 3 Yrs</th>
+                      <th colspan="3" style="text-align:center;background:rgba(34,197,94,.07);color:#22c55e">SAFE CHEMICAL · 2 Yrs</th>
+                      <th colspan="3" style="text-align:center;background:rgba(192,132,252,.07);color:#c084fc">HEARING · 1 Yr</th>
+                    </tr>
+                    <tr>
+                      <th>#</th><th>Name</th><th>WTP / Site</th><th>Designation</th><th>Cat</th>
+                      <th>Cert</th><th>Expiry</th><th>Status</th>
+                      <th>Cert</th><th>Expiry</th><th>Status</th>
+                      <th>Cert</th><th>Expiry</th><th>Status</th>
+                      <th>Cert</th><th>Expiry</th><th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody id="jwsb-tbody"></tbody>
+                </table>
+              </div>
+              <div id="jwsb-empty" style="display:none;text-align:center;padding:32px;color:var(--text-muted)">
+                <i class="fa-solid fa-magnifying-glass" style="font-size:24px;margin-bottom:8px;display:block"></i>No staff match your filters.
+              </div>
+            </div>
+          </div>
+
+          <!-- By-site grouped view -->
+          <div id="jwsb-view-site" style="display:none">
+            <div id="jwsb-site-groups"></div>
+          </div>
+
+          <!-- By-training grouped view -->
+          <div id="jwsb-view-trn" style="display:none">
+            <div id="jwsb-trn-groups"></div>
+          </div>
+        </div>
+
+        <!-- Legend -->
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;font-size:11px;font-family:var(--font-mono);color:var(--text-muted)">
+          <span style="color:#ef4444">■ EXPIRED</span>
+          <span style="color:#f97316">■ DUE THIS YEAR</span>
+          <span style="color:#eab308">■ DUE NEXT YEAR</span>
+          <span style="color:#22c55e">■ VALID</span>
+          <span style="color:#8b5cf6">■ NOT TRAINED</span>
+          <span style="margin-left:auto">AESP: DOSH ICOP 2010 · First Aid: OSHA 1994 · Chemical: USECHH 2000 · Hearing: Noise Reg 2019</span>
+        </div>
+      </div>
+
+    </div><!-- /training -->
+
+
+
+    <!-- ─────── ISSUES ─────── -->
+    <div id="page-issues" class="page-view">
+      <div class="module-header">
+        <div>
+          <div class="module-title"><i class="fa-solid fa-triangle-exclamation" style="color:var(--warning)"></i> Safety Issues & Inspection</div>
+          <div class="module-subtitle">UAUC, near miss, hazard reporting, PTW, LEV, fire equipment monitoring</div>
+        </div>
+        <div class="module-actions">
+          <button class="btn-sys btn-outline" onclick="exportIssuesExcel()"><i class="fa-solid fa-file-excel"></i> Export</button>
+          <button class="btn-sys btn-primary-sys" onclick="openIssueModal()" id="btn-add-issue"><i class="fa-solid fa-plus"></i> Report Issue</button>
+        </div>
+      </div>
+
+      <div class="kpi-grid">
+        <div class="kpi-card kpi-blue"><div class="kpi-label">Total Issues</div><div class="kpi-value" id="iss-kpi-total">—</div><div class="kpi-icon"><i class="fa-solid fa-list"></i></div></div>
+        <div class="kpi-card kpi-blue"><div class="kpi-label">Open</div><div class="kpi-value" id="iss-kpi-open">—</div><div class="kpi-icon"><i class="fa-solid fa-circle-dot"></i></div></div>
+        <div class="kpi-card kpi-red"><div class="kpi-label">Overdue</div><div class="kpi-value" id="iss-kpi-overdue">—</div><div class="kpi-icon"><i class="fa-solid fa-clock-rotate-left"></i></div></div>
+        <div class="kpi-card kpi-green"><div class="kpi-label">Closed</div><div class="kpi-value" id="iss-kpi-closed">—</div><div class="kpi-icon"><i class="fa-solid fa-circle-check"></i></div></div>
+        <div class="kpi-card kpi-red"><div class="kpi-label">Critical Unresolved</div><div class="kpi-value" id="iss-kpi-critical">—</div><div class="kpi-icon"><i class="fa-solid fa-skull-crossbones"></i></div></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title"><i class="fa-solid fa-table panel-title-icon"></i> Issue Register</div>
+          <div class="filter-bar" style="margin-bottom:0">
+            <input type="text" placeholder="Search…" oninput="issFilter.search=this.value;renderIssuesTable()"/>
+            <select onchange="issFilter.category=this.value;renderIssuesTable()">
+              <option value="">All Categories</option>
+              <option>Unsafe Act</option><option>Unsafe Condition</option><option>Near Miss</option><option>Incident</option>
+              <option>PTW</option><option>Fire Extinguisher</option><option>LEV Inspection</option><option>Housekeeping</option>
+              <option>Contractor Safety</option>
+            </select>
+            <select onchange="issFilter.risk=this.value;renderIssuesTable()">
+              <option value="">All Risk</option><option>Low</option><option>Medium</option><option>High</option><option>Critical</option>
+            </select>
+            <select onchange="issFilter.status=this.value;renderIssuesTable()">
+              <option value="">All Status</option>
+              <option>Open</option><option>In Progress</option><option>Pending Verification</option><option>Closed</option><option>Overdue</option>
+            </select>
+          </div>
+        </div>
+        <div class="tbl-wrapper">
+          <table class="sys-table">
+            <thead><tr><th>ID</th><th>Category</th><th>Description</th><th>Risk</th><th>Location</th><th>PIC</th><th>Due Date</th><th>Status</th><th>Aging</th><th>Action</th></tr></thead>
+            <tbody id="iss-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div><!-- /issues -->
+
+    <!-- ─────── CAPA ─────── -->
+    <div id="page-capa" class="page-view">
+      <div class="module-header">
+        <div>
+          <div class="module-title"><i class="fa-solid fa-diagram-next" style="color:var(--accent2)"></i> CAPA & ISO Governance</div>
+          <div class="module-subtitle">NCR, OFI, corrective actions, MRM, audit findings — ISO 9001 / 39001 / 37001 / 45001</div>
+        </div>
+        <div class="module-actions">
+          <button class="btn-sys btn-outline" onclick="exportCapaExcel()"><i class="fa-solid fa-file-excel"></i> Export</button>
+          <button class="btn-sys btn-primary-sys" onclick="openCapaModal()" id="btn-add-capa"><i class="fa-solid fa-plus"></i> Add CAPA</button>
+        </div>
+      </div>
+
+      <div class="kpi-grid">
+        <div class="kpi-card kpi-blue"><div class="kpi-label">Total</div><div class="kpi-value" id="capa-kpi-total">—</div><div class="kpi-icon"><i class="fa-solid fa-list"></i></div></div>
+        <div class="kpi-card kpi-blue"><div class="kpi-label">Open</div><div class="kpi-value" id="capa-kpi-open">—</div><div class="kpi-icon"><i class="fa-solid fa-circle-dot"></i></div></div>
+        <div class="kpi-card kpi-yellow"><div class="kpi-label">In Progress</div><div class="kpi-value" id="capa-kpi-inprog">—</div><div class="kpi-icon"><i class="fa-solid fa-spinner"></i></div></div>
+        <div class="kpi-card kpi-red"><div class="kpi-label">Overdue</div><div class="kpi-value" id="capa-kpi-overdue">—</div><div class="kpi-icon"><i class="fa-solid fa-clock-rotate-left"></i></div></div>
+        <div class="kpi-card kpi-green"><div class="kpi-label">Closed</div><div class="kpi-value" id="capa-kpi-closed">—</div><div class="kpi-icon"><i class="fa-solid fa-circle-check"></i></div></div>
+        <div class="kpi-card kpi-teal"><div class="kpi-label">Closure Rate</div><div class="kpi-value" id="capa-kpi-pct">—</div><div class="kpi-icon"><i class="fa-solid fa-percent"></i></div></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title"><i class="fa-solid fa-table panel-title-icon"></i> CAPA Register</div>
+          <div class="filter-bar" style="margin-bottom:0">
+            <input type="text" placeholder="Search…" oninput="capaFilter.search=this.value;renderCapaTable()"/>
+            <select onchange="capaFilter.iso=this.value;renderCapaTable()">
+              <option value="">All Standards</option>
+              <option>ISO 9001</option><option>ISO 39001</option><option>ISO 37001</option><option>ISO 45001</option>
+            </select>
+            <select onchange="capaFilter.type=this.value;renderCapaTable()">
+              <option value="">All Types</option>
+              <option>NCR</option><option>OFI</option><option>MRM Action</option><option>Audit Finding</option>
+            </select>
+            <select onchange="capaFilter.status=this.value;renderCapaTable()">
+              <option value="">All Status</option>
+              <option>Open</option><option>In Progress</option><option>Pending Verification</option><option>Closed</option><option>Overdue</option>
+            </select>
+          </div>
+        </div>
+        <div class="tbl-wrapper">
+          <table class="sys-table">
+            <thead><tr><th>ID</th><th>Standard</th><th>Type</th><th>Description</th><th>Corrective Action</th><th>PIC</th><th>Due Date</th><th>Status</th><th>Aging</th><th>Action</th></tr></thead>
+            <tbody id="capa-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div><!-- /capa -->
+
+    <!-- ─────── COMPLIANCE ─────── -->
+    <div id="page-compliance" class="page-view">
+      <div class="module-header">
+        <div>
+          <div class="module-title"><i class="fa-solid fa-shield-halved" style="color:var(--success)"></i> Compliance & Legal Monitoring</div>
+          <div class="module-subtitle">JKKP6/8/12, CF, CHRA, NRA, CIMAH, site registration — DOSH compliance tracking</div>
+        </div>
+        <div class="module-actions">
+          <button class="btn-sys btn-outline" onclick="exportCmpExcel()"><i class="fa-solid fa-file-excel"></i> Export</button>
+          <button class="btn-sys btn-primary-sys" onclick="openCmpModal()" id="btn-add-cmp"><i class="fa-solid fa-plus"></i> Add Item</button>
+        </div>
+      </div>
+
+      <div class="kpi-grid">
+        <div class="kpi-card kpi-blue"><div class="kpi-label">Total Items</div><div class="kpi-value" id="cmp-kpi-total">—</div><div class="kpi-icon"><i class="fa-solid fa-list"></i></div></div>
+        <div class="kpi-card kpi-green"><div class="kpi-label">Valid</div><div class="kpi-value" id="cmp-kpi-valid">—</div><div class="kpi-icon"><i class="fa-solid fa-circle-check"></i></div></div>
+        <div class="kpi-card kpi-yellow"><div class="kpi-label">Expiring Soon</div><div class="kpi-value" id="cmp-kpi-expiring">—</div><div class="kpi-icon"><i class="fa-solid fa-clock"></i></div></div>
+        <div class="kpi-card kpi-red"><div class="kpi-label">Expired</div><div class="kpi-value" id="cmp-kpi-expired">—</div><div class="kpi-icon"><i class="fa-solid fa-xmark"></i></div></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title"><i class="fa-solid fa-table panel-title-icon"></i> Compliance Register</div>
+          <div class="filter-bar" style="margin-bottom:0">
+            <input type="text" placeholder="Search…" oninput="cmpFilter.search=this.value;renderComplianceTable()"/>
+            <select onchange="cmpFilter.status=this.value;renderComplianceTable()">
+              <option value="">All Status</option><option>Valid</option><option>Expiring Soon</option><option>Expired</option>
+            </select>
+          </div>
+        </div>
+        <div class="tbl-wrapper">
+          <table class="sys-table">
+            <thead><tr><th>ID</th><th>Compliance Item</th><th>Authority</th><th>Reference</th><th>Expiry Date</th><th>PIC</th><th>Status</th><th>Aging</th><th>Remarks</th><th>Action</th></tr></thead>
+            <tbody id="cmp-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div><!-- /compliance -->
+
+    <!-- ─────── SHC ─────── -->
+    <div id="page-shc" class="page-view">
+      <div class="module-header">
+        <div>
+          <div class="module-title"><i class="fa-solid fa-people-group" style="color:var(--purple)"></i> SHC Governance</div>
+          <div class="module-subtitle">Safety & Health Committee meetings, minutes, outstanding actions & attendance</div>
+        </div>
+        <div class="module-actions">
+          <button class="btn-sys btn-outline" onclick="exportShcExcel()"><i class="fa-solid fa-file-excel"></i> Export</button>
+          <button class="btn-sys btn-primary-sys" onclick="openShcModal()" id="btn-add-shc"><i class="fa-solid fa-plus"></i> Add Action</button>
+        </div>
+      </div>
+
+      <div class="kpi-grid">
+        <div class="kpi-card kpi-blue"><div class="kpi-label">Total Actions</div><div class="kpi-value" id="shc-kpi-total">—</div><div class="kpi-icon"><i class="fa-solid fa-list"></i></div></div>
+        <div class="kpi-card kpi-yellow"><div class="kpi-label">Open / In-Progress</div><div class="kpi-value" id="shc-kpi-open">—</div><div class="kpi-icon"><i class="fa-solid fa-circle-dot"></i></div></div>
+        <div class="kpi-card kpi-red"><div class="kpi-label">Overdue</div><div class="kpi-value" id="shc-kpi-overdue">—</div><div class="kpi-icon"><i class="fa-solid fa-clock-rotate-left"></i></div></div>
+        <div class="kpi-card kpi-green"><div class="kpi-label">Closed</div><div class="kpi-value" id="shc-kpi-closed">—</div><div class="kpi-icon"><i class="fa-solid fa-circle-check"></i></div></div>
+        <div class="kpi-card kpi-teal"><div class="kpi-label">Avg Attendance</div><div class="kpi-value" id="shc-kpi-att">—</div><div class="kpi-icon"><i class="fa-solid fa-user-check"></i></div></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title"><i class="fa-solid fa-table panel-title-icon"></i> SHC Action Register</div>
+          <div class="filter-bar" style="margin-bottom:0">
+            <input type="text" placeholder="Search…" oninput="shcFilter.search=this.value;renderShcTable()"/>
+            <select onchange="shcFilter.status=this.value;renderShcTable()">
+              <option value="">All Status</option>
+              <option>Open</option><option>In Progress</option><option>Pending Verification</option><option>Closed</option><option>Overdue</option>
+            </select>
+          </div>
+        </div>
+        <div class="tbl-wrapper">
+          <table class="sys-table">
+            <thead><tr><th>ID</th><th>Meeting Date</th><th>Issue Raised</th><th>Action Required</th><th>PIC</th><th>Due Date</th><th>Status</th><th>Aging</th><th>Action</th></tr></thead>
+            <tbody id="shc-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div><!-- /shc -->
+
+    <!-- ─────── CF STATUS TRACKER ─────── -->
+    <div id="page-cf" class="page-view">
+      <div class="module-header">
+        <div>
+          <div class="module-title"><i class="fa-solid fa-certificate" style="color:var(--accent2)"></i> CF Status Tracker</div>
+          <div class="module-subtitle">KKIP Water Bottling Factory — Air Receiver &amp; Air Compressor · Certificate of Fitness (DOSH / MyKKP)</div>
+        </div>
+        <div class="module-actions">
+          <button class="btn-sys btn-outline" onclick="exportCFExcel()"><i class="fa-solid fa-file-excel"></i> Export Report</button>
+          <button class="btn-sys btn-primary-sys" id="btn-add-cf" onclick="showToast('Add equipment via Admin — contact SHE Division.','warn')"><i class="fa-solid fa-plus"></i> Add Equipment</button>
+        </div>
+      </div>
+
+      <!-- KKIP header banner -->
+      <div style="background:linear-gradient(135deg,#0a1628,#0d1f3c);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px 18px;margin-bottom:16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+        <div style="width:42px;height:42px;border-radius:10px;background:linear-gradient(135deg,var(--accent2),var(--accent));display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🏭</div>
+        <div>
+          <div style="font-family:var(--font-head);font-size:16px;font-weight:800">KKIP Water Bottling Factory</div>
+          <div style="font-size:11px;color:var(--text-muted);font-family:var(--font-mono)">Jetama Water Sdn Bhd · Inventory of Air Receiver &amp; Air Compressor 2026 · Prepared by: Roland Riset (S&amp;H Coordinator) · Reviewed by: Ferdinand Kigis (DGM-SHE)</div>
+        </div>
+        <div style="margin-left:auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <span style="background:rgba(224,60,49,.12);border:1px solid rgba(224,60,49,.3);border-radius:6px;padding:5px 12px;font-family:var(--font-mono);font-size:11px;color:var(--danger)"><i class="fa-solid fa-triangle-exclamation"></i> All 7 Equipment — CF Not Registered</span>
+          <span style="background:var(--bg-card);border:1px solid var(--border);border-radius:6px;padding:5px 12px;font-family:var(--font-mono);font-size:11px;color:var(--text-muted)">Rev 1 · 11 May 2026</span>
+        </div>
+      </div>
+
+      <!-- KPI Cards -->
+      <div class="kpi-grid">
+        <div class="kpi-card kpi-blue"><div class="kpi-label">Total Equipment</div><div class="kpi-value" id="cf-kpi-total">—</div><div class="kpi-meta">Air receivers + compressors</div><div class="kpi-icon"><i class="fa-solid fa-gauge"></i></div></div>
+        <div class="kpi-card kpi-green"><div class="kpi-label">CF Registered</div><div class="kpi-value" id="cf-kpi-registered">—</div><div class="kpi-meta">Valid CF issued</div><div class="kpi-icon"><i class="fa-solid fa-certificate"></i></div></div>
+        <div class="kpi-card kpi-red"><div class="kpi-label">Not Registered</div><div class="kpi-value" id="cf-kpi-unreg">—</div><div class="kpi-meta">Requires action</div><div class="kpi-icon"><i class="fa-solid fa-xmark"></i></div></div>
+        <div class="kpi-card kpi-yellow"><div class="kpi-label">In Progress</div><div class="kpi-value" id="cf-kpi-inprog">—</div><div class="kpi-meta">Pending / submitted</div><div class="kpi-icon"><i class="fa-solid fa-spinner"></i></div></div>
+        <div class="kpi-card kpi-green"><div class="kpi-label">Docs Complete</div><div class="kpi-value" id="cf-kpi-docs-ok">—</div><div class="kpi-meta">All docs received</div><div class="kpi-icon"><i class="fa-solid fa-folder-open"></i></div></div>
+        <div class="kpi-card kpi-red"><div class="kpi-label">Docs Missing</div><div class="kpi-value" id="cf-kpi-docs-miss">—</div><div class="kpi-meta">No documents at all</div><div class="kpi-icon"><i class="fa-solid fa-folder-closed"></i></div></div>
+        <div class="kpi-card kpi-yellow"><div class="kpi-label">Form 27C Pending</div><div class="kpi-value" id="cf-kpi-form27c">—</div><div class="kpi-meta">Not yet submitted to DOSH</div><div class="kpi-icon"><i class="fa-solid fa-file-circle-xmark"></i></div></div>
+        <div class="kpi-card kpi-blue"><div class="kpi-label">Air Receivers</div><div class="kpi-value" id="cf-kpi-receivers">—</div><div class="kpi-meta">Bejana tekanan</div><div class="kpi-icon"><i class="fa-solid fa-drum"></i></div></div>
+      </div>
+
+      <!-- Alert: all not registered -->
+      <div style="background:rgba(224,60,49,.08);border:1px solid rgba(224,60,49,.3);border-radius:var(--radius);padding:12px 16px;margin-bottom:16px;display:flex;align-items:flex-start;gap:12px">
+        <i class="fa-solid fa-triangle-exclamation" style="color:var(--danger);font-size:18px;margin-top:2px;flex-shrink:0"></i>
+        <div>
+          <div style="font-weight:700;color:var(--danger);font-family:var(--font-head);font-size:14px;margin-bottom:4px">CRITICAL — All 7 Equipment Operating WITHOUT Certificate of Fitness</div>
+          <div style="font-size:12px;color:var(--text-secondary);line-height:1.6">
+            All air receivers and air compressors at KKIP Water Bottling Factory are currently <strong>In Service</strong> without a valid Certificate of Fitness (CF) from DOSH.
+            Form 27C (Permit to Install) must be submitted via <strong>MyKKP</strong> before CF can be issued.
+            Items CF-001 &amp; CF-002 have complete documentation and are pending joint submission with CF-003 &amp; CF-004.
+            Items CF-005, CF-006, CF-007 require document recovery from previous owner (COMOGO Sdn Bhd).
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab bar -->
+      <div style="display:flex;gap:0;border-bottom:2px solid var(--border);margin-bottom:16px;overflow-x:auto">
+        <button id="cf-tab-register"  onclick="switchCFTab('register')"
+          style="background:none;border:none;padding:10px 18px;cursor:pointer;font-family:var(--font-head);font-size:13px;font-weight:700;color:var(--accent);border-bottom:2px solid var(--accent);margin-bottom:-2px;white-space:nowrap;letter-spacing:.04em">
+          <i class="fa-solid fa-table"></i> KKIP New Register
+        </button>
+        <button id="cf-tab-existing"  onclick="switchCFTab('existing')"
+          style="background:none;border:none;padding:10px 18px;cursor:pointer;font-family:var(--font-head);font-size:13px;font-weight:600;color:var(--text-muted);border-bottom:2px solid transparent;margin-bottom:-2px;white-space:nowrap;letter-spacing:.04em">
+          <i class="fa-solid fa-certificate"></i> Existing CF Register
+        </button>
+        <button id="cf-tab-docs"      onclick="switchCFTab('docs')"
+          style="background:none;border:none;padding:10px 18px;cursor:pointer;font-family:var(--font-head);font-size:13px;font-weight:600;color:var(--text-muted);border-bottom:2px solid transparent;margin-bottom:-2px;white-space:nowrap;letter-spacing:.04em">
+          <i class="fa-solid fa-folder-open"></i> Document Checklist
+        </button>
+        <button id="cf-tab-progress"  onclick="switchCFTab('progress')"
+          style="background:none;border:none;padding:10px 18px;cursor:pointer;font-family:var(--font-head);font-size:13px;font-weight:600;color:var(--text-muted);border-bottom:2px solid transparent;margin-bottom:-2px;white-space:nowrap;letter-spacing:.04em">
+          <i class="fa-solid fa-bars-progress"></i> Registration Progress
+        </button>
+      </div>
+
+      <!-- TAB 1: Equipment Register -->
+      <div id="cf-panel-register" class="cf-panel">
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title"><i class="fa-solid fa-table panel-title-icon"></i> Equipment Register — KKIP WBF</div>
+            <div class="filter-bar" style="margin-bottom:0">
+              <input type="text" id="cf-search" placeholder="Search ID, serial, manufacturer…" oninput="cfFilter.search=this.value;renderCFTable()" style="min-width:180px"/>
+              <select onchange="cfFilter.location=this.value;renderCFTable()">
+                <option value="">All Locations</option>
+                <option>New Production Area</option>
+                <option>Blowing Machine Area</option>
+              </select>
+              <select onchange="cfFilter.regStatus=this.value;renderCFTable()">
+                <option value="">All CF Status</option>
+                <option>Registered</option>
+                <option>Not Registered</option>
+                <option>In Progress</option>
+                <option>Pending Submission</option>
+              </select>
+              <button class="btn-sys btn-outline btn-sm" onclick="cfFilter={type:'',location:'',regStatus:'',docStatus:'',search:''};document.getElementById('cf-search').value='';renderCFTable()"><i class="fa-solid fa-xmark"></i> Reset</button>
+              <span style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted)" id="cf-rcnt"></span>
+            </div>
+          </div>
+          <div class="tbl-wrapper">
+            <table class="sys-table" style="min-width:1100px">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Equipment Type</th>
+                  <th>Location</th>
+                  <th>Manufacturer</th>
+                  <th>Capacity</th>
+                  <th>Design Pressure</th>
+                  <th>CF Reg Status</th>
+                  <th>Form 27C</th>
+                  <th>Doc Progress</th>
+                  <th>PIC</th>
+                  <th>Updated</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="cf-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 2: Existing CF Register -->
+      <div id="cf-panel-existing" class="cf-panel" style="display:none">
+
+        <!-- Source banner -->
+        <div style="background:linear-gradient(135deg,#0a1628,#0d1f3c);border:1px solid var(--border);border-radius:var(--radius-lg);padding:12px 18px;margin-bottom:14px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+          <i class="fa-solid fa-file-pdf" style="font-size:22px;color:var(--danger)"></i>
+          <div>
+            <div style="font-family:var(--font-head);font-size:15px;font-weight:800">CF Renewal Register — Plants 2026</div>
+            <div style="font-size:11px;color:var(--text-muted);font-family:var(--font-mono)">Source: CF_RENEWAL_FOR_2028.pdf · MWTP (H/K/0980) · KWTP (H/K/1039) · Telibong 1 WTP (SB/12/10/2007) · 27 equipment items</div>
+          </div>
+          <div style="margin-left:auto">
+            <button class="btn-sys btn-success-outline btn-sm" onclick="exportCFExistingExcel()"><i class="fa-solid fa-file-excel"></i> Export</button>
+          </div>
+        </div>
+
+        <!-- KPI Cards -->
+        <div class="kpi-grid" style="margin-bottom:14px">
+          <div class="kpi-card kpi-blue"><div class="kpi-label">Total Equipment</div><div class="kpi-value" id="cfex-kpi-total">—</div><div class="kpi-icon"><i class="fa-solid fa-gauge"></i></div></div>
+          <div class="kpi-card kpi-green"><div class="kpi-label">CF Active</div><div class="kpi-value" id="cfex-kpi-active">—</div><div class="kpi-icon"><i class="fa-solid fa-circle-check"></i></div></div>
+          <div class="kpi-card kpi-red"><div class="kpi-label">CF Expired</div><div class="kpi-value" id="cfex-kpi-expired">—</div><div class="kpi-icon"><i class="fa-solid fa-xmark"></i></div></div>
+          <div class="kpi-card kpi-yellow"><div class="kpi-label">Expiring ≤90 Days</div><div class="kpi-value" id="cfex-kpi-expiring">—</div><div class="kpi-icon"><i class="fa-solid fa-clock"></i></div></div>
+          <div class="kpi-card kpi-blue"><div class="kpi-label">Not In Use</div><div class="kpi-value" id="cfex-kpi-notuse">—</div><div class="kpi-icon"><i class="fa-solid fa-power-off"></i></div></div>
+          <div class="kpi-card kpi-red"><div class="kpi-label">Renewal Required</div><div class="kpi-value" id="cfex-kpi-renew">—</div><div class="kpi-icon"><i class="fa-solid fa-rotate"></i></div></div>
+        </div>
+
+        <!-- Location summary cards -->
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;margin-bottom:16px" id="cfex-byloc"></div>
+
+        <!-- Filter + Table -->
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title"><i class="fa-solid fa-table panel-title-icon"></i> CF Equipment Register — All Locations</div>
+            <div class="filter-bar" style="margin-bottom:0">
+              <input type="text" id="cfex-search" placeholder="Search No. Jentera, item…" oninput="cfExFilter.search=this.value;renderCFExistingTable()" style="min-width:180px"/>
+              <select onchange="cfExFilter.location=this.value;renderCFExistingTable()">
+                <option value="">All Locations</option>
+                <option>MWTP</option>
+                <option>KWTP</option>
+                <option>Telibong 1 WTP</option>
+              </select>
+              <select onchange="cfExFilter.itemType=this.value;renderCFExistingTable()">
+                <option value="">All Equipment Types</option>
+                <option value="crane">Cranes &amp; Hoists</option>
+                <option value="receiver">Tanks, Vessels &amp; Receivers</option>
+                <option value="other">Other</option>
+              </select>
+              <select onchange="cfExFilter.cfStatus=this.value;renderCFExistingTable()">
+                <option value="">All CF Status</option>
+                <option value="active">CF Active</option>
+                <option value="expiring">Expiring Soon</option>
+                <option value="expired">CF Expired</option>
+                <option value="notinuse">Not In Use</option>
+              </select>
+              <button class="btn-sys btn-outline btn-sm" onclick="cfExFilter={location:'',itemType:'',cfStatus:'',search:''};document.getElementById('cfex-search').value='';renderCFExistingTable()"><i class="fa-solid fa-xmark"></i> Reset</button>
+              <span style="font-family:var(--font-mono);font-size:11px;color:var(--text-muted)" id="cfex-rcnt"></span>
+            </div>
+          </div>
+          <div class="tbl-wrapper">
+            <table class="sys-table" style="min-width:1000px">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Location</th>
+                  <th>No. Jentera</th>
+                  <th>Equipment Item</th>
+                  <th>Date Inspected</th>
+                  <th>CF Expiry Date</th>
+                  <th>CF Status</th>
+                  <th>Days Remaining</th>
+                  <th>Action Required</th>
+                  <th>Edit</th>
+                </tr>
+              </thead>
+              <tbody id="cfex-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 3: Document Checklist (KKIP) -->
+      <div id="cf-panel-docs" class="cf-panel" style="display:none">
+        <div style="background:var(--bg-card2);border:1px solid var(--border);border-radius:var(--radius);padding:12px 16px;margin-bottom:14px;font-size:12px;color:var(--text-secondary);line-height:1.6">
+          <i class="fa-solid fa-circle-info" style="color:var(--accent)"></i>
+          <strong> Documents required for Form 27C (Permit to Install) submission via MyKKP:</strong>
+          Manufacturer's Data Report · Surat Kelulusan Verifikasi Bejana Tekanan (JKKP) · Sijil Verifikasi Reka Bentuk (JKKP) · Safety Relief Valve Test Report · Pressure Gauge Calibration Report · Manufacturer's Name Plate
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px" id="cf-doc-matrix"></div>
+      </div>
+
+      <!-- TAB 4: Registration Progress -->
+      <div id="cf-panel-progress" class="cf-panel" style="display:none">
+        <div id="cf-progress-view"></div>
+      </div>
+
+    </div><!-- /cf -->
+
+    <!-- ─────── REPORTS ─────── -->
+    <div id="page-reports" class="page-view">
+      <div class="module-header">
+        <div>
+          <div class="module-title"><i class="fa-solid fa-file-chart-column" style="color:var(--accent)"></i> Reporting Management</div>
+          <div class="module-subtitle">Auto-generated reports from live data — PDF, Excel & Print</div>
+        </div>
+        <div class="module-actions">
+          <button class="btn-sys btn-success-outline" onclick="exportToPDF()"><i class="fa-solid fa-file-pdf"></i> Export PDF</button>
+          <button class="btn-sys btn-outline" onclick="exportToExcel()"><i class="fa-solid fa-file-excel"></i> Export Excel</button>
+          <button class="btn-sys btn-outline" onclick="window.print()"><i class="fa-solid fa-print"></i> Print</button>
+        </div>
+      </div>
+
+      <!-- Report type selector -->
+      <div class="panel" style="margin-bottom:16px">
+        <div class="panel-body" style="padding:14px">
+          <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+            <span style="font-size:12px;color:var(--text-muted);font-family:var(--font-mono)">REPORT TYPE:</span>
+            <button class="btn-sys btn-primary-sys" id="rpt-btn-tw" onclick="selectReportType('two-weekly')">Two-Weekly</button>
+            <button class="btn-sys btn-outline" id="rpt-btn-mo" onclick="selectReportType('monthly')">Monthly</button>
+            <button class="btn-sys btn-outline" id="rpt-btn-an" onclick="selectReportType('annual')">Annual</button>
+            <span style="margin-left:auto;font-size:12px;color:var(--text-muted)">Data auto-collected from all modules</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Report Preview -->
+      <div id="report-preview"></div>
+    </div><!-- /reports -->
+
+  </div><!-- /page-content -->
+</div><!-- /main-content -->
+</div><!-- /app-wrapper -->
+
+<!-- ═══════════════════════════════════════
+     MODALS
+═══════════════════════════════════════ -->
+
+<!-- Training Modal -->
+<div class="modal-overlay" id="tr-modal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-title" id="tr-modal-title">Training Record</div>
+      <button class="modal-close" onclick="document.getElementById('tr-modal').classList.remove('show')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="tr-f-id"/>
+      <div class="form-grid-2">
+        <div class="form-group"><label class="form-label">Employee Name</label><input id="tr-f-employeeName" class="form-control-sys" placeholder="Full name"/></div>
+        <div class="form-group"><label class="form-label">Employee ID</label><input id="tr-f-employeeId" class="form-control-sys" placeholder="EMP-XXX"/></div>
+        <div class="form-group"><label class="form-label">Department</label>
+          <select id="tr-f-department" class="form-control-sys">
+            <option>HSE</option><option>Operations</option><option>Maintenance</option><option>Lab</option><option>Admin</option><option>Management</option>
+          </select>
+        </div>
+        <div class="form-group"><label class="form-label">Training Name</label><input id="tr-f-trainingName" class="form-control-sys" placeholder="e.g. Safety Officer Refresher"/></div>
+        <div class="form-group"><label class="form-label">Training Date</label><input id="tr-f-trainingDate" type="date" class="form-control-sys"/></div>
+        <div class="form-group"><label class="form-label">Expiry Date</label><input id="tr-f-expiryDate" type="date" class="form-control-sys"/></div>
+        <div class="form-group"><label class="form-label">Training Hours</label><input id="tr-f-hours" type="number" class="form-control-sys" placeholder="8"/></div>
+        <div class="form-group"><label class="form-label">Status</label>
+          <select id="tr-f-status" class="form-control-sys"><option>Valid</option><option>Expiring Soon</option><option>Expired</option></select>
+        </div>
+      </div>
+      <div class="form-group"><label class="form-label">Remarks</label><input id="tr-f-remarks" class="form-control-sys" placeholder="Optional remarks"/></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-sys btn-outline" onclick="document.getElementById('tr-modal').classList.remove('show')">Cancel</button>
+      <button class="btn-sys btn-primary-sys" onclick="saveTrainingRecord()"><i class="fa-solid fa-floppy-disk"></i> Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Issue Modal -->
+<div class="modal-overlay" id="iss-modal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-title" id="iss-modal-title">Safety Issue</div>
+      <button class="modal-close" onclick="document.getElementById('iss-modal').classList.remove('show')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="iss-f-id"/>
+      <div class="form-grid-2">
+        <div class="form-group"><label class="form-label">Category</label>
+          <select id="iss-f-category" class="form-control-sys">
+            <option>Unsafe Act</option><option>Unsafe Condition</option><option>Near Miss</option><option>Incident</option>
+            <option>PTW</option><option>Fire Extinguisher</option><option>Emergency Equipment</option><option>LEV Inspection</option>
+            <option>Contractor Safety</option><option>Housekeeping</option>
+          </select>
+        </div>
+        <div class="form-group"><label class="form-label">Risk Level</label>
+          <select id="iss-f-riskLevel" class="form-control-sys"><option>Low</option><option>Medium</option><option>High</option><option>Critical</option></select>
+        </div>
+        <div class="form-group"><label class="form-label">Location</label><input id="iss-f-location" class="form-control-sys" placeholder="e.g. Pump Station P-03"/></div>
+        <div class="form-group"><label class="form-label">PIC</label><input id="iss-f-pic" class="form-control-sys" placeholder="Person in charge"/></div>
+        <div class="form-group"><label class="form-label">Date Reported</label><input id="iss-f-dateReported" type="date" class="form-control-sys"/></div>
+        <div class="form-group"><label class="form-label">Due Date</label><input id="iss-f-dueDate" type="date" class="form-control-sys"/></div>
+        <div class="form-group"><label class="form-label">Status</label>
+          <select id="iss-f-status" class="form-control-sys">
+            <option>Open</option><option>In Progress</option><option>Pending Verification</option><option>Closed</option><option>Overdue</option>
+          </select>
+        </div>
+        <div class="form-group"><label class="form-label">Verification</label><input id="iss-f-verification" class="form-control-sys" placeholder="Verification notes"/></div>
+      </div>
+      <div class="form-group"><label class="form-label">Description</label><textarea id="iss-f-description" class="form-control-sys" rows="3" placeholder="Describe the issue in detail…"></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-sys btn-outline" onclick="document.getElementById('iss-modal').classList.remove('show')">Cancel</button>
+      <button class="btn-sys btn-primary-sys" onclick="saveIssueRecord()"><i class="fa-solid fa-floppy-disk"></i> Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- CAPA Modal -->
+<div class="modal-overlay" id="capa-modal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-title" id="capa-modal-title">CAPA Record</div>
+      <button class="modal-close" onclick="document.getElementById('capa-modal').classList.remove('show')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="capa-f-id"/>
+      <div class="form-grid-2">
+        <div class="form-group"><label class="form-label">ISO Standard</label>
+          <select id="capa-f-isoStandard" class="form-control-sys">
+            <option>ISO 9001</option><option>ISO 39001</option><option>ISO 37001</option><option>ISO 45001</option>
+          </select>
+        </div>
+        <div class="form-group"><label class="form-label">Finding Type</label>
+          <select id="capa-f-findingType" class="form-control-sys">
+            <option>NCR</option><option>OFI</option><option>MRM Action</option><option>Audit Finding</option><option>Risk Register</option><option>Objective</option>
+          </select>
+        </div>
+        <div class="form-group"><label class="form-label">PIC</label><input id="capa-f-pic" class="form-control-sys" placeholder="Person in charge"/></div>
+        <div class="form-group"><label class="form-label">Due Date</label><input id="capa-f-dueDate" type="date" class="form-control-sys"/></div>
+        <div class="form-group"><label class="form-label">Status</label>
+          <select id="capa-f-status" class="form-control-sys">
+            <option>Open</option><option>In Progress</option><option>Pending Verification</option><option>Closed</option><option>Overdue</option>
+          </select>
+        </div>
+        <div class="form-group"><label class="form-label">Verification</label><input id="capa-f-verification" class="form-control-sys" placeholder="Verification notes"/></div>
+      </div>
+      <div class="form-group"><label class="form-label">Finding Description</label><textarea id="capa-f-description" class="form-control-sys" rows="2" placeholder="Describe the finding…"></textarea></div>
+      <div class="form-group"><label class="form-label">Root Cause</label><textarea id="capa-f-rootCause" class="form-control-sys" rows="2" placeholder="Root cause analysis…"></textarea></div>
+      <div class="form-group"><label class="form-label">Corrective Action</label><textarea id="capa-f-correctiveAction" class="form-control-sys" rows="2" placeholder="Corrective action plan…"></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-sys btn-outline" onclick="document.getElementById('capa-modal').classList.remove('show')">Cancel</button>
+      <button class="btn-sys btn-primary-sys" onclick="saveCapaRecord()"><i class="fa-solid fa-floppy-disk"></i> Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Compliance Modal -->
+<div class="modal-overlay" id="cmp-modal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-title" id="cmp-modal-title">Compliance Item</div>
+      <button class="modal-close" onclick="document.getElementById('cmp-modal').classList.remove('show')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="cmp-f-id"/>
+      <div class="form-grid-2">
+        <div class="form-group"><label class="form-label">Compliance Item</label>
+          <select id="cmp-f-item" class="form-control-sys">
+            <option>JKKP 6 – Boiler Registration</option><option>JKKP 8 – Pressure Vessel</option>
+            <option>JKKP 12 – Machinery Registration</option><option>Competent Fitter (CF) – Renewal</option>
+            <option>Competent Fitter (CF) – New</option><option>Competent Fitter (CF) – Transfer</option>
+            <option>CHRA Report</option><option>Noise Risk Assessment (NRA)</option>
+            <option>CIMAH NRA Renewal</option><option>Site Registration</option><option>Other</option>
+          </select>
+        </div>
+        <div class="form-group"><label class="form-label">Authority</label><input id="cmp-f-authority" class="form-control-sys" placeholder="e.g. DOSH"/></div>
+        <div class="form-group"><label class="form-label">Reference Number</label><input id="cmp-f-referenceNo" class="form-control-sys" placeholder="e.g. JKKP6/2023/001"/></div>
+        <div class="form-group"><label class="form-label">Expiry Date</label><input id="cmp-f-expiryDate" type="date" class="form-control-sys"/></div>
+        <div class="form-group"><label class="form-label">PIC</label><input id="cmp-f-pic" class="form-control-sys" placeholder="Person in charge"/></div>
+        <div class="form-group"><label class="form-label">Reminder Alert</label>
+          <select id="cmp-f-reminderAlert" class="form-control-sys"><option>30 days</option><option>60 days</option><option>90 days</option></select>
+        </div>
+        <div class="form-group"><label class="form-label">Status</label>
+          <select id="cmp-f-status" class="form-control-sys"><option>Valid</option><option>Expiring Soon</option><option>Expired</option></select>
+        </div>
+      </div>
+      <div class="form-group"><label class="form-label">Remarks</label><input id="cmp-f-remarks" class="form-control-sys" placeholder="Optional remarks"/></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-sys btn-outline" onclick="document.getElementById('cmp-modal').classList.remove('show')">Cancel</button>
+      <button class="btn-sys btn-primary-sys" onclick="saveCmpRecord()"><i class="fa-solid fa-floppy-disk"></i> Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- SHC Modal -->
+<div class="modal-overlay" id="shc-modal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-title" id="shc-modal-title">SHC Action</div>
+      <button class="modal-close" onclick="document.getElementById('shc-modal').classList.remove('show')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="shc-f-id"/>
+      <div class="form-grid-2">
+        <div class="form-group"><label class="form-label">Meeting Date</label><input id="shc-f-meetingDate" type="date" class="form-control-sys"/></div>
+        <div class="form-group"><label class="form-label">Attendance %</label><input id="shc-f-attendance" type="number" class="form-control-sys" placeholder="85"/></div>
+        <div class="form-group"><label class="form-label">PIC</label><input id="shc-f-pic" class="form-control-sys" placeholder="Person in charge"/></div>
+        <div class="form-group"><label class="form-label">Due Date</label><input id="shc-f-dueDate" type="date" class="form-control-sys"/></div>
+        <div class="form-group"><label class="form-label">Status</label>
+          <select id="shc-f-status" class="form-control-sys">
+            <option>Open</option><option>In Progress</option><option>Pending Verification</option><option>Closed</option><option>Overdue</option>
+          </select>
+        </div>
+        <div class="form-group"><label class="form-label">Verification</label><input id="shc-f-verification" class="form-control-sys" placeholder="Verification notes"/></div>
+      </div>
+      <div class="form-group"><label class="form-label">Agenda</label><input id="shc-f-agenda" class="form-control-sys" placeholder="Meeting agenda items"/></div>
+      <div class="form-group"><label class="form-label">Issue Raised</label><textarea id="shc-f-issueRaised" class="form-control-sys" rows="2" placeholder="Describe the issue raised…"></textarea></div>
+      <div class="form-group"><label class="form-label">Action Required</label><textarea id="shc-f-actionRequired" class="form-control-sys" rows="2" placeholder="Describe the action required…"></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-sys btn-outline" onclick="document.getElementById('shc-modal').classList.remove('show')">Cancel</button>
+      <button class="btn-sys btn-primary-sys" onclick="saveShcRecord()"><i class="fa-solid fa-floppy-disk"></i> Save</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- CF Existing — Edit Modal -->
+<div class="modal-overlay" id="cfex-edit-modal">
+  <div class="modal-box" style="max-width:520px">
+    <div class="modal-header">
+      <div class="modal-title">Update CF Existing Record</div>
+      <button class="modal-close" onclick="document.getElementById('cfex-edit-modal').classList.remove('show')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="cfex-f-id"/>
+      <div class="form-grid-2">
+        <div class="form-group"><label class="form-label">No. Jentera</label><input id="cfex-f-noJentera" class="form-control-sys" readonly style="opacity:.6"/></div>
+        <div class="form-group"><label class="form-label">Location</label><input id="cfex-f-location" class="form-control-sys" readonly style="opacity:.6"/></div>
+        <div class="form-group"><label class="form-label">Equipment Item</label><input id="cfex-f-item" class="form-control-sys" readonly style="opacity:.6"/></div>
+        <div class="form-group"><label class="form-label">Operational Status</label>
+          <select id="cfex-f-status" class="form-control-sys">
+            <option>ACTIVE</option>
+            <option>NOT IN USED</option>
+          </select>
+        </div>
+        <div class="form-group"><label class="form-label">Date Inspected (DD/MM/YYYY)</label><input id="cfex-f-dateInspected" class="form-control-sys" placeholder="e.g. 18/9/2025"/></div>
+        <div class="form-group"><label class="form-label">CF Expiry Date (DD/MM/YYYY)</label><input id="cfex-f-cfExpiry" class="form-control-sys" placeholder="e.g. 17/12/2026"/></div>
+      </div>
+      <div style="background:rgba(0,170,255,.08);border:1px solid rgba(0,170,255,.2);border-radius:var(--radius);padding:10px 12px;font-size:12px;color:var(--text-secondary);margin-top:4px">
+        <i class="fa-solid fa-circle-info" style="color:var(--accent)"></i> Update inspection date and CF expiry after renewal inspection by DOSH-approved inspector.
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-sys btn-outline" onclick="document.getElementById('cfex-edit-modal').classList.remove('show')">Cancel</button>
+      <button class="btn-sys btn-primary-sys" onclick="saveCFExisting()"><i class="fa-solid fa-floppy-disk"></i> Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- CF Detail Modal -->
+<div class="modal-overlay" id="cf-detail-modal">
+  <div class="modal-box" style="max-width:680px">
+    <div class="modal-header">
+      <div class="modal-title" id="cf-detail-title">Equipment Detail</div>
+      <button class="modal-close" onclick="document.getElementById('cf-detail-modal').classList.remove('show')">✕</button>
+    </div>
+    <div class="modal-body" id="cf-detail-body"></div>
+    <div class="modal-footer">
+      <button class="btn-sys btn-outline" onclick="document.getElementById('cf-detail-modal').classList.remove('show')">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- CF Edit Modal -->
+<div class="modal-overlay" id="cf-edit-modal">
+  <div class="modal-box" style="max-width:620px">
+    <div class="modal-header">
+      <div class="modal-title">Update CF Record</div>
+      <button class="modal-close" onclick="document.getElementById('cf-edit-modal').classList.remove('show')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="cfe-f-id"/>
+      <div class="form-grid-2">
+        <div class="form-group">
+          <label class="form-label">Equipment Type</label>
+          <input id="cfe-f-equipmentType" class="form-control-sys" readonly style="opacity:.6"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Location</label>
+          <input id="cfe-f-location" class="form-control-sys" readonly style="opacity:.6"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Serial No</label>
+          <input id="cfe-f-serialNo" class="form-control-sys" readonly style="opacity:.6"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">PIC</label>
+          <input id="cfe-f-pic" class="form-control-sys" placeholder="Person in charge"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">CF Registration Status</label>
+          <select id="cfe-f-cfRegStatus" class="form-control-sys">
+            <option>Not Registered</option>
+            <option>Pending Submission</option>
+            <option>In Progress</option>
+            <option>Registered</option>
+            <option>Exempted</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Form 27C Status</label>
+          <select id="cfe-f-form27c" class="form-control-sys">
+            <option>Not Started</option>
+            <option>Pending Submission</option>
+            <option>In Progress</option>
+            <option>Submitted</option>
+            <option>Approved</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Registration Progress Notes</label>
+        <textarea id="cfe-f-regProgress" class="form-control-sys" rows="3" placeholder="Describe current status and next steps…"></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Remarks</label>
+        <textarea id="cfe-f-remarks" class="form-control-sys" rows="2" placeholder="Additional remarks…"></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label" style="margin-bottom:10px">Document Checklist — tick when document received</label>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:12px"><input type="checkbox" id="cfe-doc-manufacturerDataReport"/> Manufacturer's Data Report</label>
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:12px"><input type="checkbox" id="cfe-doc-suratKelulusanJKKP"/> Surat Kelulusan Verifikasi Bejana Tekanan (JKKP)</label>
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:12px"><input type="checkbox" id="cfe-doc-sijilVerifikasiJKKP"/> Sijil Verifikasi Reka Bentuk (JKKP)</label>
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:12px"><input type="checkbox" id="cfe-doc-safetyReliefValve"/> Safety Relief Valve Test Report</label>
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:12px"><input type="checkbox" id="cfe-doc-pressureGaugeCalib"/> Pressure Gauge Calibration Report</label>
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;font-size:12px"><input type="checkbox" id="cfe-doc-nameplate"/> Manufacturer's Name Plate</label>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-sys btn-outline" onclick="document.getElementById('cf-edit-modal').classList.remove('show')">Cancel</button>
+      <button class="btn-sys btn-primary-sys" onclick="saveCFEdit()"><i class="fa-solid fa-floppy-disk"></i> Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toast-container"></div>
+
+<!-- ═══════════════════════════════════════
+     SCRIPTS
+═══════════════════════════════════════ -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="app.js"></script>
+<script src="modules.js"></script>
+<script src="report.js"></script>
+<script src="cf-tracker.js"></script>
+
+<script>
+/* ── Bootstrap the application ── */
+(async function init() {
+  // Auth guard
+  const user = requireAuth();
+  if (!user) return;
+
+  // Seed data
+  await seedData();
+
+  // Apply theme preference
+  if (localStorage.getItem('hse_lightmode') === '1') {
+    document.body.classList.add('light-mode');
+    const btn = document.getElementById('darkmode-btn');
+    if (btn) btn.innerHTML = '<i class="fa-solid fa-moon"></i>';
+  }
+
+  // Populate sidebar user info
+  document.getElementById('sidebar-name').textContent = user.name;
+  const roleLabels = { admin:'Administrator', osh_coordinator:'OSH Coordinator', hse_agm:'HSE AGM' };
+  document.getElementById('sidebar-role').textContent = roleLabels[user.role] || user.role;
+  document.getElementById('sidebar-avatar').textContent = user.name.charAt(0).toUpperCase();
+
+  // Role-based UI — AGM = read-only (no add/edit)
+  if (!canEdit(user)) {
+    document.querySelectorAll('#btn-add-training,#btn-add-issue,#btn-add-capa,#btn-add-cmp,#btn-add-shc').forEach(b => b && (b.style.display='none'));
+  }
+
+  // Update nav badges
+  function updateNavBadges() {
+    const tr = getData(KEYS.training).filter(r=>r.status==='Expired'||r.status==='Expiring Soon').length;
+    const iss = getData(KEYS.issues).filter(r=>r.status==='Overdue'||r.status==='Open').length;
+    const cap = getData(KEYS.capa).filter(r=>r.status==='Overdue'||r.status==='Open').length;
+    const cmp = getData(KEYS.compliance).filter(r=>r.status==='Expired'||r.status==='Expiring Soon').length;
+    const set = (id, v) => { const el=document.getElementById(id); if(el) { el.textContent=v; el.style.display=v>0?'':'none'; } };
+    set('nav-badge-training', tr);
+    set('nav-badge-issues', iss);
+    set('nav-badge-capa', cap);
+    set('nav-badge-cmp', cmp);
+    // Notif count
+    const alerts = generateAlerts();
+    const nc = document.getElementById('notif-count');
+    if (nc) nc.textContent = alerts.length;
+  }
+  updateNavBadges();
+
+  // Render notifications
+  renderNotifPanel();
+
+  // Initial page
+  navigate('dashboard');
+
+  // Close notification panel on outside click
+  document.addEventListener('click', (e) => {
+    const panel = document.getElementById('notif-panel');
+    const btn   = panel?.previousElementSibling;
+    if (panel && !panel.contains(e.target) && btn && !btn.contains(e.target)) {
+      panel.classList.remove('show');
+    }
+  });
+
+  // Report type switcher helper
+  window.selectReportType = function(type) {
+    ['two-weekly','monthly','annual'].forEach(t => {
+      const map = { 'two-weekly':'tw', 'monthly':'mo', 'annual':'an' };
+      const btn = document.getElementById(`rpt-btn-${map[t]}`);
+      if (btn) btn.className = t===type ? 'btn-sys btn-primary-sys' : 'btn-sys btn-outline';
+    });
+    buildReportPreview(type);
+  };
+
+  // CF Tracker tab switcher — 4 tabs
+  window.switchCFTab = function(tab) {
+    ['register','existing','docs','progress'].forEach(t => {
+      const p = document.getElementById('cf-panel-'+t);
+      const b = document.getElementById('cf-tab-'+t);
+      if (p) p.style.display = t===tab ? 'block' : 'none';
+      if (b) {
+        b.style.color        = t===tab ? 'var(--accent)'    : 'var(--text-muted)';
+        b.style.fontWeight   = t===tab ? '700'              : '600';
+        b.style.borderBottom = t===tab ? '2px solid var(--accent)' : '2px solid transparent';
+      }
+    });
+    if (tab==='register')  renderCFTable();
+    if (tab==='existing')  renderCFExisting();
+    if (tab==='docs')      renderCFDocMatrix();
+    if (tab==='progress')  renderCFProgress();
+  };
+
+  // CF Progress view
+  window.renderCFProgress = function() {
+    const data = getCFData();
+    const container = document.getElementById('cf-progress-view');
+    if (!container) return;
+
+    const groups = {
+      'New Production Area':   data.filter(r=>r.location==='New Production Area'),
+      'Blowing Machine Area':  data.filter(r=>r.location==='Blowing Machine Area')
+    };
+
+    const stepDef = [
+      { key:'docs',    label:'1. Documents Complete',         check: r => CF_DOCS.every(d=>r.docs&&r.docs[d.key]) },
+      { key:'form27c', label:'2. Form 27C Submitted (MyKKP)', check: r => ['Submitted','Approved','In Progress'].includes(r.form27c) },
+      { key:'permit',  label:'3. Permit to Install Approved', check: r => r.form27c === 'Approved' },
+      { key:'cf',      label:'4. CF Issued by DOSH',          check: r => r.cfRegStatus === 'Registered' }
+    ];
+
+    container.innerHTML = Object.entries(groups).map(([loc, items]) => {
+      if (!items.length) return '';
+      return `<div class="panel" style="margin-bottom:16px">
+        <div class="panel-header" style="background:var(--bg-dark)">
+          <div class="panel-title"><i class="fa-solid fa-location-dot" style="color:var(--accent2)"></i> ${escHtml(loc)}</div>
+          <span style="font-size:11px;font-family:var(--font-mono);color:var(--text-muted)">${items.length} equipment</span>
+        </div>
+        <div class="panel-body">
+          ${items.map(r => {
+            const steps = stepDef.map((s,i) => {
+              const done = s.check(r);
+              const prev = i===0 || stepDef[i-1].check(r);
+              const active = !done && prev;
+              const col = done ? 'var(--success)' : active ? 'var(--warning)' : 'var(--text-muted)';
+              const icon = done ? '✅' : active ? '🔄' : '⏳';
+              return `<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--border)">
+                <span style="font-size:13px">${icon}</span>
+                <span style="font-size:11px;color:${col};flex:1">${s.label}</span>
+                ${done ? '<span style="font-size:9px;font-family:var(--font-mono);color:var(--success)">DONE</span>' : active ? '<span style="font-size:9px;font-family:var(--font-mono);color:var(--warning)">IN PROGRESS</span>' : '<span style="font-size:9px;font-family:var(--font-mono);color:var(--text-muted)">PENDING</span>'}
+              </div>`;
+            }).join('');
+            const doneCount = stepDef.filter(s=>s.check(r)).length;
+            const pct = Math.round(doneCount/stepDef.length*100);
+            const col = pct===100?'var(--success)':pct===0?'var(--danger)':'var(--warning)';
+            return `<div style="background:var(--bg-card2);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:10px;overflow:hidden">
+              <div style="padding:10px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+                <div>
+                  <div style="font-weight:700;font-size:13px">${escHtml(r.id)} — ${escHtml(r.equipmentType)}</div>
+                  <div style="font-size:10px;color:var(--text-muted);font-family:var(--font-mono)">${escHtml(r.serialNo)} · ${escHtml(r.manufacturer)}</div>
+                </div>
+                <div style="text-align:right">
+                  <div style="font-family:var(--font-head);font-size:20px;font-weight:800;color:${col}">${pct}%</div>
+                  <div style="font-size:9px;color:var(--text-muted)">${doneCount}/${stepDef.length} steps</div>
+                </div>
+              </div>
+              <div style="padding:4px 14px 8px">${steps}</div>
+              <div style="padding:6px 14px;background:var(--bg-dark);font-size:10px;color:var(--text-muted);border-top:1px solid var(--border)">
+                📌 ${escHtml(r.regProgress.substring(0,120))}…
+              </div>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>`;
+    }).join('');
+  };
+
+  // ── Navigate — full version including all pages ──
+  window.navigate = function(page) {
+    const titles = {
+      dashboard:  'Dashboard Overview',
+      training:   'HSE Training Monitoring',
+      issues:     'Safety Issues & Inspection',
+      capa:       'CAPA & ISO Governance',
+      compliance: 'Compliance & Legal Monitoring',
+      shc:        'SHC Governance',
+      reports:    'Reporting Management',
+      cf:         'CF Status Tracker — KKIP WBF',
+      alltasks:   'All Tasks — Master Register',
+      mytasks:    'My Tasks'
+    };
+    document.querySelectorAll('.page-view').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    const pageEl = document.getElementById('page-'+page);
+    if (pageEl) pageEl.classList.add('active');
+    const navEl = document.querySelector(`.nav-item[data-page="${page}"]`);
+    if (navEl) navEl.classList.add('active');
+    const el = document.getElementById('topbar-title');
+    if (el) el.textContent = titles[page] || page;
+    if (page==='dashboard')  renderDashboard();
+    if (page==='training')   renderTraining();
+    if (page==='issues')     renderIssues();
+    if (page==='capa')       renderCapa();
+    if (page==='compliance') renderCompliance();
+    if (page==='shc')        renderShc();
+    if (page==='reports')    renderReports();
+    if (page==='cf')         { renderCFTracker(); if(typeof switchCFTab==='function') switchCFTab('register'); }
+    if (page==='alltasks')   renderAllTasks();
+    if (page==='mytasks')    renderMyTasks();
+    if (window.innerWidth < 992) {
+      document.getElementById('sidebar').classList.remove('open');
+      document.getElementById('sidebar-overlay').classList.remove('active');
+    }
+  };
+
+  /* ================================================================
+     Aggregates tasks from: Issues, CAPA, SHC, Compliance, Training, CF
+     ================================================================ */
+
+  // Build unified task array from all modules
+  function collectAllTasks() {
+    const tasks = [];
+
+    // Issues
+    getData(KEYS.issues).forEach(r => tasks.push({
+      id: r.id, module: 'Issue',
+      moduleIcon: 'fa-triangle-exclamation', moduleColor: 'var(--warning)',
+      description: r.description,
+      priority: r.riskLevel || 'Medium',
+      pic: r.pic, dateRaised: r.dateReported,
+      dueDate: r.dueDate, status: r.status,
+      detail: r.category + ' · ' + (r.location||''),
+      page: 'issues'
+    }));
+
+    // CAPA
+    getData(KEYS.capa).forEach(r => tasks.push({
+      id: r.id, module: 'CAPA',
+      moduleIcon: 'fa-diagram-next', moduleColor: 'var(--accent2)',
+      description: r.description,
+      priority: r.findingType === 'NCR' ? 'High' : 'Medium',
+      pic: r.pic, dateRaised: r.dueDate,
+      dueDate: r.dueDate, status: r.status,
+      detail: r.isoStandard + ' · ' + r.findingType,
+      page: 'capa'
+    }));
+
+    // SHC
+    getData(KEYS.shc).forEach(r => tasks.push({
+      id: r.id, module: 'SHC',
+      moduleIcon: 'fa-people-group', moduleColor: 'var(--purple)',
+      description: r.actionRequired,
+      priority: 'Medium',
+      pic: r.pic, dateRaised: r.meetingDate,
+      dueDate: r.dueDate, status: r.status,
+      detail: 'Issue: ' + (r.issueRaised||'').substring(0,50),
+      page: 'shc'
+    }));
+
+    // Compliance
+    getData(KEYS.compliance).forEach(r => {
+      if (r.status === 'Valid') return; // only include items needing action
+      tasks.push({
+        id: r.id, module: 'Compliance',
+        moduleIcon: 'fa-shield-halved', moduleColor: 'var(--success)',
+        description: r.item,
+        priority: r.status === 'Expired' ? 'Critical' : 'High',
+        pic: r.pic, dateRaised: '',
+        dueDate: r.expiryDate, status: r.status === 'Expired' ? 'Overdue' : r.status === 'Expiring Soon' ? 'In Progress' : r.status,
+        detail: r.authority + ' · Ref: ' + r.referenceNo,
+        page: 'compliance'
+      });
+    });
+
+    // Training — expiring/expired only
+    getData(KEYS.training).forEach(r => {
+      if (r.status === 'Valid') return;
+      tasks.push({
+        id: r.id, module: 'Training',
+        moduleIcon: 'fa-graduation-cap', moduleColor: 'var(--accent)',
+        description: r.trainingName + ' — ' + r.employeeName,
+        priority: r.status === 'Expired' ? 'High' : 'Medium',
+        pic: r.employeeName, dateRaised: r.trainingDate,
+        dueDate: r.expiryDate, status: r.status === 'Expired' ? 'Overdue' : 'In Progress',
+        detail: r.department + ' · ' + r.employeeId,
+        page: 'training'
+      });
+    });
+
+    // CF — not registered items
+    const cfData = JSON.parse(localStorage.getItem('hse_cf_equipment') || '[]');
+    cfData.forEach(r => {
+      if (r.cfRegStatus === 'Registered') return;
+      const have = (typeof CF_DOCS !== 'undefined' ? CF_DOCS : []).filter(d => r.docs && r.docs[d.key]).length;
+      const total = (typeof CF_DOCS !== 'undefined' ? CF_DOCS : []).length || 6;
+      tasks.push({
+        id: r.id, module: 'CF',
+        moduleIcon: 'fa-certificate', moduleColor: 'var(--accent2)',
+        description: r.equipmentType + ' — ' + r.location,
+        priority: r.docStatus === 'missing' ? 'Critical' : 'High',
+        pic: r.pic, dateRaised: r.lastUpdated,
+        dueDate: '', status: r.cfRegStatus === 'Not Registered' ? 'Open' : 'In Progress',
+        detail: 'Docs: ' + have + '/' + total + ' · Form 27C: ' + r.form27c,
+        page: 'cf'
+      });
+    });
+
+    // Sort: Overdue first, then by due date ascending
+    const priority = { Critical:0, High:1, Medium:2, Low:3 };
+    tasks.sort((a, b) => {
+      if (a.status==='Overdue' && b.status!=='Overdue') return -1;
+      if (b.status==='Overdue' && a.status!=='Overdue') return 1;
+      if (!a.dueDate && !b.dueDate) return 0;
+      if (!a.dueDate) return 1;
+      if (!b.dueDate) return -1;
+      return new Date(a.dueDate) - new Date(b.dueDate);
+    });
+    return tasks;
+  }
+
+  // ── Task card — clean simple row card ──
+  function taskCard(t) {
+    const statusColor = {
+      'Overdue':              'var(--danger)',
+      'Open':                 'var(--accent)',
+      'In Progress':          'var(--warning)',
+      'Pending Verification': 'var(--warning)',
+      'Closed':               'var(--success)'
+    }[t.status] || 'var(--text-muted)';
+
+    const statusEmoji = {
+      'Overdue': '🔴', 'Open': '🔵', 'In Progress': '🟡',
+      'Pending Verification': '🟠', 'Closed': '🟢'
+    }[t.status] || '⚪';
+
+    const diff     = t.dueDate ? daysDiff(t.dueDate) : null;
+    const dueTxt   = !t.dueDate ? 'No due date'
+                   : diff < 0  ? `${Math.abs(diff)} days overdue`
+                   : diff === 0 ? 'Due today'
+                   : diff <= 7  ? `Due in ${diff} days`
+                   : formatDate(t.dueDate);
+    const dueColor = !t.dueDate ? 'var(--text-muted)'
+                   : diff < 0   ? 'var(--danger)'
+                   : diff <= 7  ? 'var(--warning)'
+                   : 'var(--text-secondary)';
+
+    const areaLabel = {
+      Issue:'Safety Issue', CAPA:'CAPA', SHC:'SHC Meeting',
+      Compliance:'Compliance', Training:'Training', CF:'CF Register'
+    }[t.module] || t.module;
+
+    return `<div style="background:var(--bg-card);border:1px solid var(--border);border-left:4px solid ${statusColor};border-radius:var(--radius);padding:14px 16px;margin-bottom:8px;display:flex;align-items:flex-start;gap:14px;transition:all .2s" onmouseover="this.style.background='var(--bg-card2)'" onmouseout="this.style.background='var(--bg-card)'">
+
+      <!-- Status dot -->
+      <div style="font-size:18px;flex-shrink:0;margin-top:2px">${statusEmoji}</div>
+
+      <!-- Main content -->
+      <div style="flex:1;min-width:0">
+        <div style="display:flex;align-items:flex-start;gap:8px;flex-wrap:wrap;margin-bottom:5px">
+          <span style="font-size:10px;font-family:var(--font-mono);background:var(--bg-dark);border:1px solid var(--border);border-radius:3px;padding:1px 6px;color:var(--text-muted);flex-shrink:0">${escHtml(t.id)}</span>
+          <span style="font-size:10px;background:var(--bg-dark);border:1px solid var(--border);border-radius:3px;padding:1px 8px;color:var(--text-secondary);flex-shrink:0">${escHtml(areaLabel)}</span>
+          ${t.status==='Overdue'?'<span style="font-size:10px;background:rgba(224,60,49,.15);color:var(--danger);border-radius:3px;padding:1px 8px;font-weight:700;flex-shrink:0">OVERDUE</span>':''}
+        </div>
+        <div style="font-size:13px;font-weight:600;margin-bottom:4px;line-height:1.4">${escHtml((t.description||'').substring(0,100))}${(t.description||'').length>100?'…':''}</div>
+        <div style="display:flex;gap:16px;flex-wrap:wrap;font-size:12px">
+          <span style="color:var(--text-secondary)"><i class="fa-solid fa-user" style="font-size:10px;margin-right:3px;color:var(--text-muted)"></i>${escHtml(t.pic||'Unassigned')}</span>
+          <span style="color:${dueColor};font-weight:${diff!==null&&diff<=7?'600':'400'}"><i class="fa-solid fa-calendar" style="font-size:10px;margin-right:3px;color:var(--text-muted)"></i>${dueTxt}</span>
+          ${t.detail?`<span style="color:var(--text-muted);font-size:11px">${escHtml(t.detail)}</span>`:''}
+        </div>
+      </div>
+
+      <!-- Right side: status + go button -->
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0">
+        <span style="font-size:11px;font-weight:600;color:${statusColor}">${escHtml(t.status)}</span>
+        <button class="btn-sys btn-outline btn-xs" onclick="navigate('${t.page}')" title="Go to ${escHtml(t.module)}">
+          Open <i class="fa-solid fa-arrow-right"></i>
+        </button>
+      </div>
+    </div>`;
+  }
+
+  // ── All Tasks ──
+  let atFilter = { module:'', status:'', pic:'', search:'' };
+
+  window.renderAllTasks = function() {
+    const tasks = collectAllTasks();
+
+    // Populate PIC dropdown (once)
+    const picSel = document.getElementById('at-f-pic');
+    if (picSel && picSel.options.length <= 1) {
+      const pics = [...new Set(tasks.map(t=>t.pic).filter(Boolean))].sort();
+      pics.forEach(p => { const o=document.createElement('option'); o.value=p; o.textContent=p; picSel.appendChild(o); });
+    }
+
+    // KPIs from full task list
+    const el = id => document.getElementById(id);
+    const overdue = tasks.filter(t=>t.status==='Overdue').length;
+    const open    = tasks.filter(t=>t.status==='Open').length;
+    const inprog  = tasks.filter(t=>t.status==='In Progress').length;
+    const closed  = tasks.filter(t=>t.status==='Closed').length;
+    if(el('at-kpi-overdue')) el('at-kpi-overdue').textContent = overdue;
+    if(el('at-kpi-open'))    el('at-kpi-open').textContent    = open;
+    if(el('at-kpi-inprog'))  el('at-kpi-inprog').textContent  = inprog;
+    if(el('at-kpi-closed'))  el('at-kpi-closed').textContent  = closed;
+    // still update hidden ones for JS compatibility
+    if(el('at-kpi-total'))    el('at-kpi-total').textContent    = tasks.length;
+    if(el('at-kpi-pending'))  el('at-kpi-pending').textContent  = tasks.filter(t=>t.status==='Pending Verification').length;
+    if(el('at-kpi-critical')) el('at-kpi-critical').textContent = tasks.filter(t=>t.priority==='Critical'||t.priority==='High').length;
+    if(el('at-kpi-week'))     el('at-kpi-week').textContent     = tasks.filter(t=>t.dueDate&&daysDiff(t.dueDate)>=0&&daysDiff(t.dueDate)<=7).length;
+
+    // Overdue banner
+    const alertBox = document.getElementById('at-overdue-alert');
+    if(alertBox) alertBox.style.display = overdue>0?'flex':'none';
+    const alertN = document.getElementById('at-overdue-n');
+    if(alertN) alertN.textContent = overdue;
+
+    // Nav badge
+    const nb = document.getElementById('nav-badge-alltasks');
+    if(nb) { nb.textContent=overdue; nb.style.display=overdue>0?'':'none'; }
+
+    // Filter
+    const { module, status, pic, search } = atFilter;
+    const filtered = tasks.filter(t => {
+      if (module && t.module !== module) return false;
+      if (status && t.status !== status) return false;
+      if (pic    && t.pic   !== pic)     return false;
+      if (search) {
+        const q = search.toLowerCase();
+        if (!(t.id+t.description+t.pic+t.module+t.detail).toLowerCase().includes(q)) return false;
+      }
+      return true;
+    });
+
+    const rcnt = document.getElementById('at-rcnt');
+    if(rcnt) rcnt.textContent = filtered.length + (filtered.length===1?' task':' tasks');
+
+    // Render task cards
+    const list = document.getElementById('at-task-list');
+    if(!list) return;
+
+    if(!filtered.length) {
+      list.innerHTML = `<div style="text-align:center;padding:48px 24px;color:var(--text-muted)">
+        <i class="fa-solid fa-circle-check" style="font-size:36px;color:var(--success);display:block;margin-bottom:12px"></i>
+        <div style="font-size:15px;font-weight:600;margin-bottom:6px">All clear!</div>
+        <div style="font-size:13px">No tasks match the selected filters.</div>
+      </div>`;
+      return;
+    }
+    list.innerHTML = filtered.map(t => taskCard(t)).join('');
+  };
+
+  // ── My Tasks ──
+  window.renderMyTasks = function() {
+    const user  = getCurrentUser();
+    const tasks = collectAllTasks();
+    const name  = user ? user.name : '';
+    const firstName = name.toLowerCase().split(' ')[0];
+
+    // Filter to logged-in user
+    const mine = tasks.filter(t => t.pic && t.pic.toLowerCase().includes(firstName));
+
+    const sub = document.getElementById('mytasks-subtitle');
+    if(sub) sub.textContent = `Showing tasks assigned to: ${name}`;
+
+    // KPIs
+    const el = id => document.getElementById(id);
+    const overdue = mine.filter(t=>t.status==='Overdue').length;
+    const open    = mine.filter(t=>t.status==='Open'||t.status==='In Progress').length;
+    const closed  = mine.filter(t=>t.status==='Closed').length;
+    if(el('mt-kpi-total'))   el('mt-kpi-total').textContent   = mine.length;
+    if(el('mt-kpi-overdue')) el('mt-kpi-overdue').textContent = overdue;
+    if(el('mt-kpi-open'))    el('mt-kpi-open').textContent    = open;
+    if(el('mt-kpi-inprog'))  el('mt-kpi-inprog').textContent  = mine.filter(t=>t.status==='In Progress').length;
+    if(el('mt-kpi-closed'))  el('mt-kpi-closed').textContent  = closed;
+    if(el('mt-kpi-week'))    el('mt-kpi-week').textContent    = mine.filter(t=>t.dueDate&&daysDiff(t.dueDate)>=0&&daysDiff(t.dueDate)<=7).length;
+
+    // Overdue alert
+    const alertBox = document.getElementById('mt-overdue-alert');
+    if(alertBox) alertBox.style.display = overdue>0?'flex':'none';
+    const alertN = document.getElementById('mt-overdue-n');
+    if(alertN) alertN.textContent = overdue;
+
+    // Nav badge
+    const nb = document.getElementById('nav-badge-mytasks');
+    if(nb) { nb.textContent=overdue; nb.style.display=overdue>0?'':'none'; }
+
+    const groups = document.getElementById('mt-groups');
+    if(!groups) return;
+
+    if(!mine.length) {
+      groups.innerHTML = `<div style="text-align:center;padding:48px 24px;color:var(--text-muted);background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg)">
+        <i class="fa-solid fa-circle-check" style="font-size:36px;color:var(--success);display:block;margin-bottom:12px"></i>
+        <div style="font-size:15px;font-weight:600;margin-bottom:6px">You have no tasks!</div>
+        <div style="font-size:13px">Tasks are matched to your name: <strong>${escHtml(name)}</strong></div>
+      </div>`;
+      return;
+    }
+
+    // Group by area with simple section headers
+    const areaOrder = ['Issue','CAPA','SHC','Compliance','Training','CF'];
+    const areaLabel = {
+      Issue:'Safety Issues', CAPA:'CAPA Actions', SHC:'SHC Meeting Actions',
+      Compliance:'Compliance Tasks', Training:'Training Renewals', CF:'CF Registration'
+    };
+
+    groups.innerHTML = areaOrder
+      .filter(mod => mine.some(t=>t.module===mod))
+      .map(mod => {
+        const modTasks = mine.filter(t=>t.module===mod);
+        const ov  = modTasks.filter(t=>t.status==='Overdue').length;
+        const col = modTasks[0]?.moduleColor || 'var(--accent)';
+        return `<div style="margin-bottom:20px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;padding-bottom:8px;border-bottom:2px solid var(--border)">
+            <div style="font-family:var(--font-head);font-size:15px;font-weight:700;color:${col}">
+              <i class="fa-solid ${modTasks[0]?.moduleIcon||'fa-list'}" style="margin-right:6px"></i>${escHtml(areaLabel[mod]||mod)}
+            </div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <span style="font-size:12px;color:var(--text-muted)">${modTasks.length} task${modTasks.length!==1?'s':''}</span>
+              ${ov>0?`<span style="font-size:11px;background:rgba(224,60,49,.15);color:var(--danger);padding:2px 8px;border-radius:4px;font-weight:700">${ov} overdue</span>`:`<span style="font-size:11px;color:var(--success)">✓ On track</span>`}
+            </div>
+          </div>
+          ${modTasks.map(t=>taskCard(t)).join('')}
+        </div>`;
+      }).join('');
+  };
+
+
+
+  // ── Export All Tasks Excel — clean daily report ──
+  window.exportAllTasksExcel = function() {
+    const XLSX  = window.XLSX;
+    const tasks = collectAllTasks();
+    const wb    = XLSX.utils.book_new();
+    const now   = new Date();
+    const dateStr = now.toLocaleDateString('en-MY',{day:'2-digit',month:'long',year:'numeric'});
+    const fileDate = now.toISOString().split('T')[0];
+
+    // Summary sheet
+    const overdue = tasks.filter(t=>t.status==='Overdue');
+    const open    = tasks.filter(t=>t.status==='Open');
+    const inprog  = tasks.filter(t=>t.status==='In Progress');
+    const pending = tasks.filter(t=>t.status==='Pending Verification');
+    const closed  = tasks.filter(t=>t.status==='Closed');
+
+    const sumWs = XLSX.utils.aoa_to_sheet([
+      [`HSE TEAM — DAILY TASK REPORT`],
+      [`Date: ${dateStr}`],
+      [],
+      ['STATUS','COUNT'],
+      ['🔴 Overdue',     overdue.length],
+      ['🔵 Not Started', open.length],
+      ['🟡 In Progress', inprog.length],
+      ['🟠 Pending Check', pending.length],
+      ['🟢 Done',        closed.length],
+      ['TOTAL',          tasks.length]
+    ]);
+    sumWs['!cols'] = [{wch:20},{wch:10}];
+    XLSX.utils.book_append_sheet(wb, sumWs, 'Summary');
+
+    // All tasks sheet — simple columns, no jargon
+    const h = ['#','Task ID','Area','What needs to be done','Assigned To','Due Date','Status','Days Late / Left'];
+    const rows = tasks.map((t,i) => {
+      const diff = t.dueDate ? daysDiff(t.dueDate) : null;
+      const agingTxt = diff===null ? '—' : diff<0 ? `${Math.abs(diff)} days late` : diff===0 ? 'Due today' : `${diff} days left`;
+      const areaLabel = {Issue:'Safety Issue',CAPA:'CAPA',SHC:'SHC',Compliance:'Compliance',Training:'Training',CF:'CF Register'}[t.module]||t.module;
+      return [i+1, t.id, areaLabel, t.description, t.pic, t.dueDate||'—', t.status, agingTxt];
+    });
+    const ws = XLSX.utils.aoa_to_sheet([
+      [`HSE TEAM TASK BOARD — ${dateStr}`],[],h,...rows
+    ]);
+    ws['!cols']=[{wch:4},{wch:12},{wch:16},{wch:55},{wch:22},{wch:14},{wch:20},{wch:16}];
+    XLSX.utils.book_append_sheet(wb, ws, 'All Tasks');
+
+    // Overdue only — action sheet
+    if(overdue.length) {
+      const ovRows = overdue.map((t,i) => {
+        const diff = t.dueDate ? Math.abs(daysDiff(t.dueDate)) : '—';
+        const areaLabel = {Issue:'Safety Issue',CAPA:'CAPA',SHC:'SHC',Compliance:'Compliance',Training:'Training',CF:'CF Register'}[t.module]||t.module;
+        return [i+1, t.id, areaLabel, t.description, t.pic, t.dueDate||'—', typeof diff==='number'?`${diff} days late`:'—'];
+      });
+      const ovWs = XLSX.utils.aoa_to_sheet([
+        [`⚠ OVERDUE TASKS — Action Required`],[`${overdue.length} tasks are past their due date`],[],
+        ['#','Task ID','Area','What needs to be done','Assigned To','Due Date','Days Late'],
+        ...ovRows
+      ]);
+      ovWs['!cols']=[{wch:4},{wch:12},{wch:16},{wch:55},{wch:22},{wch:14},{wch:14}];
+      XLSX.utils.book_append_sheet(wb, ovWs, 'Overdue — Action Now');
+    }
+
+    XLSX.writeFile(wb, `HSE_Tasks_${fileDate}.xlsx`);
+    showToast('Task report exported!','success');
+  };
+
+  // ── Export My Tasks Excel ──
+  window.exportMyTasksExcel = function() {
+    const XLSX     = window.XLSX;
+    const user     = getCurrentUser();
+    const name     = user ? user.name : '';
+    const firstName = name.toLowerCase().split(' ')[0];
+    const mine     = collectAllTasks().filter(t=>t.pic&&t.pic.toLowerCase().includes(firstName));
+    const wb       = XLSX.utils.book_new();
+    const now      = new Date();
+    const dateStr  = now.toLocaleDateString('en-MY',{day:'2-digit',month:'long',year:'numeric'});
+    const fileDate = now.toISOString().split('T')[0];
+
+    const h = ['#','Task ID','Area','What needs to be done','Due Date','Status','Days Late / Left'];
+    const rows = mine.map((t,i) => {
+      const diff = t.dueDate ? daysDiff(t.dueDate) : null;
+      const agingTxt = diff===null?'—':diff<0?`${Math.abs(diff)} days late`:diff===0?'Due today':`${diff} days left`;
+      const areaLabel = {Issue:'Safety Issue',CAPA:'CAPA',SHC:'SHC',Compliance:'Compliance',Training:'Training',CF:'CF Register'}[t.module]||t.module;
+      return [i+1, t.id, areaLabel, t.description, t.dueDate||'—', t.status, agingTxt];
+    });
+    const ws = XLSX.utils.aoa_to_sheet([
+      [`MY TASKS — ${name}`],[`Date: ${dateStr} | Total: ${mine.length} tasks`],[],h,...rows
+    ]);
+    ws['!cols']=[{wch:4},{wch:12},{wch:16},{wch:55},{wch:14},{wch:20},{wch:16}];
+    XLSX.utils.book_append_sheet(wb, ws, 'My Tasks');
+    XLSX.writeFile(wb, `MyTasks_${name.replace(/\s/g,'_')}_${fileDate}.xlsx`);
+    showToast('Your tasks exported!','success');
+  };
+
+  // Quick export helpers for individual modules
+  window.exportTrainingExcel = function() {
+    const XLSX = window.XLSX;
+    const wb = XLSX.utils.book_new();
+    const h  = ['ID','Employee Name','Employee ID','Department','Training Name','Training Date','Expiry Date','Status','Hours','Remarks'];
+    const rows = getData(KEYS.training).map(r=>[r.id,r.employeeName,r.employeeId,r.department,r.trainingName,r.trainingDate,r.expiryDate,r.status,r.hours,r.remarks]);
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([h,...rows]), 'Training');
+    XLSX.writeFile(wb, `Training_${new Date().toISOString().split('T')[0]}.xlsx`);
+    showToast('Training data exported!','success');
+  };
+  window.exportIssuesExcel = function() {
+    const XLSX = window.XLSX;
+    const wb = XLSX.utils.book_new();
+    const h  = ['ID','Category','Description','Risk Level','Location','PIC','Date Reported','Due Date','Status','Verification'];
+    const rows = getData(KEYS.issues).map(r=>[r.id,r.category,r.description,r.riskLevel,r.location,r.pic,r.dateReported,r.dueDate,r.status,r.verification]);
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([h,...rows]), 'Issues');
+    XLSX.writeFile(wb, `SafetyIssues_${new Date().toISOString().split('T')[0]}.xlsx`);
+    showToast('Issues exported!','success');
+  };
+  window.exportCapaExcel = function() {
+    const XLSX = window.XLSX;
+    const wb = XLSX.utils.book_new();
+    const h  = ['ID','ISO Standard','Finding Type','Description','Root Cause','Corrective Action','PIC','Due Date','Status','Verification'];
+    const rows = getData(KEYS.capa).map(r=>[r.id,r.isoStandard,r.findingType,r.description,r.rootCause,r.correctiveAction,r.pic,r.dueDate,r.status,r.verification]);
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([h,...rows]), 'CAPA');
+    XLSX.writeFile(wb, `CAPA_${new Date().toISOString().split('T')[0]}.xlsx`);
+    showToast('CAPA data exported!','success');
+  };
+  window.exportCmpExcel = function() {
+    const XLSX = window.XLSX;
+    const wb = XLSX.utils.book_new();
+    const h  = ['ID','Item','Authority','Reference No','Expiry Date','PIC','Status','Remarks'];
+    const rows = getData(KEYS.compliance).map(r=>[r.id,r.item,r.authority,r.referenceNo,r.expiryDate,r.pic,r.status,r.remarks]);
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([h,...rows]), 'Compliance');
+    XLSX.writeFile(wb, `Compliance_${new Date().toISOString().split('T')[0]}.xlsx`);
+    showToast('Compliance data exported!','success');
+  };
+  window.exportShcExcel = function() {
+    const XLSX = window.XLSX;
+    const wb = XLSX.utils.book_new();
+    const h  = ['ID','Meeting Date','Issue Raised','Action Required','PIC','Due Date','Status','Verification'];
+    const rows = getData(KEYS.shc).map(r=>[r.id,r.meetingDate,r.issueRaised,r.actionRequired,r.pic,r.dueDate,r.status,r.verification]);
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([h,...rows]), 'SHC');
+    XLSX.writeFile(wb, `SHC_${new Date().toISOString().split('T')[0]}.xlsx`);
+    showToast('SHC data exported!','success');
+  };
+
+})();
+
+/* ================================================================
+   TRAINING MODULE — TAB SWITCHER
+   ================================================================ */
+
+function switchTrainingTab(tab) {
+  // Hide all panels
+  document.querySelectorAll('.tr-panel').forEach(p => p.style.display = 'none');
+  // Reset all tab styles
+  ['matrix','site','name','jwsb'].forEach(t => {
+    const btn = document.getElementById('tr-tab-' + t);
+    if (btn) {
+      btn.style.color        = 'var(--text-muted)';
+      btn.style.fontWeight   = '600';
+      btn.style.borderBottom = '2px solid transparent';
+    }
+  });
+  // Show active panel + style active tab
+  const panel = document.getElementById('tr-panel-' + tab);
+  if (panel) panel.style.display = 'block';
+  const activeBtn = document.getElementById('tr-tab-' + tab);
+  if (activeBtn) {
+    activeBtn.style.color        = 'var(--accent)';
+    activeBtn.style.fontWeight   = '700';
+    activeBtn.style.borderBottom = '2px solid var(--accent)';
+  }
+  // Render the right view
+  if (tab === 'matrix') renderTrainingTable();
+  if (tab === 'site')   renderBySite();
+  if (tab === 'name')   renderByName();
+  if (tab === 'jwsb')   { jwsbInit(); jwsbApplyFilters(); }
+}
+
+/* ================================================================
+   TAB 2 — BY SITE / WTP
+   ================================================================ */
+
+function renderBySite() {
+  const data       = getData(KEYS.training);
+  const siteFilter = document.getElementById('site-filter-site')?.value   || '';
+  const statFilter = document.getElementById('site-filter-status')?.value || '';
+  const search     = (document.getElementById('site-search')?.value || '').toLowerCase();
+
+  // Filtered dataset
+  const filtered = data.filter(r => {
+    const matchSite   = !siteFilter || r.department === siteFilter || (r.site||'') === siteFilter;
+    const matchStatus = !statFilter || r.status === statFilter;
+    const matchSearch = !search || (r.employeeName+r.trainingName+r.department).toLowerCase().includes(search);
+    return matchSite && matchStatus && matchSearch;
+  });
+
+  const rcnt = document.getElementById('site-rcnt');
+  if (rcnt) rcnt.textContent = filtered.length + ' records';
+
+  // Get unique sites
+  const sites = [...new Set(data.map(r => r.department || 'Unassigned'))].sort();
+  const filtSites = siteFilter ? [siteFilter] : sites;
+
+  // Summary cards
+  const cardsEl = document.getElementById('site-summary-cards');
+  if (cardsEl) {
+    cardsEl.innerHTML = filtSites.map(site => {
+      const sData   = data.filter(r => (r.department||'Unassigned') === site);
+      const valid   = sData.filter(r => r.status === 'Valid').length;
+      const expiring= sData.filter(r => r.status === 'Expiring Soon').length;
+      const expired = sData.filter(r => r.status === 'Expired').length;
+      const pct     = sData.length ? Math.round(valid/sData.length*100) : 0;
+      const color   = expired > 0 ? 'var(--danger)' : expiring > 0 ? 'var(--warning)' : 'var(--success)';
+      return `<div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:12px;border-top:3px solid ${color};cursor:pointer"
+                   onclick="document.getElementById('site-filter-site').value='${site.replace(/'/g,"\\'")}';renderBySite()">
+        <div style="font-family:var(--font-head);font-size:13px;font-weight:700;margin-bottom:6px">${escHtml(site)}</div>
+        <div style="display:flex;gap:8px;font-size:11px;font-family:var(--font-mono)">
+          <span style="color:var(--success)">${valid} Valid</span>
+          <span style="color:var(--warning)">${expiring} Expiring</span>
+          <span style="color:var(--danger)">${expired} Expired</span>
+        </div>
+        <div style="margin-top:6px">
+          <div style="background:var(--bg-dark);border-radius:3px;height:5px;overflow:hidden">
+            <div style="width:${pct}%;background:${color};height:100%;border-radius:3px;transition:width .5s"></div>
+          </div>
+          <div style="font-size:10px;color:var(--text-muted);font-family:var(--font-mono);margin-top:2px">${pct}% compliant · ${sData.length} total</div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  // Grouped tables
+  const groupsEl = document.getElementById('site-groups');
+  if (!groupsEl) return;
+
+  groupsEl.innerHTML = filtSites.map(site => {
+    const sData = filtered.filter(r => (r.department||'Unassigned') === site);
+    if (!sData.length) return '';
+    const rows = sData.map(r => `<tr>
+      <td class="td-id">${escHtml(r.id)}</td>
+      <td><div style="font-weight:600">${escHtml(r.employeeName)}</div><div class="td-muted">${escHtml(r.employeeId)}</div></td>
+      <td>${escHtml(r.trainingName)}</td>
+      <td class="td-muted">${formatDate(r.trainingDate)}</td>
+      <td class="${daysDiff(r.expiryDate)<0?'text-danger':daysDiff(r.expiryDate)<30?'text-warning':''}">${formatDate(r.expiryDate)}</td>
+      <td style="font-family:var(--font-mono);font-size:12px">${escHtml(r.hours||'—')} hrs</td>
+      <td>${statusBadge(r.status)}</td>
+      <td>${agingBadge(r.expiryDate)}</td>
+    </tr>`).join('');
+    const valid   = sData.filter(r=>r.status==='Valid').length;
+    const expiring= sData.filter(r=>r.status==='Expiring Soon').length;
+    const expired = sData.filter(r=>r.status==='Expired').length;
+    return `
+      <div class="panel" style="margin-bottom:14px">
+        <div class="panel-header" style="background:var(--bg-dark)">
+          <div class="panel-title">
+            <i class="fa-solid fa-location-dot" style="color:var(--accent)"></i>
+            ${escHtml(site)}
+            <span style="font-size:11px;font-family:var(--font-mono);font-weight:400;color:var(--text-muted);margin-left:8px">${sData.length} records</span>
+          </div>
+          <div style="display:flex;gap:8px;font-size:11px;font-family:var(--font-mono)">
+            <span style="color:var(--success)">${valid} Valid</span>
+            <span style="color:var(--warning)">${expiring} Expiring</span>
+            <span style="color:var(--danger)">${expired} Expired</span>
+          </div>
+        </div>
+        <div class="tbl-wrapper">
+          <table class="sys-table">
+            <thead><tr><th>ID</th><th>Employee</th><th>Training Name</th><th>Date Trained</th><th>Expiry</th><th>Hours</th><th>Status</th><th>Aging</th></tr></thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>
+      </div>`;
+  }).join('') || '<div style="text-align:center;padding:32px;color:var(--text-muted)">No records found for selected filters.</div>';
+}
+
+/* ================================================================
+   TAB 3 — BY TRAINING NAME
+   ================================================================ */
+
+function renderByName() {
+  const data    = getData(KEYS.training);
+  const search  = (document.getElementById('name-search')?.value || '').toLowerCase();
+  const statF   = document.getElementById('name-filter-status')?.value || '';
+  const nameF   = document.getElementById('name-filter-training')?.value || '';
+
+  // Populate training-name dropdown dynamically from data
+  const nameDropdown = document.getElementById('name-filter-training');
+  if (nameDropdown && nameDropdown.options.length <= 1) {
+    const names = [...new Set(data.map(r => r.trainingName).filter(Boolean))].sort();
+    names.forEach(n => {
+      const opt = document.createElement('option');
+      opt.value = n; opt.textContent = n;
+      nameDropdown.appendChild(opt);
+    });
+  }
+
+  const filtered = data.filter(r => {
+    const matchName   = !nameF   || r.trainingName === nameF;
+    const matchStatus = !statF   || r.status === statF;
+    const matchSearch = !search  || (r.employeeName+r.department+r.trainingName).toLowerCase().includes(search);
+    return matchName && matchStatus && matchSearch;
+  });
+
+  const rcnt = document.getElementById('name-rcnt');
+  if (rcnt) rcnt.textContent = filtered.length + ' records';
+
+  // Get unique training names
+  const names = [...new Set(data.map(r => r.trainingName||'Unknown'))].sort();
+  const filtNames = nameF ? [nameF] : names;
+
+  // Summary cards
+  const cardsEl = document.getElementById('name-summary-cards');
+  if (cardsEl) {
+    cardsEl.innerHTML = filtNames.map(name => {
+      const nData   = data.filter(r => (r.trainingName||'Unknown') === name);
+      const valid   = nData.filter(r => r.status==='Valid').length;
+      const expiring= nData.filter(r => r.status==='Expiring Soon').length;
+      const expired = nData.filter(r => r.status==='Expired').length;
+      const pct     = nData.length ? Math.round(valid/nData.length*100) : 0;
+      const color   = expired>0?'var(--danger)':expiring>0?'var(--warning)':'var(--success)';
+      const totalHrs= nData.reduce((s,r)=>s+(parseInt(r.hours,10)||0),0);
+      return `<div style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:12px;border-top:3px solid ${color};cursor:pointer"
+                   onclick="document.getElementById('name-filter-training').value=encodeURIComponent('${name.replace(/'/g,"\\'")}');renderByName()">
+        <div style="font-family:var(--font-head);font-size:12px;font-weight:700;margin-bottom:4px">${escHtml(name)}</div>
+        <div style="display:flex;gap:8px;font-size:11px;font-family:var(--font-mono);flex-wrap:wrap">
+          <span style="color:var(--success)">${valid} Valid</span>
+          <span style="color:var(--warning)">${expiring} Expiring</span>
+          <span style="color:var(--danger)">${expired} Expired</span>
+          <span style="color:var(--text-muted)">${totalHrs}h total</span>
+        </div>
+        <div style="margin-top:6px">
+          <div style="background:var(--bg-dark);border-radius:3px;height:5px;overflow:hidden">
+            <div style="width:${pct}%;background:${color};height:100%;border-radius:3px"></div>
+          </div>
+          <div style="font-size:10px;color:var(--text-muted);font-family:var(--font-mono);margin-top:2px">${pct}% compliant · ${nData.length} staff</div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  // Grouped tables
+  const groupsEl = document.getElementById('name-groups');
+  if (!groupsEl) return;
+
+  groupsEl.innerHTML = filtNames.map(name => {
+    const nData = filtered.filter(r => (r.trainingName||'Unknown') === name);
+    if (!nData.length) return '';
+    const sites = [...new Set(nData.map(r=>r.department||'—'))].join(', ');
+    const rows = nData.map(r => `<tr>
+      <td class="td-id">${escHtml(r.id)}</td>
+      <td><div style="font-weight:600">${escHtml(r.employeeName)}</div><div class="td-muted">${escHtml(r.employeeId)}</div></td>
+      <td>${escHtml(r.department)}</td>
+      <td class="td-muted">${formatDate(r.trainingDate)}</td>
+      <td class="${daysDiff(r.expiryDate)<0?'text-danger':daysDiff(r.expiryDate)<30?'text-warning':''}">${formatDate(r.expiryDate)}</td>
+      <td style="font-family:var(--font-mono);font-size:12px">${escHtml(r.hours||'—')} hrs</td>
+      <td>${statusBadge(r.status)}</td>
+      <td>${agingBadge(r.expiryDate)}</td>
+    </tr>`).join('');
+    const valid  = nData.filter(r=>r.status==='Valid').length;
+    const expir  = nData.filter(r=>r.status==='Expiring Soon').length;
+    const expd   = nData.filter(r=>r.status==='Expired').length;
+    const hrs    = nData.reduce((s,r)=>s+(parseInt(r.hours,10)||0),0);
+    return `
+      <div class="panel" style="margin-bottom:14px">
+        <div class="panel-header" style="background:var(--bg-dark)">
+          <div class="panel-title">
+            <i class="fa-solid fa-certificate" style="color:var(--accent2)"></i>
+            ${escHtml(name)}
+            <span style="font-size:11px;font-family:var(--font-mono);font-weight:400;color:var(--text-muted);margin-left:8px">${nData.length} staff · ${hrs} hrs total</span>
+          </div>
+          <div style="display:flex;gap:8px;font-size:11px;font-family:var(--font-mono)">
+            <span style="color:var(--success)">${valid} Valid</span>
+            <span style="color:var(--warning)">${expir} Expiring</span>
+            <span style="color:var(--danger)">${expd} Expired</span>
+          </div>
+        </div>
+        <div style="padding:8px 16px;font-size:11px;color:var(--text-muted);border-bottom:1px solid var(--border)">
+          <i class="fa-solid fa-location-dot"></i> Sites: ${escHtml(sites)}
+        </div>
+        <div class="tbl-wrapper">
+          <table class="sys-table">
+            <thead><tr><th>ID</th><th>Employee</th><th>Department / Site</th><th>Date Trained</th><th>Expiry</th><th>Hours</th><th>Status</th><th>Aging</th></tr></thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>
+      </div>`;
+  }).join('') || '<div style="text-align:center;padding:32px;color:var(--text-muted)">No records found for selected filters.</div>';
+}
+
+/* ================================================================
+   TAB 4 — JWSB STATUTORY RENEWAL TRACKER
+   ================================================================ */
+
+// JWSB data + computed fields (from embedded RAW array)
+const JWSB_RAW = [{"name":"Alvin Adrian Petrus Jinuik","wtp":"Head Office","desig":"Administration Executive","cat":"EXECUTIVE","aesp_cert":"","fa_cert":"2024","chem_cert":"","hear_cert":""},{"name":"Ferdinand Kigis @ Jemmey","wtp":"Head Office","desig":"Asst General Manager - SHE","cat":"Top Management","aesp_cert":"2022","fa_cert":"","chem_cert":"","hear_cert":""},{"name":"Abner Bin Ayadun","wtp":"Moyog WTP","desig":"Operator","cat":"UNION","aesp_cert":"","fa_cert":"","chem_cert":"2023","hear_cert":""},{"name":"Alloerand Abel Otteran","wtp":"Moyog WTP","desig":"Operator","cat":"UNION","aesp_cert":"2026-05-15","fa_cert":"2026-05-06","chem_cert":"","hear_cert":""},{"name":"Brandon Clifford","wtp":"Moyog WTP","desig":"Operator","cat":"UNION","aesp_cert":"2026-05-15","fa_cert":"2026-05-06","chem_cert":"","hear_cert":""},{"name":"Jay Joel P S Mojiniu","wtp":"Moyog WTP","desig":"Trainee Operator","cat":"UNION","aesp_cert":"","fa_cert":"","chem_cert":"2024","hear_cert":""},{"name":"Jesper William Puduk","wtp":"Moyog WTP","desig":"Senior Plant Engineer","cat":"EXECUTIVE","aesp_cert":"2025","fa_cert":"","chem_cert":"","hear_cert":""},{"name":"Rayner Yasin","wtp":"Moyog WTP","desig":"Trainee Operator","cat":"UNION","aesp_cert":"","fa_cert":"2026-05-06","chem_cert":"2024","hear_cert":""},{"name":"Weddy Jipanis","wtp":"Moyog WTP","desig":"Senior Operator","cat":"NENU","aesp_cert":"2025-05-16","fa_cert":"","chem_cert":"","hear_cert":""},{"name":"Anest Lampongon","wtp":"Moyog WTP","desig":"General Worker","cat":"UNION","aesp_cert":"2026-05-15","fa_cert":"2026-05-06","chem_cert":"2025-05-08","hear_cert":""},{"name":"Christ Nesterson Robert","wtp":"Moyog WTP","desig":"General Worker","cat":"UNION","aesp_cert":"2026-05-15","fa_cert":"","chem_cert":"2025-05-08","hear_cert":""},{"name":"Hildey Sungki","wtp":"Moyog WTP","desig":"General Worker","cat":"UNION","aesp_cert":"2025-05-16","fa_cert":"","chem_cert":"2025-05-08","hear_cert":""},{"name":"Jefarison Magiling","wtp":"Moyog WTP","desig":"General Worker","cat":"UNION","aesp_cert":"2026-05-15","fa_cert":"","chem_cert":"2025-05-08","hear_cert":""},{"name":"Julini Gudang @ Elsie","wtp":"Moyog WTP","desig":"General Worker","cat":"UNION","aesp_cert":"","fa_cert":"","chem_cert":"2023","hear_cert":""},{"name":"Sevastianus Kimtuan","wtp":"Moyog WTP","desig":"General Worker","cat":"UNION","aesp_cert":"2025-05-16","fa_cert":"","chem_cert":"2025-05-08","hear_cert":""},{"name":"Stanley Vincent","wtp":"Moyog WTP","desig":"General Worker","cat":"UNION","aesp_cert":"2025-05-23","fa_cert":"2026-05-06","chem_cert":"2025-05-08","hear_cert":""},{"name":"Roland Riset","wtp":"Moyog WTP","desig":"Safety & Health Coordinator","cat":"Jr. Executive","aesp_cert":"2025-12-18","fa_cert":"2026-05-13","chem_cert":"","hear_cert":""},{"name":"Hellena Lina Anak Lenggeng","wtp":"Moyog WTP","desig":"Safety & Health Officer","cat":"Jr. Executive","aesp_cert":"2026-04-08","fa_cert":"2026-05-06","chem_cert":"","hear_cert":""},{"name":"Othniel Wong Chengyi","wtp":"Moyog WTP","desig":"Mechanical Engineer","cat":"EXECUTIVE","aesp_cert":"2026-04-08","fa_cert":"2026-05-06","chem_cert":"","hear_cert":""},{"name":"Danesius Kam","wtp":"Kasigui WTP","desig":"Operator","cat":"NENU","aesp_cert":"","fa_cert":"2024","chem_cert":"","hear_cert":""},{"name":"Dempster Patrus","wtp":"Kasigui WTP","desig":"Trainee Operator","cat":"UNION","aesp_cert":"","fa_cert":"2022","chem_cert":"2025-05-08","hear_cert":""},{"name":"Jeremyer Flavian Saimon","wtp":"Kasigui WTP","desig":"Trainee Operator","cat":"UNION","aesp_cert":"2026-05-15","fa_cert":"2026-05-06","chem_cert":"","hear_cert":""},{"name":"Nellbon Del Jaidin","wtp":"Kasigui WTP","desig":"Trainee Operator","cat":"UNION","aesp_cert":"","fa_cert":"","chem_cert":"2025-05-08","hear_cert":""},{"name":"Sharizan Satim Kumbar","wtp":"Kasigui WTP","desig":"Trainee Operator","cat":"UNION","aesp_cert":"2026-05-15","fa_cert":"2026-05-06","chem_cert":"","hear_cert":""},{"name":"Ivo Jerophy Victor","wtp":"Kasigui WTP","desig":"Operator","cat":"UNION","aesp_cert":"2025-05-23","fa_cert":"","chem_cert":"","hear_cert":""},{"name":"Hilary Doline","wtp":"Kasigui WTP","desig":"General Worker","cat":"UNION","aesp_cert":"2025-05-16","fa_cert":"2026-05-06","chem_cert":"2024","hear_cert":""},{"name":"Joshua John","wtp":"Kasigui WTP","desig":"General Worker cum Excavator Operator","cat":"UNION","aesp_cert":"2026-05-15","fa_cert":"","chem_cert":"2025-05-08","hear_cert":""},{"name":"Elfie Bin Mohd Sahril","wtp":"Kasigui WTP","desig":"Technical Engineer","cat":"EXECUTIVE","aesp_cert":"2022","fa_cert":"","chem_cert":"","hear_cert":""},{"name":"Izwan Haeruddin","wtp":"Kasigui WTP","desig":"Network Maintenance Asst","cat":"UNION","aesp_cert":"2025-05-23","fa_cert":"2026-05-13","chem_cert":"","hear_cert":""},{"name":"Kevin Peter Yee","wtp":"Kasigui WTP","desig":"Network Maintenance Asst","cat":"UNION","aesp_cert":"2026-04-08","fa_cert":"2026-05-13","chem_cert":"2023","hear_cert":""},{"name":"Mike John Takong","wtp":"Kasigui WTP","desig":"Reservoir Chief","cat":"Jr. Executive","aesp_cert":"2025-05-23","fa_cert":"2022","chem_cert":"","hear_cert":""},{"name":"Dominik Salvester","wtp":"Kasigui WTP","desig":"Building & Ground Chief","cat":"UNION","aesp_cert":"2026-04-08","fa_cert":"","chem_cert":"","hear_cert":""},{"name":"Melvin Val Madin","wtp":"Papar WTP","desig":"Plant Executive","cat":"Executive","aesp_cert":"2025-05-16","fa_cert":"","chem_cert":"","hear_cert":""},{"name":"Daryl Whelan Catherinus","wtp":"Papar WTP","desig":"Operator","cat":"UNION","aesp_cert":"2026-05-15","fa_cert":"2026-05-13","chem_cert":"2025-05-08","hear_cert":""},{"name":"Izaac Bin Stephen","wtp":"Papar WTP","desig":"Operator","cat":"","aesp_cert":"2026-05-15","fa_cert":"2022","chem_cert":"2025-05-08","hear_cert":""},{"name":"Mohd Syazwi Bin Husin","wtp":"Papar WTP","desig":"Operator","cat":"UNION","aesp_cert":"2026-05-15","fa_cert":"2026-05-13","chem_cert":"","hear_cert":""},{"name":"Zulfadli Bin Abd Majit","wtp":"Papar WTP","desig":"General Worker","cat":"UNION","aesp_cert":"2025-05-16","fa_cert":"","chem_cert":"2025-05-08","hear_cert":""},{"name":"Adrian Gregory A. Sham","wtp":"Papar WTP","desig":"Operator","cat":"UNION","aesp_cert":"2026-05-15","fa_cert":"2026-05-06","chem_cert":"","hear_cert":""},{"name":"Girol Bin Rubin","wtp":"Telibong WTP","desig":"Operator","cat":"UNION","aesp_cert":"2025-05-23","fa_cert":"2026-05-13","chem_cert":"","hear_cert":""},{"name":"Farley Doitey Aloysius","wtp":"Telibong WTP","desig":"Plant Engineer","cat":"Jr. Executive","aesp_cert":"2025-12-18","fa_cert":"","chem_cert":"","hear_cert":""},{"name":"Datu Mohd Azizy Dzulfikar","wtp":"Telibong WTP","desig":"General Worker","cat":"UNION","aesp_cert":"2025-05-23","fa_cert":"2026-05-13","chem_cert":"2025-05-08","hear_cert":""},{"name":"Rushty Kok","wtp":"Telibong WTP","desig":"General Worker","cat":"UNION","aesp_cert":"2025-05-16","fa_cert":"","chem_cert":"2025-05-08","hear_cert":""},{"name":"Edmund Vencislaus","wtp":"Telibong WTP","desig":"Mechanical Technician GII","cat":"UNION","aesp_cert":"2026-04-08","fa_cert":"2026-05-06","chem_cert":"","hear_cert":""},{"name":"Fredoline K. Lontrus","wtp":"Telibong WTP","desig":"Senior Technician - Mechanical","cat":"NENU","aesp_cert":"2025-05-16","fa_cert":"2026-05-13","chem_cert":"","hear_cert":""},{"name":"Azrin Bin Jamahat","wtp":"Telibong WTP","desig":"Electrical Technician GII","cat":"UNION","aesp_cert":"2026-04-08","fa_cert":"2026-05-13","chem_cert":"","hear_cert":""},{"name":"Velvet Valerian","wtp":"Telibong WTP","desig":"Plant Engineer","cat":"EXECUTIVE","aesp_cert":"2026-04-08","fa_cert":"","chem_cert":"","hear_cert":""},{"name":"Gaius Joachim Joseph","wtp":"Telibong 2 WTP","desig":"Acting Senior Operator","cat":"UNION","aesp_cert":"2025-05-23","fa_cert":"2026-05-06","chem_cert":"","hear_cert":""},{"name":"Ardean Join","wtp":"Telibong 2 WTP","desig":"Trainee Operator","cat":"UNION","aesp_cert":"","fa_cert":"","chem_cert":"2025-05-08","hear_cert":""},{"name":"Harvey McDarryl Bin Binsin","wtp":"Telibong 2 WTP","desig":"Trainee Operator","cat":"UNION","aesp_cert":"","fa_cert":"","chem_cert":"2025-05-08","hear_cert":""},{"name":"Richie Deshen","wtp":"Telibong 2 WTP","desig":"Trainee Operator","cat":"UNION","aesp_cert":"","fa_cert":"","chem_cert":"2025-05-08","hear_cert":""},{"name":"Tyrence Jaflis","wtp":"Tamparuli & Tuaran WTP","desig":"Operator","cat":"UNION","aesp_cert":"2025-05-23","fa_cert":"","chem_cert":"","hear_cert":""},{"name":"Kenneth Dee Saibin","wtp":"Tamparuli & Tuaran WTP","desig":"Trainee Operator","cat":"UNION","aesp_cert":"2025-05-16","fa_cert":"2022","chem_cert":"","hear_cert":""},{"name":"Mechellincoln Saimon","wtp":"Tamparuli & Tuaran WTP","desig":"Operator","cat":"UNION","aesp_cert":"2026-04-08","fa_cert":"2022","chem_cert":"","hear_cert":""},{"name":"Fandie Bin Untung","wtp":"Tamparuli & Tuaran WTP","desig":"General Worker","cat":"UNION","aesp_cert":"2025-05-16","fa_cert":"2026-05-13","chem_cert":"","hear_cert":""},{"name":"Maximus Noel Duanis","wtp":"KKIP Warehouse","desig":"General Worker","cat":"UNION","aesp_cert":"","fa_cert":"2026-05-13","chem_cert":"","hear_cert":""},{"name":"Joshrin Jino Allion","wtp":"KKIP Warehouse","desig":"QA/QC Executive cum OSH Coordinator","cat":"Jr. Executive","aesp_cert":"","fa_cert":"2026-05-06","chem_cert":"","hear_cert":""},{"name":"Erdy Meivin Maratin","wtp":"KKIP Warehouse","desig":"Operator","cat":"UNION","aesp_cert":"","fa_cert":"2026-05-06","chem_cert":"","hear_cert":""},{"name":"Anthonio P J Mathew Gilong","wtp":"Head Office","desig":"Office Assistant","cat":"NENU","aesp_cert":"","fa_cert":"2026-05-06","chem_cert":"","hear_cert":""},{"name":"Chrystal Gayle Mojinun","wtp":"Head Office","desig":"Human Resources Assistant","cat":"EXECUTIVE","aesp_cert":"","fa_cert":"2026-05-06","chem_cert":"","hear_cert":""},{"name":"Mohamad Shafiee bin Ghazali","wtp":"Head Office","desig":"Electrical Engineer","cat":"Jr. Executive","aesp_cert":"","fa_cert":"2026-05-06","chem_cert":"","hear_cert":""}];
+
+const JWSB_TRAININGS = [
+  {key:'aesp', cert:'aesp_cert', validity:3, label:'AESP / AGT'},
+  {key:'fa',   cert:'fa_cert',   validity:3, label:'First Aid & CPR'},
+  {key:'chem', cert:'chem_cert', validity:2, label:'Safe Chemical Handling'},
+  {key:'hear', cert:'hear_cert', validity:1, label:'Hearing Conservation'},
+];
+
+let jwsbData = [];
+let jwsbActiveStat = '';
+let jwsbCurrentView = 'all';
+
+function jwsbComputeStatus(cert, validity) {
+  if (!cert || cert === '') return 'NOT TRAINED';
+  const s = String(cert).trim();
+  const today = new Date(); today.setHours(0,0,0,0);
+  let expDate;
+  try {
+    if (s.length===10 && s[4]==='-' && s[7]==='-') {
+      const [y,m,d] = s.split('-').map(Number);
+      expDate = new Date(y+validity, m-1, d);
+    } else if (/^\d{4}$/.test(s)) {
+      expDate = new Date(parseInt(s)+validity, 0, 1);
+    } else return 'NOT TRAINED';
+    const diff = Math.floor((expDate-today)/86400000);
+    if (diff<0)   return 'EXPIRED';
+    if (diff<365) return 'DUE THIS YEAR';
+    if (diff<730) return 'DUE NEXT YEAR';
+    return 'VALID';
+  } catch(e) { return 'NOT TRAINED'; }
+}
+
+function jwsbComputeExpiry(cert, validity) {
+  if (!cert||cert==='') return '';
+  const s = String(cert).trim();
+  const M = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  try {
+    if (s.length===10 && s[4]==='-') {
+      const [y,m,d] = s.split('-').map(Number);
+      const exp = new Date(y+validity, m-1, d);
+      return `${String(exp.getDate()).padStart(2,'0')} ${M[exp.getMonth()]} ${exp.getFullYear()}`;
+    } else if (/^\d{4}$/.test(s)) {
+      return String(parseInt(s)+validity);
+    }
+    return '';
+  } catch(e) { return ''; }
+}
+
+function jwsbCertDisplay(cert) {
+  if (!cert||cert==='') return '—';
+  const s = String(cert).trim();
+  const M = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  if (s.length===10 && s[4]==='-') {
+    try {
+      const [y,m,d] = s.split('-').map(Number);
+      return `${String(d).padStart(2,'0')} ${M[m-1]} ${y}`;
+    } catch(e) { return s; }
+  }
+  return s;
+}
+
+function jwsbStatusBadge(stat) {
+  const map = {
+    'EXPIRED':      'background:rgba(239,68,68,.15);color:#ef4444;border:1px solid rgba(239,68,68,.3)',
+    'DUE THIS YEAR':'background:rgba(249,115,22,.15);color:#f97316;border:1px solid rgba(249,115,22,.3)',
+    'DUE NEXT YEAR':'background:rgba(234,179,8,.15);color:#eab308;border:1px solid rgba(234,179,8,.3)',
+    'VALID':         'background:rgba(34,197,94,.12);color:#22c55e;border:1px solid rgba(34,197,94,.25)',
+    'NOT TRAINED':   'background:rgba(139,92,246,.15);color:#8b5cf6;border:1px solid rgba(139,92,246,.3)',
+  };
+  const lbl = {'EXPIRED':'EXPIRED','DUE THIS YEAR':'DUE THIS YR','DUE NEXT YEAR':'DUE NEXT YR','VALID':'VALID','NOT TRAINED':'NOT TRAINED'}[stat]||stat;
+  return `<span style="display:inline-block;border-radius:4px;padding:2px 6px;font-family:var(--font-mono);font-size:9px;font-weight:600;white-space:nowrap;${map[stat]||''}">${lbl}</span>`;
+}
+
+function jwsbRowColor(s) {
+  const stats = JWSB_TRAININGS.map(t => s[t.key+'_stat']);
+  if (stats.includes('EXPIRED'))       return '#ef4444';
+  if (stats.includes('DUE THIS YEAR')) return '#f97316';
+  if (stats.includes('DUE NEXT YEAR')) return '#eab308';
+  if (stats.includes('NOT TRAINED'))   return '#8b5cf6';
+  return '#22c55e';
+}
+
+function jwsbInit() {
+  if (jwsbData.length) return; // already built
+  jwsbData = JWSB_RAW.map((s,i) => {
+    const e = Object.assign({}, s, {idx:i+1});
+    JWSB_TRAININGS.forEach(t => {
+      e[t.key+'_stat'] = jwsbComputeStatus(s[t.cert], t.validity);
+      e[t.key+'_exp']  = jwsbComputeExpiry(s[t.cert], t.validity);
+      e[t.key+'_disp'] = jwsbCertDisplay(s[t.cert]);
+    });
+    return e;
+  });
+  // Date badge
+  const badge = document.getElementById('jwsb-date-badge');
+  if (badge) badge.textContent = new Date().toLocaleDateString('en-MY', {day:'2-digit',month:'short',year:'numeric'});
+}
+
+function jwsbFilterStat(st) {
+  jwsbActiveStat = st;
+  const sel = document.getElementById('jwsb-fStat');
+  if (sel) sel.value = st;
+  jwsbApplyFilters();
+}
+
+function jwsbResetAll() {
+  jwsbActiveStat = '';
+  ['jwsb-srch','jwsb-fWTP','jwsb-fTrn','jwsb-fStat'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.value = '';
+  });
+  jwsbApplyFilters();
+}
+
+function jwsbApplyFilters() {
+  jwsbInit();
+  const search = (document.getElementById('jwsb-srch')?.value||'').toLowerCase();
+  const wtp    = document.getElementById('jwsb-fWTP')?.value  || '';
+  const trn    = document.getElementById('jwsb-fTrn')?.value  || '';
+  const stat   = document.getElementById('jwsb-fStat')?.value || jwsbActiveStat;
+
+  const filtered = jwsbData.filter(s => {
+    if (search && !(s.name+' '+s.wtp+' '+s.desig+' '+s.cat).toLowerCase().includes(search)) return false;
+    if (wtp && s.wtp !== wtp) return false;
+    if (trn && stat) return s[trn+'_stat'] === stat;
+    if (stat) return JWSB_TRAININGS.some(t => s[t.key+'_stat'] === stat);
+    return true;
+  });
+
+  // Update summary counts
+  const cnt = st => filtered.filter(s => JWSB_TRAININGS.some(t => s[t.key+'_stat']===st)).length;
+  document.getElementById('jwsb-n-all').textContent = filtered.length;
+  document.getElementById('jwsb-n-exp').textContent = cnt('EXPIRED');
+  document.getElementById('jwsb-n-dun').textContent = cnt('DUE THIS YEAR');
+  document.getElementById('jwsb-n-dnx').textContent = cnt('DUE NEXT YEAR');
+  document.getElementById('jwsb-n-val').textContent = filtered.filter(s=>JWSB_TRAININGS.every(t=>s[t.key+'_stat']==='VALID')).length;
+  document.getElementById('jwsb-n-non').textContent = cnt('NOT TRAINED');
+  document.getElementById('jwsb-rcnt').textContent  = filtered.length + ' staff';
+
+  // Critical alert
+  const crit = filtered.filter(s=>JWSB_TRAININGS.some(t=>['EXPIRED','DUE THIS YEAR'].includes(s[t.key+'_stat']))).length;
+  const alertBox = document.getElementById('jwsb-alert-box');
+  if (alertBox) { alertBox.style.display = crit>0?'flex':'none'; }
+  const alertN = document.getElementById('jwsb-alert-n');
+  if (alertN) alertN.textContent = crit;
+
+  // Render the active sub-view
+  if (jwsbCurrentView==='all')  jwsbRenderFlat(filtered);
+  if (jwsbCurrentView==='site') jwsbRenderBySite(filtered);
+  if (jwsbCurrentView==='trn')  jwsbRenderByTraining(filtered);
+}
+
+function setJwsbView(view) {
+  jwsbCurrentView = view;
+  ['all','site','trn'].forEach(v => {
+    const panel = document.getElementById('jwsb-view-'+v);
+    const btn   = document.getElementById('jwsb-view-'+v+'-btn');
+    if (panel) panel.style.display = v===view ? 'block' : 'none';
+    if (btn)   btn.className = v===view ? 'btn-sys btn-primary-sys btn-sm' : 'btn-sys btn-outline btn-sm';
+  });
+  jwsbApplyFilters();
+}
+
+// ── Flat all-staff table ──
+function jwsbRenderFlat(data) {
+  const tbody = document.getElementById('jwsb-tbody');
+  const empty = document.getElementById('jwsb-empty');
+  if (!tbody) return;
+  if (!data.length) {
+    tbody.innerHTML = '';
+    if (empty) empty.style.display='block';
+    return;
+  }
+  if (empty) empty.style.display='none';
+  tbody.innerHTML = data.map((s,i) => {
+    const pc = jwsbRowColor(s);
+    let row = `<tr style="border-left:3px solid ${pc}">
+      <td style="font-family:var(--font-mono);font-size:10px;color:var(--text-muted)">${i+1}</td>
+      <td style="font-weight:600;font-size:12px">${escHtml(s.name)}</td>
+      <td style="font-size:11px;color:var(--text-secondary)">${escHtml(s.wtp)}</td>
+      <td style="font-size:11px;color:var(--text-muted);max-width:140px" title="${escHtml(s.desig)}">${escHtml(s.desig.length>22?s.desig.slice(0,20)+'…':s.desig)}</td>
+      <td><span style="font-size:9px;background:var(--bg-dark);border:1px solid var(--border);border-radius:3px;padding:1px 5px;font-family:var(--font-mono)">${escHtml(s.cat)}</span></td>`;
+    JWSB_TRAININGS.forEach(t => {
+      const expCol = {EXPIRED:'#ef4444','DUE THIS YEAR':'#f97316','DUE NEXT YEAR':'#eab308',VALID:'#22c55e'}[s[t.key+'_stat']]||'var(--text-muted)';
+      row += `<td style="font-size:10px;font-family:var(--font-mono);text-align:center;color:var(--text-muted)">${escHtml(s[t.key+'_disp'])}</td>
+              <td style="font-size:10px;font-family:var(--font-mono);text-align:center;color:${expCol};font-weight:600">${escHtml(s[t.key+'_exp']||'—')}</td>
+              <td style="text-align:center">${jwsbStatusBadge(s[t.key+'_stat'])}</td>`;
+    });
+    row += '</tr>';
+    return row;
+  }).join('');
+}
+
+// ── By-Site grouped ──
+function jwsbRenderBySite(data) {
+  const container = document.getElementById('jwsb-site-groups');
+  if (!container) return;
+  const sites = [...new Set(jwsbData.map(s=>s.wtp))].sort();
+  container.innerHTML = sites.map(site => {
+    const sData = data.filter(s => s.wtp===site);
+    if (!sData.length) return '';
+    const exp  = sData.filter(s=>JWSB_TRAININGS.some(t=>s[t.key+'_stat']==='EXPIRED')).length;
+    const dty  = sData.filter(s=>JWSB_TRAININGS.some(t=>s[t.key+'_stat']==='DUE THIS YEAR')).length;
+    const val  = sData.filter(s=>JWSB_TRAININGS.every(t=>s[t.key+'_stat']==='VALID')).length;
+    const color= exp>0?'var(--danger)':dty>0?'var(--warning)':'var(--success)';
+    const rows = sData.map((s,i) => {
+      const pc = jwsbRowColor(s);
+      let row = `<tr style="border-left:3px solid ${pc}">
+        <td style="font-family:var(--font-mono);font-size:10px;color:var(--text-muted)">${i+1}</td>
+        <td style="font-weight:600;font-size:12px">${escHtml(s.name)}</td>
+        <td style="font-size:11px;color:var(--text-muted)">${escHtml(s.desig.length>25?s.desig.slice(0,23)+'…':s.desig)}</td>
+        <td><span style="font-size:9px;background:var(--bg-dark);border:1px solid var(--border);border-radius:3px;padding:1px 5px;font-family:var(--font-mono)">${escHtml(s.cat)}</span></td>`;
+      JWSB_TRAININGS.forEach(t => {
+        const expCol = {EXPIRED:'#ef4444','DUE THIS YEAR':'#f97316','DUE NEXT YEAR':'#eab308',VALID:'#22c55e'}[s[t.key+'_stat']]||'var(--text-muted)';
+        row += `<td style="font-size:10px;text-align:center;font-family:var(--font-mono);color:${expCol};font-weight:600">${escHtml(s[t.key+'_exp']||'—')}</td>
+                <td style="text-align:center">${jwsbStatusBadge(s[t.key+'_stat'])}</td>`;
+      });
+      row += '</tr>';
+      return row;
+    }).join('');
+    return `<div class="panel" style="margin-bottom:14px">
+      <div class="panel-header" style="background:var(--bg-dark);border-left:4px solid ${color}">
+        <div class="panel-title">
+          <i class="fa-solid fa-location-dot" style="color:${color}"></i> ${escHtml(site)}
+          <span style="font-size:11px;font-family:var(--font-mono);font-weight:400;color:var(--text-muted);margin-left:8px">${sData.length} staff</span>
+        </div>
+        <div style="display:flex;gap:10px;font-size:11px;font-family:var(--font-mono)">
+          <span style="color:#22c55e">${val} All Valid</span>
+          <span style="color:#f97316">${dty} Due This Yr</span>
+          <span style="color:#ef4444">${exp} Expired</span>
+        </div>
+      </div>
+      <div class="tbl-wrapper"><table class="sys-table" style="min-width:900px">
+        <thead><tr>
+          <th>#</th><th>Name</th><th>Designation</th><th>Cat</th>
+          <th>AESP Expiry</th><th>AESP Status</th>
+          <th>FA Expiry</th><th>FA Status</th>
+          <th>Chem Expiry</th><th>Chem Status</th>
+          <th>Hearing Expiry</th><th>Hearing Status</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table></div>
+    </div>`;
+  }).join('') || '<div style="text-align:center;padding:32px;color:var(--text-muted)">No data for selected filters.</div>';
+}
+
+// ── By-Training grouped ──
+function jwsbRenderByTraining(data) {
+  const container = document.getElementById('jwsb-trn-groups');
+  if (!container) return;
+  container.innerHTML = JWSB_TRAININGS.map(t => {
+    const exp  = data.filter(s=>s[t.key+'_stat']==='EXPIRED');
+    const dty  = data.filter(s=>s[t.key+'_stat']==='DUE THIS YEAR');
+    const dny  = data.filter(s=>s[t.key+'_stat']==='DUE NEXT YEAR');
+    const val  = data.filter(s=>s[t.key+'_stat']==='VALID');
+    const nt   = data.filter(s=>s[t.key+'_stat']==='NOT TRAINED');
+    const color= exp.length>0?'var(--danger)':dty.length>0?'var(--warning)':'var(--success)';
+
+    // Build one mini-table per status group
+    const mkSection = (label, color, arr) => {
+      if (!arr.length) return '';
+      return `<div style="padding:6px 16px;background:${color}18;border-bottom:1px solid var(--border);font-size:10px;font-family:var(--font-mono);color:${color};font-weight:700;letter-spacing:.05em">
+        ${label} — ${arr.length} staff
+      </div>` + arr.map((s,i) => `<tr style="border-left:3px solid ${color}">
+        <td style="font-family:var(--font-mono);font-size:10px;color:var(--text-muted)">${i+1}</td>
+        <td style="font-weight:600;font-size:12px">${escHtml(s.name)}</td>
+        <td style="font-size:11px;color:var(--text-secondary)">${escHtml(s.wtp)}</td>
+        <td style="font-size:11px;color:var(--text-muted)">${escHtml(s.desig.length>25?s.desig.slice(0,23)+'…':s.desig)}</td>
+        <td style="font-family:var(--font-mono);font-size:10px;text-align:center;color:var(--text-muted)">${escHtml(s[t.key+'_disp'])}</td>
+        <td style="font-family:var(--font-mono);font-size:10px;text-align:center;color:${color};font-weight:700">${escHtml(s[t.key+'_exp']||'—')}</td>
+        <td style="text-align:center">${jwsbStatusBadge(s[t.key+'_stat'])}</td>
+      </tr>`).join('');
+    };
+
+    const pct = data.length ? Math.round(val.length/data.length*100) : 0;
+    return `<div class="panel" style="margin-bottom:14px">
+      <div class="panel-header" style="background:var(--bg-dark);border-left:4px solid ${color}">
+        <div class="panel-title">
+          <i class="fa-solid fa-certificate" style="color:${color}"></i> ${escHtml(t.label)}
+          <span style="font-size:10px;font-family:var(--font-mono);font-weight:400;color:var(--text-muted);margin-left:8px">Validity: ${t.validity} yr(s)</span>
+        </div>
+        <div style="display:flex;gap:8px;font-size:11px;font-family:var(--font-mono)">
+          <span style="color:#22c55e">${val.length} Valid (${pct}%)</span>
+          <span style="color:#f97316">${dty.length} Due This Yr</span>
+          <span style="color:#ef4444">${exp.length} Expired</span>
+          <span style="color:#8b5cf6">${nt.length} Not Trained</span>
+        </div>
+      </div>
+      <div style="padding:6px 16px;background:var(--bg-dark)">
+        <div style="background:var(--bg-card);border-radius:3px;height:6px;overflow:hidden">
+          <div style="width:${pct}%;background:${color};height:100%;border-radius:3px;transition:width .6s"></div>
+        </div>
+      </div>
+      <div class="tbl-wrapper"><table class="sys-table" style="min-width:700px">
+        <thead><tr><th>#</th><th>Name</th><th>WTP / Site</th><th>Designation</th><th>Cert Date</th><th>Expiry</th><th>Status</th></tr></thead>
+        <tbody>
+          ${mkSection('EXPIRED',       '#ef4444', exp)}
+          ${mkSection('DUE THIS YEAR', '#f97316', dty)}
+          ${mkSection('DUE NEXT YEAR', '#eab308', dny)}
+          ${mkSection('VALID',         '#22c55e', val)}
+          ${mkSection('NOT TRAINED',   '#8b5cf6', nt)}
+        </tbody>
+      </table></div>
+    </div>`;
+  }).join('');
+}
+
+// ── JWSB Excel Export ──
+function jwsbShowExportModal() {
+  jwsbInit();
+  const XLSX = window.XLSX;
+  const wb   = XLSX.utils.book_new();
+  const dc   = new Date().toISOString().split('T')[0];
+  const td   = new Date().toLocaleDateString('en-MY',{day:'2-digit',month:'short',year:'numeric'});
+
+  const hdrs = ['No.','Name','WTP','Designation','Category',
+    'AESP Cert Date','AESP Expiry','AESP Status',
+    'FA Cert Date','FA Expiry','FA Status',
+    'Chem Cert Date','Chem Expiry','Chem Status',
+    'Hearing Cert Date','Hearing Expiry','Hearing Status'];
+  const rows = jwsbData.map((s,i) => {
+    const r = [i+1,s.name,s.wtp,s.desig,s.cat];
+    JWSB_TRAININGS.forEach(t => r.push(s[t.key+'_disp'],s[t.key+'_exp']||'',s[t.key+'_stat']));
+    return r;
+  });
+  const ws = XLSX.utils.aoa_to_sheet([
+    [`JWSB Safety Training Renewal Report — ${td}`],
+    [`Total Staff: ${jwsbData.length}`],[],
+    hdrs,...rows
+  ]);
+  ws['!cols'] = [{wch:5},{wch:26},{wch:18},{wch:26},{wch:12},{wch:14},{wch:14},{wch:15},{wch:14},{wch:14},{wch:15},{wch:14},{wch:14},{wch:15},{wch:14},{wch:14},{wch:15}];
+  XLSX.utils.book_append_sheet(wb, ws, 'All Staff');
+
+  // Sheet by site
+  const sites = [...new Set(jwsbData.map(s=>s.wtp))].sort();
+  sites.forEach(site => {
+    const sd = jwsbData.filter(s=>s.wtp===site);
+    if (!sd.length) return;
+    const crit = sd.filter(s=>JWSB_TRAININGS.some(t=>['EXPIRED','DUE THIS YEAR'].includes(s[t.key+'_stat']))).length;
+    const sRows = sd.map((s,i) => {
+      const r = [i+1,s.name,s.desig,s.cat];
+      JWSB_TRAININGS.forEach(t => r.push(s[t.key+'_disp'],s[t.key+'_exp']||'',s[t.key+'_stat']));
+      return r;
+    });
+    const sWs = XLSX.utils.aoa_to_sheet([
+      [`${site} — Training Status — ${td}`],
+      [`Staff: ${sd.length} | Critical: ${crit}`],[],
+      ['No.','Name','Designation','Cat','AESP Cert','AESP Expiry','AESP Status','FA Cert','FA Expiry','FA Status','Chem Cert','Chem Expiry','Chem Status','Hearing Cert','Hearing Expiry','Hearing Status'],
+      ...sRows
+    ]);
+    const sn = site.replace(' WTP','').replace(' & ','&').replace(' Warehouse','').slice(0,31);
+    XLSX.utils.book_append_sheet(wb, sWs, sn);
+  });
+
+  XLSX.writeFile(wb, `JWSB_Training_Tracker_${dc}.xlsx`);
+  showToast('JWSB report exported!','success');
+}
+
