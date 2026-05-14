@@ -1918,12 +1918,14 @@
 
       <div class="form-grid-2">
         <div class="form-group" style="grid-column:1/-1">
-          <label class="form-label">Master Key (from JSONBin API Keys page) <span style="color:var(--danger)">*</span></label>
-          <input id="cloud-api-key" class="form-control-sys" placeholder="$2b$10$xxxxxxxxxxxxxxxxxxxxx…" type="password"/>
+          <label class="form-label">Master Key (from JSONBin → Account → API Keys) <span style="color:var(--danger)">*</span></label>
+          <input id="cloud-api-key" class="form-control-sys" placeholder="Starts with $2b$10$…" type="password"/>
+          <div style="font-size:10px;color:var(--text-muted);margin-top:3px">Go to jsonbin.io → Account → API Keys → Create → copy the key</div>
         </div>
         <div class="form-group" style="grid-column:1/-1">
           <label class="form-label">Bin ID (from the URL after creating a Bin) <span style="color:var(--danger)">*</span></label>
           <input id="cloud-bin-id" class="form-control-sys" placeholder="e.g. 6836f2a48960c335e8872abc"/>
+          <div style="font-size:10px;color:var(--text-muted);margin-top:3px">Go to jsonbin.io → Bins → Create New Bin → type {} → Save → copy the ID shown on screen</div>
         </div>
       </div>
 
@@ -1933,6 +1935,9 @@
       </div>
     </div>
     <div class="modal-footer">
+      <button class="btn-sys btn-danger-outline btn-sm" onclick="clearCloudSettings()" style="margin-right:auto">
+        <i class="fa-solid fa-xmark"></i> Disconnect
+      </button>
       <button class="btn-sys btn-outline" onclick="document.getElementById('cloud-settings-modal').classList.remove('show')">Cancel</button>
       <button class="btn-sys btn-outline" onclick="manualCloudPush()"><i class="fa-solid fa-upload"></i> Push Data Now</button>
       <button class="btn-sys btn-primary-sys" onclick="saveCloudSettings()"><i class="fa-solid fa-floppy-disk"></i> Save & Connect</button>

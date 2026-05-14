@@ -157,18 +157,31 @@ const cloudSync = {
     if (!c.apiKey || !c.binId) return null;
     try {
       const resp = await fetch(`https://api.jsonbin.io/v3/b/${c.binId}/latest`, {
-        headers: { 'X-Master-Key': c.apiKey }
+        headers: { 'X-Master-Key': c.apiKey, 'X-Bin-Meta': 'false' }
       });
+      if (!resp.ok) {
+        console.warn('JSONBin read failed:', resp.status, resp.statusText);
+        return null;
+      }
       const json = await resp.json();
-      return json.record || null;
-    } catch(e) { return null; }
+      // JSONBin returns { record: {...} } or the data directly
+      return json.record || json || null;
+    } catch(e) {
+      console.warn('JSONBin read error:', e.message);
+      return null;
+    }
   },
   // Pull ALL data from cloud into localStorage on login
   async pullAll() {
     if (!this.isConfigured()) return false;
     try {
       const record = await this._read();
-      if (!record) return false;
+      if (!record || typeof record !== 'object') return false;
+      // Ignore JSONBin error messages returned as JSON
+      if (record.message || record.error) {
+        console.warn('JSONBin returned error:', record.message || record.error);
+        return false;
+      }
       const keys = [KEYS.training, KEYS.issues, KEYS.capa, KEYS.compliance, KEYS.shc, KEYS.users, 'hse_tasks', 'hse_cf_existing', 'hse_training_arrangement'];
       keys.forEach(k => {
         if (record[k] !== undefined) {
@@ -179,7 +192,7 @@ const cloudSync = {
       console.info('Cloud data synced ✓');
       return true;
     } catch(e) {
-      console.warn('Cloud sync failed — using local data');
+      console.warn('Cloud sync failed — using local data:', e.message);
       return false;
     }
   },
@@ -194,13 +207,24 @@ const cloudSync = {
       if (d) { try { payload[k] = JSON.parse(d); } catch(e) {} }
     });
     try {
-      await fetch(`https://api.jsonbin.io/v3/b/${c.binId}`, {
+      const resp = await fetch(`https://api.jsonbin.io/v3/b/${c.binId}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json', 'X-Master-Key': c.apiKey },
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Master-Key': c.apiKey
+        },
         body: JSON.stringify(payload)
       });
+      if (!resp.ok) {
+        const err = await resp.json().catch(() => ({}));
+        console.warn('JSONBin push failed:', err.message || resp.statusText);
+        return false;
+      }
       return true;
-    } catch(e) { return false; }
+    } catch(e) {
+      console.warn('JSONBin push error:', e.message);
+      return false;
+    }
   }
 };
 
@@ -219,15 +243,43 @@ window.openCloudSettings = function() {
 };
 
 window.saveCloudSettings = function() {
-  const apiKey = document.getElementById('cloud-api-key')?.value.trim();
-  const binId  = document.getElementById('cloud-bin-id')?.value.trim();
-  if (!apiKey || !binId) { showToast('Please enter both API Key and Bin ID.', 'error'); return; }
+  const apiKey = (document.getElementById('cloud-api-key')?.value || '').trim();
+  const binId  = (document.getElementById('cloud-bin-id')?.value || '').trim();
+
+  if (!apiKey) { showToast('Please enter your Master Key from JSONBin.', 'error'); return; }
+  if (!binId)  { showToast('Please enter your Bin ID from JSONBin.', 'error'); return; }
+
+  // Basic format check — Bin ID is 24 hex chars
+  if (binId.length < 10) {
+    showToast('Bin ID looks too short — copy it directly from the JSONBin URL.', 'error');
+    return;
+  }
+
   localStorage.setItem(CLOUD_CFG_KEY, JSON.stringify({ apiKey, binId }));
   document.getElementById('cloud-settings-modal')?.classList.remove('show');
-  showToast('Cloud sync configured ✓ — pushing all data now…', 'success');
+
+  // Update nav badge
+  const badge = document.getElementById('cloud-nav-badge');
+  if (badge) badge.style.display = 'inline';
+
+  showToast('Cloud sync configured — pushing all data now…', 'success');
   cloudSync.pushAll().then(ok => {
-    showToast(ok ? '✅ All data pushed to cloud — team can now sync automatically!' : '❌ Push failed — check your API Key and Bin ID.', ok ? 'success' : 'error');
+    showToast(ok
+      ? '✅ Connected! All team members will now see shared data on login.'
+      : '❌ Push failed — check your Master Key and Bin ID are correct.',
+      ok ? 'success' : 'error');
   });
+};
+
+window.clearCloudSettings = function() {
+  localStorage.removeItem(CLOUD_CFG_KEY);
+  const badge = document.getElementById('cloud-nav-badge');
+  if (badge) badge.style.display = 'none';
+  document.getElementById('cloud-api-key').value = '';
+  document.getElementById('cloud-bin-id').value  = '';
+  const statusBadge = document.getElementById('cloud-status-badge');
+  if (statusBadge) { statusBadge.textContent = '⚠ Not configured'; statusBadge.style.color = 'var(--warning)'; }
+  showToast('Cloud sync disconnected — system will use local storage only.', 'success');
 };
 
 window.manualCloudPush = function() {
