@@ -159,6 +159,7 @@ function renderDashCharts(kpi, trend) {
 let trFilter = { dept:'', status:'', search:'' };
 
 function renderTraining() {
+  autoFlagModuleOverdue();
   const data = getData(KEYS.training);
   const kpi  = {
     total:   data.length,
@@ -267,6 +268,7 @@ function saveTrainingRecord() {
 let issFilter = { category:'', status:'', risk:'' , search:'' };
 
 function renderIssues() {
+  autoFlagModuleOverdue();
   const data = getData(KEYS.issues);
   const kpi  = {
     total:   data.length,
@@ -362,6 +364,7 @@ function saveIssueRecord() {
 let capaFilter = { iso:'', type:'', status:'', search:'' };
 
 function renderCapa() {
+  autoFlagModuleOverdue();
   const data = getData(KEYS.capa);
   const kpi  = {
     total:   data.length,
@@ -458,6 +461,7 @@ function saveCapaRecord() {
 let cmpFilter = { status:'', search:'' };
 
 function renderCompliance() {
+  autoFlagModuleOverdue();
   const data = getData(KEYS.compliance);
   const kpi  = {
     total:   data.length,
@@ -558,6 +562,7 @@ function saveCmpRecord() {
 let shcFilter = { status:'', search:'' };
 
 function renderShc() {
+  autoFlagModuleOverdue();
   const data = getData(KEYS.shc);
   const kpi  = {
     total:   data.length,

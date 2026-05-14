@@ -2024,6 +2024,10 @@
   // Seed data
   await seedData();
 
+  // Auto-flag overdue records on every page load
+  autoFlagModuleOverdue();
+  if (typeof ttAutoFlagOverdue === 'function') ttAutoFlagOverdue();
+
   // Apply theme preference
   if (localStorage.getItem('hse_lightmode') === '1') {
     document.body.classList.add('light-mode');

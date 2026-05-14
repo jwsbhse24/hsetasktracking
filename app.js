@@ -22,6 +22,33 @@ function doLogout() {
   window.location.href = 'login.html';
 }
 
+// ── Auto-flag overdue on ALL module records ───────────────────
+// Runs on every page render — updates status in localStorage if past due date
+function autoFlagModuleOverdue() {
+  const moduleKeys = [
+    { key: KEYS.issues,     dateField: 'dueDate',    skip: ['Closed','Overdue'] },
+    { key: KEYS.capa,       dateField: 'dueDate',    skip: ['Closed','Overdue'] },
+    { key: KEYS.shc,        dateField: 'dueDate',    skip: ['Closed','Overdue'] },
+    { key: KEYS.compliance, dateField: 'expiryDate', skip: ['Valid','Overdue'] },
+    { key: KEYS.training,   dateField: 'expiryDate', skip: ['Valid','Overdue'] },
+  ];
+  moduleKeys.forEach(({ key, dateField, skip }) => {
+    const data    = getData(key);
+    let   changed = false;
+    data.forEach(r => {
+      if (skip.includes(r.status)) return;
+      if (!r[dateField]) return;
+      if (daysDiff(r[dateField]) < 0) {
+        // For training/compliance, use Expired instead of Overdue
+        r.status  = (key === KEYS.training || key === KEYS.compliance) ? 'Expired' : 'Overdue';
+        changed   = true;
+      }
+    });
+    if (changed) saveData(key, data);
+  });
+}
+
+
 // Role checks
 function canEdit(user) {
   return user && (user.role === 'admin' || user.role === 'osh_coordinator');
