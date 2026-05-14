@@ -242,23 +242,49 @@ window.openCloudSettings = function() {
   el('cloud-settings-modal')?.classList.add('show');
 };
 
-window.saveCloudSettings = function() {
+window.saveCloudSettings = async function() {
   const apiKey = (document.getElementById('cloud-api-key')?.value || '').trim();
   const binId  = (document.getElementById('cloud-bin-id')?.value || '').trim();
 
   if (!apiKey) { showToast('Please enter your Master Key from JSONBin.', 'error'); return; }
-  if (!binId)  { showToast('Please enter your Bin ID from JSONBin.', 'error'); return; }
 
-  // Basic format check — Bin ID is 24 hex chars
-  if (binId.length < 10) {
-    showToast('Bin ID looks too short — copy it directly from the JSONBin URL.', 'error');
-    return;
+  let finalBinId = binId;
+
+  // If no Bin ID — auto-create one
+  if (!finalBinId) {
+    showToast('No Bin ID — creating one automatically…', 'success');
+    try {
+      const resp = await fetch('https://api.jsonbin.io/v3/b', {
+        method: 'POST',
+        headers: {
+          'Content-Type':  'application/json',
+          'X-Master-Key':  apiKey,
+          'X-Bin-Name':    'HSE-Governance-Data',
+          'X-Bin-Private': 'true'
+        },
+        body: JSON.stringify({ _init: true, created: new Date().toISOString() })
+      });
+      if (!resp.ok) {
+        const err = await resp.json().catch(() => ({}));
+        showToast('Failed to create bin: ' + (err.message || resp.statusText), 'error');
+        return;
+      }
+      const json = await resp.json();
+      finalBinId = json.metadata?.id || json.record?.id || '';
+      if (!finalBinId) { showToast('Bin created but could not read Bin ID — try again.', 'error'); return; }
+      // Show the Bin ID to user
+      const binEl = document.getElementById('cloud-bin-id');
+      if (binEl) binEl.value = finalBinId;
+      showToast(`Bin created! ID: ${finalBinId}`, 'success');
+    } catch(e) {
+      showToast('Could not create bin — check your Master Key.', 'error');
+      return;
+    }
   }
 
-  localStorage.setItem(CLOUD_CFG_KEY, JSON.stringify({ apiKey, binId }));
+  localStorage.setItem(CLOUD_CFG_KEY, JSON.stringify({ apiKey, binId: finalBinId }));
   document.getElementById('cloud-settings-modal')?.classList.remove('show');
 
-  // Update nav badge
   const badge = document.getElementById('cloud-nav-badge');
   if (badge) badge.style.display = 'inline';
 
@@ -266,7 +292,7 @@ window.saveCloudSettings = function() {
   cloudSync.pushAll().then(ok => {
     showToast(ok
       ? '✅ Connected! All team members will now see shared data on login.'
-      : '❌ Push failed — check your Master Key and Bin ID are correct.',
+      : '❌ Push failed — check your Master Key is correct.',
       ok ? 'success' : 'error');
   });
 };

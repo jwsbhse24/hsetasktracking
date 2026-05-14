@@ -1906,32 +1906,34 @@
 
       <!-- How it works -->
       <div style="background:rgba(0,170,255,.06);border:1px solid rgba(0,170,255,.2);border-radius:var(--radius);padding:12px 14px;margin-bottom:16px;font-size:12px;line-height:1.8">
-        <div style="font-weight:700;color:var(--accent);margin-bottom:6px"><i class="fa-solid fa-circle-info"></i> One-time setup — 3 minutes</div>
+        <div style="font-weight:700;color:var(--accent);margin-bottom:6px"><i class="fa-solid fa-circle-info"></i> Setup — 2 minutes, only needed once</div>
         <div style="color:var(--text-secondary)">
-          <strong style="color:var(--text-primary)">1.</strong> Go to <a href="https://jsonbin.io" target="_blank" style="color:var(--accent)">jsonbin.io</a> → Sign up free<br>
-          <strong style="color:var(--text-primary)">2.</strong> Go to <strong>API Keys</strong> → Create key → copy your <strong>Master Key</strong><br>
-          <strong style="color:var(--text-primary)">3.</strong> Go to <strong>Bins</strong> → Create New Bin → put <code style="background:var(--bg-dark);padding:1px 5px;border-radius:3px">{}</code> as content → Save → copy the <strong>Bin ID</strong> from the URL<br>
-          <strong style="color:var(--text-primary)">4.</strong> Paste both below and click Save<br>
-          <strong style="color:var(--text-primary)">5.</strong> Done — Roland and all coordinators will automatically see all data when they log in
+          <strong style="color:var(--text-primary)">1.</strong> Go to <a href="https://jsonbin.io" target="_blank" style="color:var(--accent)">jsonbin.io</a> → Sign up free (use Google or GitHub login)<br>
+          <strong style="color:var(--text-primary)">2.</strong> Go to <strong>Account → API Keys</strong> → click <strong>Create API Key</strong> → copy the key<br>
+          <strong style="color:var(--text-primary)">3.</strong> Paste it below and click <strong>Save & Connect</strong> — that's it!
         </div>
       </div>
 
       <div class="form-grid-2">
         <div class="form-group" style="grid-column:1/-1">
-          <label class="form-label">Master Key (from JSONBin → Account → API Keys) <span style="color:var(--danger)">*</span></label>
-          <input id="cloud-api-key" class="form-control-sys" placeholder="Starts with $2b$10$…" type="password"/>
-          <div style="font-size:10px;color:var(--text-muted);margin-top:3px">Go to jsonbin.io → Account → API Keys → Create → copy the key</div>
+          <label class="form-label">Master Key <span style="color:var(--danger)">*</span></label>
+          <input id="cloud-api-key" class="form-control-sys" placeholder="Paste your Master Key here…" type="password"/>
+          <div style="font-size:10px;color:var(--text-muted);margin-top:3px">
+            From jsonbin.io → Account → API Keys → Create Key → copy it
+          </div>
         </div>
         <div class="form-group" style="grid-column:1/-1">
-          <label class="form-label">Bin ID (from the URL after creating a Bin) <span style="color:var(--danger)">*</span></label>
-          <input id="cloud-bin-id" class="form-control-sys" placeholder="e.g. 6836f2a48960c335e8872abc"/>
-          <div style="font-size:10px;color:var(--text-muted);margin-top:3px">Go to jsonbin.io → Bins → Create New Bin → type {} → Save → copy the ID shown on screen</div>
+          <label class="form-label">Bin ID <span style="font-size:10px;color:var(--accent2);font-weight:400">(leave blank — system creates it automatically)</span></label>
+          <input id="cloud-bin-id" class="form-control-sys" placeholder="Leave blank to auto-create, or paste existing Bin ID"/>
+          <div style="font-size:10px;color:var(--text-muted);margin-top:3px">
+            If you already have a Bin ID from a previous setup, paste it here. Otherwise leave blank.
+          </div>
         </div>
       </div>
 
       <div style="background:rgba(29,185,84,.06);border:1px solid rgba(29,185,84,.2);border-radius:var(--radius);padding:10px 12px;font-size:12px;color:var(--text-secondary)">
         <i class="fa-solid fa-circle-check" style="color:var(--success)"></i>
-        After saving, all your data will be pushed to the cloud. Every team member who logs in will automatically get the latest data — <strong>no manual sync needed.</strong>
+        Just paste your <strong>Master Key</strong> and click <strong>Save & Connect</strong>. The system will create a storage bin automatically and push all your data. Roland and all coordinators will see the same data when they log in.
       </div>
     </div>
     <div class="modal-footer">
