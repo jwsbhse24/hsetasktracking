@@ -165,15 +165,17 @@ window.ttSaveNewTask = function() {
   el('tt-modal')?.classList.remove('show');
   showToast(`Task ${task.id} assigned to ${pic.split(' ')[0]} ✓`, 'success');
 
-  // Refresh whatever is currently visible
-  if (currentPage === 'alltasks') renderAllTasks();
-  if (currentPage === 'mytasks')  renderMyTasks();
-  if (src==='training')   { if(currentPage==='training')   renderTraining();   }
-  if (src==='issues')     { if(currentPage==='issues')     renderIssues();     }
-  if (src==='capa')       { if(currentPage==='capa')       renderCapa();       }
-  if (src==='compliance') { if(currentPage==='compliance') renderCompliance(); }
-  if (src==='shc')        { if(currentPage==='shc')        renderShc();        }
-  if (src==='cf')         { if(currentPage==='cf')         { if(typeof renderCFExisting==='function') renderCFExisting(); } }
+  // Always refresh task board counts (nav badges)
+  if (typeof renderAllTasks === 'function') renderAllTasks();
+  if (typeof renderMyTasks  === 'function') renderMyTasks();
+
+  // Also refresh the source module table if currently viewing it
+  if (src==='training'   && currentPage==='training')   renderTraining();
+  if (src==='issues'     && currentPage==='issues')     renderIssues();
+  if (src==='capa'       && currentPage==='capa')       renderCapa();
+  if (src==='compliance' && currentPage==='compliance') renderCompliance();
+  if (src==='shc'        && currentPage==='shc')        renderShc();
+  if (src==='cf'         && currentPage==='cf' && typeof renderCFExisting==='function') renderCFExisting();
 };
 
 // ── Accept task (OSH Coordinator) ────────────────────────────
@@ -536,7 +538,64 @@ function ttTaskCard(task, user) {
 }
 
 // ── Daily Email Report ────────────────────────────────────────
-// ── EmailJS config key ────────────────────────────────────────
+// ── Task Sync — share tasks between devices ───────────────────
+window.openTaskSync = function() {
+  document.getElementById('sync-export-code').value = '';
+  document.getElementById('sync-import-code').value = '';
+  document.getElementById('task-sync-modal').classList.add('show');
+};
+
+window.generateSyncCode = function() {
+  const tasks = ttGetAll();
+  const users = JSON.parse(localStorage.getItem('hse_users') || '[]');
+  const payload = {
+    v:     2,
+    ts:    new Date().toISOString(),
+    tasks,
+    users,
+  };
+  const code = btoa(JSON.stringify(payload));
+  document.getElementById('sync-export-code').value = code;
+  showToast('Export code generated — now copy and send to coordinator ✓', 'success');
+};
+
+window.copySyncCode = function() {
+  const el = document.getElementById('sync-export-code');
+  if (!el.value) { showToast('Generate the code first.', 'error'); return; }
+  navigator.clipboard.writeText(el.value).then(() => {
+    showToast('Code copied to clipboard ✓', 'success');
+  }).catch(() => {
+    el.select();
+    document.execCommand('copy');
+    showToast('Code copied ✓', 'success');
+  });
+};
+
+window.importSyncCode = function() {
+  const code = (document.getElementById('sync-import-code')?.value || '').trim();
+  if (!code) { showToast('Please paste the code first.', 'error'); return; }
+  try {
+    const payload = JSON.parse(atob(code));
+    if (!payload.tasks || !Array.isArray(payload.tasks)) throw new Error('Invalid code');
+
+    // Import tasks
+    ttSave(payload.tasks);
+
+    // Import users if present (so coordinators can log in)
+    if (payload.users && Array.isArray(payload.users)) {
+      localStorage.setItem('hse_users', JSON.stringify(payload.users));
+    }
+
+    document.getElementById('task-sync-modal').classList.remove('show');
+    showToast(`✓ ${payload.tasks.length} tasks imported successfully! Refresh My Tasks to see them.`, 'success');
+    renderAllTasks();
+    renderMyTasks();
+  } catch(e) {
+    showToast('Invalid code — please check and try again.', 'error');
+  }
+};
+
+
 const EJ_KEY = 'hse_emailjs_config';
 
 function ejGetConfig() {

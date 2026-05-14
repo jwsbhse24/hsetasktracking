@@ -296,6 +296,7 @@
           <button class="btn-sys btn-outline" onclick="sendDailyEmailReport()" id="ej-send-btn-main" class="ej-send-btn"><i class="fa-solid fa-envelope"></i> Send Morning Briefing</button>
           <button class="btn-sys btn-outline btn-xs" onclick="openEmailSettings()" title="Email settings"><i class="fa-solid fa-gear"></i></button>
           <button class="btn-sys btn-outline" onclick="exportAllTasksExcel()"><i class="fa-solid fa-file-excel"></i> Export</button>
+          <button class="btn-sys btn-outline" onclick="openTaskSync()" title="Share tasks with team"><i class="fa-solid fa-rotate"></i> Sync Tasks</button>
           <button class="btn-sys btn-outline btn-sm" onclick="atFilter={module:'',status:'',pic:'',search:''};renderAllTasks()"><i class="fa-solid fa-xmark"></i> Clear</button>
           <button class="btn-sys btn-primary-sys" id="btn-new-task" onclick="openNewTask()"><i class="fa-solid fa-plus"></i> New Task</button>
         </div>
@@ -1824,6 +1825,68 @@
 </div>
 
 <!-- ═══════════════════════════════════════
+     TASK SYNC MODAL
+     Allows Admin to share tasks with coordinators
+     by copying/pasting a JSON code
+═══════════════════════════════════════ -->
+<div class="modal-overlay" id="task-sync-modal">
+  <div class="modal-box" style="max-width:580px">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title"><i class="fa-solid fa-rotate" style="color:var(--accent)"></i> Sync Tasks with Team</div>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:2px">Share tasks between devices — copy code and send to coordinator</div>
+      </div>
+      <button class="modal-close" onclick="document.getElementById('task-sync-modal').classList.remove('show')">✕</button>
+    </div>
+    <div class="modal-body">
+
+      <!-- How it works -->
+      <div style="background:rgba(0,170,255,.06);border:1px solid rgba(0,170,255,.2);border-radius:var(--radius);padding:12px 14px;margin-bottom:16px;font-size:12px;color:var(--text-secondary);line-height:1.7">
+        <i class="fa-solid fa-circle-info" style="color:var(--accent)"></i>
+        <strong style="color:var(--text-primary)"> Why sync?</strong> Tasks are stored on each person's browser. To share tasks with Roland's device:<br>
+        1. Click <strong>Export Code</strong> — copies all tasks as a code<br>
+        2. Send the code to Roland (WhatsApp, email, etc.)<br>
+        3. Roland clicks <strong>Import Code</strong> on his device and pastes it
+      </div>
+
+      <!-- Export section -->
+      <div style="margin-bottom:16px">
+        <div style="font-size:12px;font-weight:700;color:var(--text-primary);margin-bottom:8px">📤 Export — Share tasks with coordinator</div>
+        <textarea id="sync-export-code" class="form-control-sys" rows="4" readonly
+                  style="font-family:var(--font-mono);font-size:10px;word-break:break-all"
+                  placeholder="Click Export to generate code…"></textarea>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <button class="btn-sys btn-primary-sys btn-sm" onclick="generateSyncCode()">
+            <i class="fa-solid fa-code"></i> Generate Export Code
+          </button>
+          <button class="btn-sys btn-outline btn-sm" onclick="copySyncCode()">
+            <i class="fa-solid fa-copy"></i> Copy Code
+          </button>
+        </div>
+      </div>
+
+      <div style="border-top:1px solid var(--border);margin:16px 0"></div>
+
+      <!-- Import section -->
+      <div>
+        <div style="font-size:12px;font-weight:700;color:var(--text-primary);margin-bottom:8px">📥 Import — Load tasks from Admin</div>
+        <textarea id="sync-import-code" class="form-control-sys" rows="4"
+                  style="font-family:var(--font-mono);font-size:10px"
+                  placeholder="Paste the code received from Admin here…"></textarea>
+        <div style="margin-top:8px">
+          <button class="btn-sys btn-success-outline btn-sm" onclick="importSyncCode()">
+            <i class="fa-solid fa-file-import"></i> Import Tasks
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-sys btn-outline" onclick="document.getElementById('task-sync-modal').classList.remove('show')">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
      EMAIL SETTINGS MODAL (EmailJS)
 ═══════════════════════════════════════ -->
 <div class="modal-overlay" id="ej-settings-modal">
@@ -2220,7 +2283,9 @@
   };
 
   // ── Navigate — full version including all pages ──
+  let currentPage = 'dashboard';
   window.navigate = function(page) {
+    currentPage = page;
     const titles = {
       dashboard:  'Dashboard Overview',
       training:   'HSE Training Monitoring',
@@ -2230,7 +2295,7 @@
       shc:        'SHC Governance',
       reports:    'Reporting Management',
       cf:         'CF Status Tracker — KKIP WBF',
-      alltasks:   'All Tasks — Master Register',
+      alltasks:   'Task Board',
       mytasks:    'My Tasks'
     };
     document.querySelectorAll('.page-view').forEach(p => p.classList.remove('active'));
