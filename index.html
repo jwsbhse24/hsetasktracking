@@ -631,8 +631,9 @@
             <table class="sys-table">
               <thead>
                 <tr>
-                  <th>ID</th><th>Employee</th><th>Dept / Site</th><th>Training Name</th>
-                  <th>Date Trained</th><th>Expiry</th><th>Hours</th><th>Status</th><th>Aging</th><th>Action</th>
+                  <th>ID</th><th>Training / Programme</th><th>Provider</th>
+                  <th>Date</th><th>Next Due</th><th>No. of Staff</th>
+                  <th>PIC</th><th>Status</th><th>Aging</th><th>Evidence</th><th>Action</th>
                 </tr>
               </thead>
               <tbody id="tr-tbody"></tbody>
@@ -914,7 +915,7 @@
             <div class="tbl-wrapper">
               <table class="sys-table" style="min-width:900px">
                 <thead><tr>
-                  <th>#</th><th>Month</th><th>Training / Event</th><th>Type</th><th>Participants</th><th>Trainer / PIC</th><th>Scheduled Date</th><th>Status</th><th>Record Found</th><th>Remarks</th>
+                  <th>#</th><th>Month</th><th>Training / Event</th><th>Type</th><th>Participants</th><th>Trainer / PIC</th><th>Date</th><th>Status</th><th>Remarks</th><th>Action</th>
                 </tr></thead>
                 <tbody id="ta-list-tbody"></tbody>
               </table>
@@ -1374,27 +1375,64 @@
     </div>
     <div class="modal-body">
       <input type="hidden" id="tr-f-id"/>
+      <!-- Hidden fields kept for data compatibility but not shown -->
+      <input type="hidden" id="tr-f-employeeName" value=""/>
+      <input type="hidden" id="tr-f-employeeId" value=""/>
+      <input type="hidden" id="tr-f-department" value="HSE"/>
+
       <div class="form-grid-2">
-        <div class="form-group"><label class="form-label">Employee Name</label><input id="tr-f-employeeName" class="form-control-sys" placeholder="Full name"/></div>
-        <div class="form-group"><label class="form-label">Employee ID</label><input id="tr-f-employeeId" class="form-control-sys" placeholder="EMP-XXX"/></div>
-        <div class="form-group"><label class="form-label">Department</label>
-          <select id="tr-f-department" class="form-control-sys">
-            <option>HSE</option><option>Operations</option><option>Maintenance</option><option>Lab</option><option>Admin</option><option>Management</option>
+        <div class="form-group" style="grid-column:1/-1">
+          <label class="form-label">Training Name / Programme <span style="color:var(--danger)">*</span></label>
+          <input id="tr-f-trainingName" class="form-control-sys" placeholder="e.g. Safety Officer Refresher, First Aid & CPR, AESP"/>
+        </div>
+        <div class="form-group"><label class="form-label">Training Type</label>
+          <select id="tr-f-trainingType" class="form-control-sys">
+            <option>External Training</option>
+            <option>Internal Training</option>
+            <option>Internal Briefing</option>
+            <option>Emergency Drill</option>
+            <option>Fire Drill</option>
+            <option>Campaign</option>
           </select>
         </div>
-        <div class="form-group"><label class="form-label">Training Name</label><input id="tr-f-trainingName" class="form-control-sys" placeholder="e.g. Safety Officer Refresher"/></div>
-        <div class="form-group"><label class="form-label">Training Date</label><input id="tr-f-trainingDate" type="date" class="form-control-sys"/></div>
-        <div class="form-group"><label class="form-label">Expiry Date</label><input id="tr-f-expiryDate" type="date" class="form-control-sys"/></div>
-        <div class="form-group"><label class="form-label">Training Hours</label><input id="tr-f-hours" type="number" class="form-control-sys" placeholder="8"/></div>
+        <div class="form-group"><label class="form-label">Training Provider</label>
+          <input id="tr-f-provider" class="form-control-sys" placeholder="e.g. NIOSH, CIDB, In-house"/>
+        </div>
+        <div class="form-group"><label class="form-label">Training Date <span style="color:var(--danger)">*</span></label>
+          <input id="tr-f-trainingDate" type="date" class="form-control-sys"/>
+        </div>
+        <div class="form-group"><label class="form-label">Expiry / Next Due Date</label>
+          <input id="tr-f-expiryDate" type="date" class="form-control-sys"/>
+        </div>
+        <div class="form-group"><label class="form-label">No. of Staff Trained</label>
+          <input id="tr-f-hours" type="number" class="form-control-sys" placeholder="e.g. 12" min="1"/>
+        </div>
+        <div class="form-group"><label class="form-label">Assign To (PIC)</label>
+          <select id="tr-f-pic" class="form-control-sys">
+            <option value="">— Select coordinator —</option>
+            <option>Roland Riset</option>
+            <option>OSH Coordinator 1</option>
+            <option>OSH Coordinator 2</option>
+            <option>Hellena Lina</option>
+          </select>
+        </div>
         <div class="form-group"><label class="form-label">Status</label>
-          <select id="tr-f-status" class="form-control-sys"><option>Valid</option><option>Expiring Soon</option><option>Expired</option></select>
+          <select id="tr-f-status" class="form-control-sys">
+            <option>Planned</option>
+            <option>In Progress</option>
+            <option>Completed</option>
+            <option>Pending Approval</option>
+            <option>Cancelled</option>
+          </select>
         </div>
       </div>
-      <div class="form-group"><label class="form-label">Remarks</label><input id="tr-f-remarks" class="form-control-sys" placeholder="Optional remarks"/></div>
+      <div class="form-group"><label class="form-label">Remarks / Notes</label>
+        <input id="tr-f-remarks" class="form-control-sys" placeholder="e.g. Venue, participant list, special notes…"/>
+      </div>
       <div class="form-group">
-        <label class="form-label"><i class="fa-brands fa-google-drive" style="color:#4285f4;margin-right:4px"></i> Certificate — Google Drive Link <span style="font-size:10px;color:var(--text-muted)">(paste after training is completed)</span></label>
+        <label class="form-label"><i class="fa-brands fa-google-drive" style="color:#4285f4;margin-right:4px"></i> Attendance List / Certificate — Google Drive Link</label>
         <input id="tr-f-evidence" class="form-control-sys" placeholder="https://drive.google.com/…" type="url"/>
-        <div style="font-size:10px;color:var(--text-muted);margin-top:3px">Upload training certificate to Google Drive and paste the share link here</div>
+        <div style="font-size:10px;color:var(--text-muted);margin-top:3px">Upload attendance sheet or training certificate to Google Drive and paste the share link here</div>
       </div>
     </div>
     <div class="modal-footer">
@@ -1403,6 +1441,7 @@
     </div>
   </div>
 </div>
+
 
 
 <!-- Issue Modal -->
@@ -1744,30 +1783,37 @@
 
 <!-- Training Arrangement Update Modal -->
 <div class="modal-overlay" id="ta-update-modal">
-  <div class="modal-box" style="max-width:460px">
+  <div class="modal-box" style="max-width:480px">
     <div class="modal-header">
-      <div class="modal-title">Update Training Status</div>
+      <div class="modal-title">Update Activity Status</div>
       <button class="modal-close" onclick="document.getElementById('ta-update-modal').classList.remove('show')">✕</button>
     </div>
     <div class="modal-body">
       <input type="hidden" id="ta-u-id"/>
       <div class="form-group">
-        <label class="form-label">Training / Event</label>
+        <label class="form-label">Activity</label>
         <input id="ta-u-event" class="form-control-sys" readonly style="opacity:.7"/>
       </div>
-      <div class="form-group">
-        <label class="form-label">Status</label>
-        <select id="ta-u-status" class="form-control-sys">
-          <option>Done</option>
-          <option>In Progress</option>
-          <option>Pending Approval</option>
-          <option>Planned</option>
-          <option>TBD</option>
-        </select>
+      <div class="form-grid-2">
+        <div class="form-group">
+          <label class="form-label">Status</label>
+          <select id="ta-u-status" class="form-control-sys">
+            <option>Done</option>
+            <option>In Progress</option>
+            <option>Pending Approval</option>
+            <option>Planned</option>
+            <option>TBD</option>
+            <option>Cancelled</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Date (update if confirmed)</label>
+          <input id="ta-u-date" class="form-control-sys" placeholder="e.g. 15 Jun 2026"/>
+        </div>
       </div>
       <div class="form-group">
         <label class="form-label">Remarks / Notes</label>
-        <textarea id="ta-u-remarks" class="form-control-sys" rows="2" placeholder="e.g. Postponed to next month, awaiting NIOSH confirmation…"></textarea>
+        <textarea id="ta-u-remarks" class="form-control-sys" rows="2" placeholder="e.g. Postponed, awaiting NIOSH confirmation…"></textarea>
       </div>
     </div>
     <div class="modal-footer">

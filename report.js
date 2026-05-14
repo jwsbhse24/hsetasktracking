@@ -192,33 +192,38 @@ function buildReportPreview(type) {
       const periodStart = reportPeriodStart();
       const periodEnd   = new Date().toISOString().split('T')[0];
 
-      // ── Conducted in this period ──────────────────────────────
+      // ── Conducted in this period (from training records) ─────
       const conducted = training.filter(r => r.trainingDate >= periodStart && r.trainingDate <= periodEnd);
-
-      // Group by training session (same trainingName + same trainingDate)
-      const sessions = {};
+      const sessions  = {};
       conducted.forEach(r => {
-        const key = `${r.trainingName}||${r.trainingDate}`;
+        const key = (r.trainingName||'') + '||' + (r.trainingDate||'');
         if (!sessions[key]) sessions[key] = { trainingName: r.trainingName, trainingDate: r.trainingDate, staff: [], totalHours: 0 };
-        sessions[key].staff.push(r.employeeName);
-        sessions[key].totalHours += parseInt(r.hours, 10) || 0;
+        sessions[key].staff.push(r.employeeName || r.pic || '—');
+        sessions[key].totalHours += parseInt(r.hours,10)||0;
       });
-      const sessionList = Object.values(sessions).sort((a,b) => a.trainingDate.localeCompare(b.trainingDate));
-      const totalStaffTrained = [...new Set(conducted.map(r=>r.employeeName))].length;
-      const totalHours        = conducted.reduce((s,r)=>s+(parseInt(r.hours,10)||0), 0);
+      const sessionList    = Object.values(sessions).sort((a,b)=>(a.trainingDate||'').localeCompare(b.trainingDate||''));
+      const totalStaffTrained = [...new Set(conducted.map(r=>r.employeeName||r.pic).filter(Boolean))].length || conducted.length;
+      const totalHours     = conducted.reduce((s,r)=>s+(parseInt(r.hours,10)||0),0);
 
-      // ── Competency status (all records) ──────────────────────
-      const valid    = training.filter(r=>r.status==='Valid').length;
+      // ── Yearly plan from HSE Calendar ────────────────────────
+      const calData   = typeof taGetAllCalendar === 'function' ? taGetAllCalendar() : [];
+      const calDone   = calData.filter(r=>r.status==='Done').length;
+      const calTotal  = calData.length;
+      const calPct    = calTotal ? Math.round(calDone/calTotal*100) : 0;
+      const calPending= calData.filter(r=>r.status==='Pending Approval'||r.status==='TBD').length;
+
+      // ── Competency status ─────────────────────────────────────
+      const valid    = training.filter(r=>r.status==='Valid'||r.status==='Completed').length;
       const expiring = training.filter(r=>r.status==='Expiring Soon').length;
       const expired  = training.filter(r=>r.status==='Expired').length;
 
       return `
-      <!-- Summary KPIs -->
+      <!-- KPI summary -->
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px">
-        ${miniStatCard('Trainings Conducted', sessionList.length, sessionList.length>0?'success':'warning')}
+        ${miniStatCard('Trainings This Period', sessionList.length, sessionList.length>0?'success':'warning')}
         ${miniStatCard('Staff Trained', totalStaffTrained, totalStaffTrained>0?'success':'warning')}
-        ${miniStatCard('Total Training Hours', totalHours+' hrs', totalHours>0?'success':'warning')}
-        ${miniStatCard('Competency Compliance', kpi.trPct+'%', kpi.trPct>=85?'success':kpi.trPct>=70?'warning':'danger')}
+        ${miniStatCard('Training Hours', totalHours+' hrs', totalHours>0?'success':'warning')}
+        ${miniStatCard('Yearly Plan Progress', calPct+'%  ('+calDone+'/'+calTotal+')', calPct>=50?'success':'warning')}
       </div>
 
       <!-- Trainings Conducted This Period -->
@@ -228,74 +233,72 @@ function buildReportPreview(type) {
       ${sessionList.length > 0 ? `
       <table class="sys-table" style="margin-bottom:16px">
         <thead><tr>
-          <th>#</th>
-          <th>Training Name</th>
-          <th>Date Conducted</th>
-          <th>No. of Staff</th>
-          <th>Staff Names</th>
-          <th>Total Hours</th>
+          <th>#</th><th>Training Name / Programme</th><th>Date</th><th>No. of Staff</th><th>Training Hours</th>
         </tr></thead>
         <tbody>
           ${sessionList.map((s,i) => `<tr>
-            <td class="td-id" style="text-align:center">${i+1}</td>
-            <td style="font-weight:600;font-size:12px">${escHtml(s.trainingName)}</td>
-            <td style="font-size:12px;font-family:var(--font-mono)">${formatDate(s.trainingDate)}</td>
-            <td style="text-align:center;font-weight:700;color:var(--accent)">${s.staff.length}</td>
-            <td style="font-size:11px;color:var(--text-secondary)">${s.staff.map(n=>escHtml(n)).join(', ')}</td>
-            <td style="font-size:12px;font-family:var(--font-mono);text-align:center">${s.totalHours} hrs</td>
+            <td style="text-align:center">${i+1}</td>
+            <td style="font-weight:600;font-size:12px">${escHtml(s.trainingName||'—')}</td>
+            <td style="font-size:12px;font-family:var(--font-mono)">${formatDate(s.trainingDate)||'—'}</td>
+            <td style="text-align:center;font-weight:700;color:var(--accent)">${s.staff.length||'—'}</td>
+            <td style="text-align:center;font-family:var(--font-mono)">${s.totalHours||'—'} hrs</td>
           </tr>`).join('')}
           <tr style="background:var(--bg-dark);font-weight:700">
-            <td colspan="2" style="font-size:12px;color:var(--text-primary)">TOTAL</td>
-            <td></td>
-            <td style="text-align:center;color:var(--accent)">${totalStaffTrained} staff</td>
-            <td></td>
+            <td colspan="2">TOTAL</td><td></td>
+            <td style="text-align:center;color:var(--accent)">${totalStaffTrained}</td>
             <td style="text-align:center;font-family:var(--font-mono)">${totalHours} hrs</td>
           </tr>
         </tbody>
       </table>` : `
       <div style="background:rgba(245,166,35,.08);border:1px solid rgba(245,166,35,.2);border-radius:var(--radius);padding:12px;margin-bottom:16px;font-size:12px;color:var(--warning)">
-        No training records found for this reporting period (${periodStart} to ${periodEnd}).
+        No training records found for this reporting period.
       </div>`}
 
-      <!-- Competency Status -->
+      <!-- Yearly Plan Progress from HSE Calendar -->
+      ${calData.length > 0 ? `
       <div style="font-size:12px;font-weight:700;color:var(--accent);margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid var(--border)">
-        🎓 Competency Status — All Staff
+        📅 HSE Training Yearly Plan 2026 — Progress (SHE-CAL-2026)
       </div>
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px">
         <div style="background:rgba(29,185,84,.08);border:1px solid rgba(29,185,84,.2);border-radius:var(--radius);padding:10px;text-align:center">
-          <div style="font-size:22px;font-weight:800;color:var(--success)">${valid}</div>
-          <div style="font-size:11px;color:var(--text-muted)">Valid / Current</div>
+          <div style="font-size:22px;font-weight:800;color:var(--success)">${calDone}</div>
+          <div style="font-size:11px;color:var(--text-muted)">Done</div>
+        </div>
+        <div style="background:rgba(0,170,255,.08);border:1px solid rgba(0,170,255,.2);border-radius:var(--radius);padding:10px;text-align:center">
+          <div style="font-size:22px;font-weight:800;color:var(--accent)">${calData.filter(r=>r.status==='In Progress').length}</div>
+          <div style="font-size:11px;color:var(--text-muted)">In Progress</div>
         </div>
         <div style="background:rgba(245,166,35,.08);border:1px solid rgba(245,166,35,.2);border-radius:var(--radius);padding:10px;text-align:center">
-          <div style="font-size:22px;font-weight:800;color:var(--warning)">${expiring}</div>
-          <div style="font-size:11px;color:var(--text-muted)">Expiring Soon</div>
-        </div>
-        <div style="background:rgba(224,60,49,.08);border:1px solid rgba(224,60,49,.2);border-radius:var(--radius);padding:10px;text-align:center">
-          <div style="font-size:22px;font-weight:800;color:var(--danger)">${expired}</div>
-          <div style="font-size:11px;color:var(--text-muted)">Expired — Action Needed</div>
+          <div style="font-size:22px;font-weight:800;color:var(--warning)">${calPending}</div>
+          <div style="font-size:11px;color:var(--text-muted)">Pending / TBD</div>
         </div>
       </div>
-
-      ${expiring > 0 || expired > 0 ? `
-      <table class="sys-table">
-        <thead><tr><th>ID</th><th>Employee</th><th>Department</th><th>Training</th><th>Expiry Date</th><th>Status</th></tr></thead>
+      <table class="sys-table" style="margin-bottom:16px">
+        <thead><tr><th>Month</th><th>Activity</th><th>Type</th><th>Date</th><th>Status</th></tr></thead>
         <tbody>
-          ${training.filter(r=>r.status==='Expired'||r.status==='Expiring Soon')
-            .sort((a,b)=>new Date(a.expiryDate)-new Date(b.expiryDate))
-            .map(r=>`<tr>
-              <td class="td-id">${escHtml(r.id)}</td>
-              <td style="font-size:12px">${escHtml(r.employeeName)}</td>
-              <td style="font-size:12px">${escHtml(r.department)}</td>
-              <td style="font-size:12px">${escHtml(r.trainingName)}</td>
-              <td style="font-size:12px;color:${r.status==='Expired'?'var(--danger)':'var(--warning)'};font-weight:600">${formatDate(r.expiryDate)}</td>
-              <td>${statusBadge(r.status)}</td>
-            </tr>`).join('')}
+          ${calData.filter(r=>r.status==='Done'||r.status==='In Progress').map(r=>`<tr>
+            <td style="font-size:11px;color:var(--accent);font-weight:600">${escHtml(r.month)}</td>
+            <td style="font-size:12px;font-weight:600">${escHtml(r.event)}</td>
+            <td style="font-size:11px">${escHtml(r.type)}</td>
+            <td style="font-size:11px;font-family:var(--font-mono)">${escHtml(r.date)}</td>
+            <td>${statusBadge(r.status)}</td>
+          </tr>`).join('')}
         </tbody>
-      </table>` : `<div style="color:var(--success);font-size:12px;padding:8px">✓ All staff competencies are current.</div>`}
+      </table>` : ''}
 
-      <div class="stat-row" style="margin-top:12px"><span class="stat-row-label">Compliance Rate</span><span class="stat-row-value" style="color:${kpi.trPct>=85?'var(--success)':kpi.trPct>=70?'var(--warning)':'var(--danger)'}">${kpi.trPct}%</span></div>
+      <!-- Competency status -->
+      <div style="font-size:12px;font-weight:700;color:var(--accent);margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid var(--border)">
+        🎓 Staff Competency Status
+      </div>
+      <div style="display:flex;gap:10px;margin-bottom:8px;flex-wrap:wrap">
+        <span style="font-size:12px">✅ Valid / Completed: <strong style="color:var(--success)">${valid}</strong></span>
+        <span style="font-size:12px">⚠️ Expiring Soon: <strong style="color:var(--warning)">${expiring}</strong></span>
+        <span style="font-size:12px">❌ Expired: <strong style="color:var(--danger)">${expired}</strong></span>
+      </div>
+      <div class="stat-row"><span class="stat-row-label">Yearly Plan Completion</span><span class="stat-row-value" style="color:${calPct>=50?'var(--success)':'var(--warning)'}">${calPct}%</span></div>
       <div class="stat-row"><span class="stat-row-label">Total Training Hours (Period)</span><span class="stat-row-value">${totalHours} hrs</span></div>
     `})())}
+
 
 
     <!-- Section G: Management Attention -->

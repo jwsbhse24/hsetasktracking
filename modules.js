@@ -185,35 +185,42 @@ function renderTrainingTable() {
   const data = getData(KEYS.training);
   const { dept, status, search } = trFilter;
   const filtered = data.filter(r => {
-    const matchDept   = !dept   || r.department === dept;
     const matchStatus = !status || r.status === status;
-    const matchSearch = !search || (r.employeeName+r.trainingName+r.employeeId).toLowerCase().includes(search.toLowerCase());
-    return matchDept && matchStatus && matchSearch;
+    const matchSearch = !search || (r.trainingName+r.provider+r.trainingType+r.remarks).toLowerCase().includes(search.toLowerCase());
+    return matchStatus && matchSearch;
   });
 
   const tbody = document.getElementById('tr-tbody');
   const user  = getCurrentUser();
   tbody.innerHTML = filtered.map(r => {
-    const daysLeft = daysDiff(r.expiryDate);
-    const expClass = daysLeft < 0 ? 'text-danger' : daysLeft < 30 ? 'text-warning' : '';
+    const daysLeft = r.expiryDate ? daysDiff(r.expiryDate) : null;
+    const expClass = daysLeft !== null && daysLeft < 0 ? 'text-danger' : daysLeft !== null && daysLeft < 30 ? 'text-warning' : '';
+    // Number of staff trained stored in 'hours' field for compatibility
+    const staffCount = r.hours || r.staffCount || '—';
     return `<tr>
       <td class="td-id">${escHtml(r.id)}</td>
-      <td><div style="font-weight:600">${escHtml(r.employeeName)}</div><div class="td-muted">${escHtml(r.employeeId)}</div></td>
-      <td>${escHtml(r.department)}</td>
-      <td>${escHtml(r.trainingName)}</td>
+      <td>
+        <div style="font-weight:600;font-size:13px">${escHtml(r.trainingName)}</div>
+        <div class="td-muted">${escHtml(r.trainingType||'')}</div>
+      </td>
+      <td style="font-size:12px">${escHtml(r.provider||'—')}</td>
       <td class="td-muted">${formatDate(r.trainingDate)}</td>
-      <td class="${expClass}">${formatDate(r.expiryDate)}</td>
-      <td style="font-family:var(--font-mono);font-size:12px">${escHtml(r.hours||'—')} hrs</td>
+      <td class="${expClass}" style="font-size:12px">${r.expiryDate ? formatDate(r.expiryDate) : '—'}</td>
+      <td style="text-align:center;font-weight:600;color:var(--accent);font-size:13px">${escHtml(String(staffCount))}</td>
+      <td style="font-size:12px">${escHtml(r.pic||'—')}</td>
       <td>${statusBadge(r.status)}</td>
-      <td>${agingBadge(r.expiryDate)}</td>
+      <td>${r.expiryDate ? agingBadge(r.expiryDate) : '—'}</td>
+      <td>
+        ${r.evidence ? `<a href="${escHtml(r.evidence)}" target="_blank" style="font-size:10px;color:#4285f4;text-decoration:none"><i class="fa-brands fa-google-drive"></i> View</a>` : '<span style="font-size:10px;color:var(--text-muted)">—</span>'}
+      </td>
       <td class="td-action">
         ${canEdit(user) ? `
         <button class="btn-sys btn-outline btn-xs" onclick="editTraining('${r.id}')" title="Edit"><i class="fa-solid fa-pen"></i></button>
-        <button class="btn-sys btn-accent btn-xs" onclick="openAssignTask('training','${r.id}','${escHtml(r.trainingName)} — ${escHtml(r.employeeName)}','${escHtml(r.expiryDate)}')" title="Assign to OSH Coordinator" style="background:rgba(0,212,170,.15);color:var(--accent2);border-color:var(--accent2)"><i class="fa-solid fa-user-plus"></i></button>
+        <button class="btn-sys btn-xs" onclick="openAssignTask('training','${r.id}','${escHtml(r.trainingName)}','${escHtml(r.expiryDate||'')}')" title="Assign task" style="background:rgba(0,212,170,.15);color:var(--accent2);border:1px solid var(--accent2);border-radius:var(--radius);cursor:pointer;padding:2px 8px;font-size:11px"><i class="fa-solid fa-user-plus"></i></button>
         <button class="btn-sys btn-danger-outline btn-xs" onclick="deleteRecord(KEYS.training,'${r.id}',renderTraining)" title="Delete"><i class="fa-solid fa-trash"></i></button>` : '—'}
       </td>
     </tr>`;
-  }).join('') || `<tr><td colspan="10" style="text-align:center;color:var(--text-muted);padding:24px">No records found</td></tr>`;
+  }).join('') || `<tr><td colspan="11" style="text-align:center;color:var(--text-muted);padding:24px">No training records found</td></tr>`;
 }
 
 function editTraining(id) {
@@ -225,40 +232,67 @@ function editTraining(id) {
 function openTrainingModal(rec={}) {
   const isNew = !rec.id;
   document.getElementById('tr-modal-title').textContent = isNew ? 'Add Training Record' : 'Edit Training Record';
-  ['id','employeeName','employeeId','department','trainingName','trainingDate','expiryDate','status','remarks','hours','evidence'].forEach(f => {
+  // New fields
+  ['id','trainingName','trainingType','provider','trainingDate','expiryDate','remarks','status','evidence'].forEach(f => {
     const el = document.getElementById('tr-f-'+f);
     if (el) el.value = rec[f] || '';
   });
+  // No. of staff (stored in hours for compatibility)
+  const hoursEl = document.getElementById('tr-f-hours');
+  if (hoursEl) hoursEl.value = rec.hours || rec.staffCount || '';
+  // PIC
+  const picEl = document.getElementById('tr-f-pic');
+  if (picEl) picEl.value = rec.pic || '';
   if (isNew) {
-    const data = getData(KEYS.training);
-    document.getElementById('tr-f-id').value = genId('TR', data);
+    document.getElementById('tr-f-id').value = genId('TR', getData(KEYS.training));
+    document.getElementById('tr-f-status').value = 'Planned';
   }
   document.getElementById('tr-modal').classList.add('show');
 }
 
 function saveTrainingRecord() {
   const user = getCurrentUser();
-  if (!user) { showToast('Session expired. Please log in again.','error'); return; }
-  if (!canEdit(user)) { showToast('Your role cannot save records. Admin or OSH Coordinator required.','error'); return; }
+  if (!user) { showToast('Session expired. Please log in again.', 'error'); return; }
+  if (!canEdit(user)) { showToast('Your role cannot save records. Admin or OSH Coordinator required.', 'error'); return; }
+
+  const get = id => { const el = document.getElementById(id); return el ? el.value.trim() : ''; };
+
+  const id  = get('tr-f-id');
+  if (!get('tr-f-trainingName')) { showToast('Please enter a training name.', 'error'); return; }
+  if (!get('tr-f-trainingDate')) { showToast('Please enter the training date.', 'error'); return; }
+
+  const rec = {
+    id,
+    trainingName: get('tr-f-trainingName'),
+    trainingType: get('tr-f-trainingType'),
+    provider:     get('tr-f-provider'),
+    trainingDate: get('tr-f-trainingDate'),
+    expiryDate:   get('tr-f-expiryDate'),
+    hours:        get('tr-f-hours'),      // stores no. of staff trained
+    staffCount:   get('tr-f-hours'),
+    pic:          get('tr-f-pic'),
+    status:       get('tr-f-status'),
+    remarks:      get('tr-f-remarks'),
+    evidence:     get('tr-f-evidence'),
+    // Keep empty employee fields for data compatibility
+    employeeName: '', employeeId: '', department: 'HSE',
+  };
+
+  // Auto-update status based on expiry if set
+  if (rec.expiryDate) {
+    const diff = daysDiff(rec.expiryDate);
+    if (rec.status === 'Completed') {
+      // Keep completed — just check if expired since then
+      if (diff < 0) rec.status = 'Expired';
+    }
+  }
+
   const data = getData(KEYS.training);
-  const id   = document.getElementById('tr-f-id').value;
-  const rec  = {};
-  ['id','employeeName','employeeId','department','trainingName','trainingDate','expiryDate','status','remarks','hours','evidence'].forEach(f => {
-    const el = document.getElementById('tr-f-'+f);
-    if (el) rec[f] = el.value.trim();
-  });
-
-  // Auto status from expiry
-  const diff = daysDiff(rec.expiryDate);
-  if (diff < 0)       rec.status = 'Expired';
-  else if (diff < 30) rec.status = 'Expiring Soon';
-  else                rec.status = 'Valid';
-
-  const idx = data.findIndex(r => r.id === id);
+  const idx  = data.findIndex(r => r.id === id);
   if (idx >= 0) data[idx] = rec; else data.push(rec);
   saveData(KEYS.training, data);
   document.getElementById('tr-modal').classList.remove('show');
-  showToast('Training record saved.','success');
+  showToast('Training record saved ✓', 'success');
   renderTraining();
 }
 
