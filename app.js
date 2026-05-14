@@ -114,7 +114,129 @@ function getData(key) {
 }
 function saveData(key, arr) {
   localStorage.setItem(key, JSON.stringify(arr));
+  // Push to cloud if configured
+  cloudSync.push(key, arr);
 }
+
+// ── Cloud Sync via JSONBin.io ─────────────────────────────────
+// Allows all team members to share the same data across devices
+// One-time setup: Admin configures JSONBin API key + Bin ID in Settings
+const CLOUD_CFG_KEY = 'hse_cloud_config';
+
+const cloudSync = {
+  getConfig() {
+    try { return JSON.parse(localStorage.getItem(CLOUD_CFG_KEY) || '{}'); } catch(e) { return {}; }
+  },
+  isConfigured() {
+    const c = this.getConfig();
+    return !!(c.apiKey && c.binId);
+  },
+  // Push a single key to cloud (debounced — max once per 2s)
+  _timers: {},
+  push(key, data) {
+    if (!this.isConfigured()) return;
+    clearTimeout(this._timers[key]);
+    this._timers[key] = setTimeout(() => this._pushNow(key, data), 2000);
+  },
+  async _pushNow(key, data) {
+    const c = this.getConfig();
+    try {
+      // Read current cloud state, merge, write back
+      const current = await this._read();
+      if (!current) return;
+      current[key] = data;
+      await fetch(`https://api.jsonbin.io/v3/b/${c.binId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'X-Master-Key': c.apiKey },
+        body: JSON.stringify(current)
+      });
+    } catch(e) { /* silent — local still works */ }
+  },
+  async _read() {
+    const c = this.getConfig();
+    if (!c.apiKey || !c.binId) return null;
+    try {
+      const resp = await fetch(`https://api.jsonbin.io/v3/b/${c.binId}/latest`, {
+        headers: { 'X-Master-Key': c.apiKey }
+      });
+      const json = await resp.json();
+      return json.record || null;
+    } catch(e) { return null; }
+  },
+  // Pull ALL data from cloud into localStorage on login
+  async pullAll() {
+    if (!this.isConfigured()) return false;
+    try {
+      const record = await this._read();
+      if (!record) return false;
+      const keys = [KEYS.training, KEYS.issues, KEYS.capa, KEYS.compliance, KEYS.shc, KEYS.users, 'hse_tasks', 'hse_cf_existing', 'hse_training_arrangement'];
+      keys.forEach(k => {
+        if (record[k] !== undefined) {
+          localStorage.setItem(k, JSON.stringify(record[k]));
+        }
+      });
+      if (record['hse_trend']) localStorage.setItem('hse_trend', JSON.stringify(record['hse_trend']));
+      console.info('Cloud data synced ✓');
+      return true;
+    } catch(e) {
+      console.warn('Cloud sync failed — using local data');
+      return false;
+    }
+  },
+  // Push ALL local data to cloud (Admin initial setup)
+  async pushAll() {
+    const c = this.getConfig();
+    if (!c.apiKey || !c.binId) return false;
+    const payload = {};
+    const keys = [KEYS.training, KEYS.issues, KEYS.capa, KEYS.compliance, KEYS.shc, KEYS.users, 'hse_tasks', 'hse_cf_existing', 'hse_training_arrangement', 'hse_trend'];
+    keys.forEach(k => {
+      const d = localStorage.getItem(k);
+      if (d) { try { payload[k] = JSON.parse(d); } catch(e) {} }
+    });
+    try {
+      await fetch(`https://api.jsonbin.io/v3/b/${c.binId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'X-Master-Key': c.apiKey },
+        body: JSON.stringify(payload)
+      });
+      return true;
+    } catch(e) { return false; }
+  }
+};
+
+// Open cloud settings modal
+window.openCloudSettings = function() {
+  const c = cloudSync.getConfig();
+  const el = id => document.getElementById(id);
+  if (el('cloud-api-key')) el('cloud-api-key').value = c.apiKey || '';
+  if (el('cloud-bin-id'))  el('cloud-bin-id').value  = c.binId  || '';
+  const badge = el('cloud-status-badge');
+  if (badge) {
+    badge.textContent = cloudSync.isConfigured() ? '✅ Connected' : '⚠ Not configured';
+    badge.style.color = cloudSync.isConfigured() ? 'var(--success)' : 'var(--warning)';
+  }
+  el('cloud-settings-modal')?.classList.add('show');
+};
+
+window.saveCloudSettings = function() {
+  const apiKey = document.getElementById('cloud-api-key')?.value.trim();
+  const binId  = document.getElementById('cloud-bin-id')?.value.trim();
+  if (!apiKey || !binId) { showToast('Please enter both API Key and Bin ID.', 'error'); return; }
+  localStorage.setItem(CLOUD_CFG_KEY, JSON.stringify({ apiKey, binId }));
+  document.getElementById('cloud-settings-modal')?.classList.remove('show');
+  showToast('Cloud sync configured ✓ — pushing all data now…', 'success');
+  cloudSync.pushAll().then(ok => {
+    showToast(ok ? '✅ All data pushed to cloud — team can now sync automatically!' : '❌ Push failed — check your API Key and Bin ID.', ok ? 'success' : 'error');
+  });
+};
+
+window.manualCloudPush = function() {
+  if (!cloudSync.isConfigured()) { openCloudSettings(); return; }
+  cloudSync.pushAll().then(ok => {
+    showToast(ok ? '✅ Data pushed to cloud successfully!' : '❌ Push failed — check connection.', ok ? 'success' : 'error');
+  });
+};
+
 function genId(prefix, arr) {
   const maxN = arr.reduce((m, r) => {
     const n = parseInt((r.id||'').replace(/\D/g,''),10)||0;

@@ -10,7 +10,13 @@ const TT_KEY = 'hse_tasks';
 
 // ── Task store ────────────────────────────────────────────────
 function ttGetAll()       { return JSON.parse(localStorage.getItem(TT_KEY) || '[]'); }
-function ttSave(tasks)    { localStorage.setItem(TT_KEY, JSON.stringify(tasks)); }
+function ttSave(tasks)    {
+  localStorage.setItem(TT_KEY, JSON.stringify(tasks));
+  // Push to cloud so all team members see it
+  if (typeof cloudSync !== 'undefined' && cloudSync.isConfigured()) {
+    cloudSync.push(TT_KEY, tasks);
+  }
+}
 function ttGet(id)        { return ttGetAll().find(t => t.id === id); }
 function ttGenId()        { const tasks = ttGetAll(); const maxN = tasks.reduce((m,t) => { const n=parseInt((t.id||'').replace(/\D/g,''),10)||0; return n>m?n:m; },0); return `TASK-${String(maxN+1).padStart(3,'0')}`; }
 

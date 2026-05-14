@@ -68,7 +68,15 @@
       const users = JSON.parse(stored);
       // Reseed if old/incomplete data
       const hasHellena = users.some(u => u.name === 'Hellena Lina');
-      if (!hasHellena) { localStorage.removeItem('hse_users'); return seedUsers(); }
+      if (!hasHellena) {
+        // Merge — keep any custom users, just ensure core team exists
+        const merged = seedUsers();
+        // Re-add any users that were in the old list but aren't in the defaults
+        const mergedNames = merged.map(u => u.username);
+        users.filter(u => !mergedNames.includes(u.username)).forEach(u => merged.push(u));
+        localStorage.setItem('hse_users', JSON.stringify(merged));
+        return merged;
+      }
       return users;
     }
     return seedUsers();
