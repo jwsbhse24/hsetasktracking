@@ -285,9 +285,136 @@
       </div>
     </div><!-- /dashboard -->
 
-    <!-- ─────── ALL TASKS ─────── -->
-    <!-- ─────── ALL TASKS (Daily Task Board) ─────── -->
+    <!-- ─────── TASK BOARD (All Tasks) ─────── -->
     <div id="page-alltasks" class="page-view">
+      <div class="module-header">
+        <div>
+          <div class="module-title"><i class="fa-solid fa-list-check" style="color:var(--accent)"></i> Task Board</div>
+          <div class="module-subtitle">HSE team tasks — assign, track, verify and close</div>
+        </div>
+        <div class="module-actions">
+          <button class="btn-sys btn-outline" onclick="sendDailyEmailReport()" id="ej-send-btn-main" class="ej-send-btn"><i class="fa-solid fa-envelope"></i> Send Morning Briefing</button>
+          <button class="btn-sys btn-outline btn-xs" onclick="openEmailSettings()" title="Email settings"><i class="fa-solid fa-gear"></i></button>
+          <button class="btn-sys btn-outline" onclick="exportAllTasksExcel()"><i class="fa-solid fa-file-excel"></i> Export</button>
+          <button class="btn-sys btn-outline btn-sm" onclick="atFilter={module:'',status:'',pic:'',search:''};renderAllTasks()"><i class="fa-solid fa-xmark"></i> Clear</button>
+          <button class="btn-sys btn-primary-sys" id="btn-new-task" onclick="openNewTask()"><i class="fa-solid fa-plus"></i> New Task</button>
+        </div>
+      </div>
+
+      <!-- 4 status summary boxes — clickable to filter -->
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px">
+        <div style="background:var(--bg-card);border:1px solid var(--border);border-top:3px solid var(--danger);border-radius:var(--radius-lg);padding:16px;cursor:pointer;transition:all .2s" onclick="atFilter.status='Overdue';document.getElementById('at-f-status').value='Overdue';renderAllTasks()">
+          <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em">🔴 Overdue</div>
+          <div style="font-family:var(--font-head);font-size:40px;font-weight:800;color:var(--danger);line-height:1" id="at-kpi-overdue">—</div>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:4px">Act now</div>
+        </div>
+        <div style="background:var(--bg-card);border:1px solid var(--border);border-top:3px solid var(--accent);border-radius:var(--radius-lg);padding:16px;cursor:pointer;transition:all .2s" onclick="atFilter.status='Open';document.getElementById('at-f-status').value='Open';renderAllTasks()">
+          <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em">🔵 Open / Accepted</div>
+          <div style="font-family:var(--font-head);font-size:40px;font-weight:800;color:var(--accent);line-height:1" id="at-kpi-open">—</div>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:4px">Not started yet</div>
+        </div>
+        <div style="background:var(--bg-card);border:1px solid var(--border);border-top:3px solid var(--warning);border-radius:var(--radius-lg);padding:16px;cursor:pointer;transition:all .2s" onclick="atFilter.status='In Progress';document.getElementById('at-f-status').value='In Progress';renderAllTasks()">
+          <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em">🔄 In Progress</div>
+          <div style="font-family:var(--font-head);font-size:40px;font-weight:800;color:var(--warning);line-height:1" id="at-kpi-inprog">—</div>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:4px">Being worked on</div>
+        </div>
+        <div style="background:var(--bg-card);border:1px solid var(--border);border-top:3px solid var(--success);border-radius:var(--radius-lg);padding:16px;cursor:pointer;transition:all .2s" onclick="atFilter.status='Completed';document.getElementById('at-f-status').value='Completed';renderAllTasks()">
+          <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em">✅ Completed</div>
+          <div style="font-family:var(--font-head);font-size:40px;font-weight:800;color:var(--success);line-height:1" id="at-kpi-closed">—</div>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:4px">Done & verified</div>
+        </div>
+      </div>
+
+      <!-- Hidden KPIs still needed by JS -->
+      <span id="at-kpi-total" style="display:none"></span>
+      <span id="at-kpi-pending" style="display:none"></span>
+      <span id="at-kpi-critical" style="display:none"></span>
+      <span id="at-kpi-week" style="display:none"></span>
+
+      <!-- Overdue alert -->
+      <div id="at-overdue-alert" style="display:none;background:rgba(224,60,49,.08);border:1px solid rgba(224,60,49,.3);border-radius:var(--radius);padding:12px 16px;margin-bottom:14px;align-items:center;gap:12px">
+        <i class="fa-solid fa-circle-exclamation" style="color:var(--danger);font-size:18px;flex-shrink:0"></i>
+        <div style="flex:1;font-size:13px"><strong id="at-overdue-n" style="color:var(--danger)">0</strong> tasks are overdue and need immediate attention.</div>
+        <button class="btn-sys btn-danger-outline btn-sm" onclick="atFilter.status='Overdue';document.getElementById('at-f-status').value='Overdue';renderAllTasks()">Show overdue only</button>
+      </div>
+
+      <!-- Filter bar -->
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:center">
+        <input type="text" id="at-search" placeholder="🔍 Search task, person, keyword…"
+               oninput="atFilter.search=this.value;renderAllTasks()"
+               style="flex:1;min-width:180px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);color:var(--text-primary);font-family:var(--font-body);font-size:13px;padding:8px 12px;outline:none"/>
+        <select id="at-f-status" onchange="atFilter.status=this.value;renderAllTasks()"
+                style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);color:var(--text-primary);font-size:12.5px;padding:8px 12px;outline:none">
+          <option value="">All Status</option>
+          <option>Overdue</option><option>Open</option><option>Accepted</option>
+          <option>In Progress</option><option>Pending Verification</option>
+          <option>Completed</option><option>Cancelled</option>
+        </select>
+        <select id="at-f-module" onchange="atFilter.module=this.value;renderAllTasks()"
+                style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);color:var(--text-primary);font-size:12.5px;padding:8px 12px;outline:none">
+          <option value="">All Areas</option>
+          <option value="training">Training</option><option value="issues">Safety Issues</option>
+          <option value="capa">CAPA</option><option value="compliance">Compliance</option>
+          <option value="shc">SHC</option><option value="general">General</option>
+        </select>
+        <select id="at-f-pic" onchange="atFilter.pic=this.value;renderAllTasks()"
+                style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);color:var(--text-primary);font-size:12.5px;padding:8px 12px;outline:none">
+          <option value="">All People</option>
+        </select>
+        <span style="font-size:12px;color:var(--text-muted)" id="at-rcnt"></span>
+      </div>
+
+      <div id="at-task-list"></div>
+    </div><!-- /alltasks -->
+
+    <!-- ─────── MY TASKS ─────── -->
+    <div id="page-mytasks" class="page-view">
+      <div class="module-header">
+        <div>
+          <div class="module-title"><i class="fa-solid fa-user-check" style="color:var(--accent2)"></i> My Tasks</div>
+          <div class="module-subtitle" id="mytasks-subtitle">Your personal task list — accept, update progress and mark complete</div>
+        </div>
+        <div class="module-actions">
+          <button class="btn-sys btn-outline" onclick="sendDailyEmailReport()" class="ej-send-btn"><i class="fa-solid fa-envelope"></i> Send Morning Briefing</button>
+          <button class="btn-sys btn-outline btn-xs" onclick="openEmailSettings()" title="Email settings"><i class="fa-solid fa-gear"></i></button>
+          <button class="btn-sys btn-outline" onclick="exportMyTasksExcel()"><i class="fa-solid fa-file-excel"></i> Export</button>
+        </div>
+      </div>
+
+      <!-- 3 summary boxes -->
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px">
+        <div style="background:var(--bg-card);border:1px solid var(--border);border-top:3px solid var(--danger);border-radius:var(--radius-lg);padding:16px">
+          <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em">🔴 Overdue</div>
+          <div style="font-family:var(--font-head);font-size:40px;font-weight:800;color:var(--danger);line-height:1" id="mt-kpi-overdue">—</div>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:4px">Past due date</div>
+        </div>
+        <div style="background:var(--bg-card);border:1px solid var(--border);border-top:3px solid var(--warning);border-radius:var(--radius-lg);padding:16px">
+          <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em">📋 Active</div>
+          <div style="font-family:var(--font-head);font-size:40px;font-weight:800;color:var(--warning);line-height:1" id="mt-kpi-open">—</div>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:4px">Open + in progress</div>
+        </div>
+        <div style="background:var(--bg-card);border:1px solid var(--border);border-top:3px solid var(--success);border-radius:var(--radius-lg);padding:16px">
+          <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em">✅ Done</div>
+          <div style="font-family:var(--font-head);font-size:40px;font-weight:800;color:var(--success);line-height:1" id="mt-kpi-closed">—</div>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:4px">Completed</div>
+        </div>
+      </div>
+
+      <!-- Hidden -->
+      <span id="mt-kpi-total" style="display:none"></span>
+      <span id="mt-kpi-inprog" style="display:none"></span>
+      <span id="mt-kpi-week" style="display:none"></span>
+
+      <!-- Overdue alert -->
+      <div id="mt-overdue-alert" style="display:none;background:rgba(224,60,49,.08);border:1px solid rgba(224,60,49,.3);border-radius:var(--radius);padding:12px 16px;margin-bottom:16px;align-items:center;gap:12px">
+        <i class="fa-solid fa-circle-exclamation" style="color:var(--danger);font-size:18px;flex-shrink:0"></i>
+        <div style="font-size:13px">You have <strong id="mt-overdue-n" style="color:var(--danger)">0</strong> overdue tasks. Please update your progress or inform Admin.</div>
+      </div>
+
+      <div id="mt-groups"></div>
+    </div><!-- /mytasks -->
+
+
       <div class="module-header">
         <div>
           <div class="module-title"><i class="fa-solid fa-list-check" style="color:var(--accent)"></i> Task Board</div>
@@ -473,6 +600,10 @@
         <button class="tr-tab" id="tr-tab-jwsb"    onclick="switchTrainingTab('jwsb')"
           style="background:none;border:none;padding:10px 18px;cursor:pointer;font-family:var(--font-head);font-size:13px;font-weight:600;color:var(--text-muted);border-bottom:2px solid transparent;margin-bottom:-2px;letter-spacing:0.04em;white-space:nowrap">
           <i class="fa-solid fa-shield-halved"></i> JWSB Renewal Tracker
+        </button>
+        <button class="tr-tab" id="tr-tab-arrange" onclick="switchTrainingTab('arrange')"
+          style="background:none;border:none;padding:10px 18px;cursor:pointer;font-family:var(--font-head);font-size:13px;font-weight:600;color:var(--text-muted);border-bottom:2px solid transparent;margin-bottom:-2px;letter-spacing:0.04em;white-space:nowrap">
+          <i class="fa-solid fa-calendar-check"></i> Training Arrangement
         </button>
       </div>
 
@@ -701,6 +832,99 @@
           <span style="margin-left:auto">AESP: DOSH ICOP 2010 · First Aid: OSHA 1994 · Chemical: USECHH 2000 · Hearing: Noise Reg 2019</span>
         </div>
       </div>
+
+      </div><!-- /tr-panel-jwsb -->
+
+      <!-- ═══════════════════════════════════
+           TAB 5 — TRAINING ARRANGEMENT
+           Source: Jetama HSE Calendar 2026
+      ═══════════════════════════════════ -->
+      <div id="tr-panel-arrange" class="tr-panel" style="display:none">
+
+        <!-- Header banner -->
+        <div style="background:linear-gradient(135deg,#0a1628,#0d1f3c);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px 18px;margin-bottom:14px;display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+          <div style="width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">📅</div>
+          <div>
+            <div style="font-family:var(--font-head);font-size:16px;font-weight:800">HSE Training Arrangement 2026</div>
+            <div style="font-size:11px;color:var(--text-muted);font-family:var(--font-mono)">Jetama Water Sdn. Bhd. · SHE-CAL-2026 · Cross-checked against training records · 38 activities Apr–Dec 2026</div>
+          </div>
+          <div style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn-sys btn-success-outline btn-sm" onclick="exportArrangementExcel()"><i class="fa-solid fa-file-excel"></i> Export</button>
+          </div>
+        </div>
+
+        <!-- Summary boxes -->
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-bottom:16px">
+          <div style="background:var(--bg-card);border:1px solid var(--border);border-top:3px solid var(--success);border-radius:var(--radius);padding:12px;cursor:pointer" onclick="taFilter='Done';renderArrangement()">
+            <div style="font-family:var(--font-head);font-size:28px;font-weight:800;color:var(--success)" id="ta-kpi-done">0</div>
+            <div style="font-size:10px;color:var(--text-muted);margin-top:2px">✅ Done</div>
+          </div>
+          <div style="background:var(--bg-card);border:1px solid var(--border);border-top:3px solid var(--accent);border-radius:var(--radius);padding:12px;cursor:pointer" onclick="taFilter='In Progress';renderArrangement()">
+            <div style="font-family:var(--font-head);font-size:28px;font-weight:800;color:var(--accent)" id="ta-kpi-inprog">0</div>
+            <div style="font-size:10px;color:var(--text-muted);margin-top:2px">🔄 In Progress</div>
+          </div>
+          <div style="background:var(--bg-card);border:1px solid var(--border);border-top:3px solid var(--warning);border-radius:var(--radius);padding:12px;cursor:pointer" onclick="taFilter='Pending Approval';renderArrangement()">
+            <div style="font-family:var(--font-head);font-size:28px;font-weight:800;color:var(--warning)" id="ta-kpi-pending">0</div>
+            <div style="font-size:10px;color:var(--text-muted);margin-top:2px">⏳ Pending Approval</div>
+          </div>
+          <div style="background:var(--bg-card);border:1px solid var(--border);border-top:3px solid var(--accent2);border-radius:var(--radius);padding:12px;cursor:pointer" onclick="taFilter='Planned';renderArrangement()">
+            <div style="font-family:var(--font-head);font-size:28px;font-weight:800;color:var(--accent2)" id="ta-kpi-planned">0</div>
+            <div style="font-size:10px;color:var(--text-muted);margin-top:2px">📌 Planned</div>
+          </div>
+          <div style="background:var(--bg-card);border:1px solid var(--border);border-top:3px solid var(--text-muted);border-radius:var(--radius);padding:12px;cursor:pointer" onclick="taFilter='TBD';renderArrangement()">
+            <div style="font-family:var(--font-head);font-size:28px;font-weight:800;color:var(--text-muted)" id="ta-kpi-tbd">0</div>
+            <div style="font-size:10px;color:var(--text-muted);margin-top:2px">❓ TBD</div>
+          </div>
+          <div style="background:var(--bg-card);border:1px solid var(--border);border-top:3px solid var(--purple);border-radius:var(--radius);padding:12px;cursor:pointer" onclick="taFilter='';renderArrangement()">
+            <div style="font-family:var(--font-head);font-size:28px;font-weight:800;color:var(--purple)" id="ta-kpi-total">0</div>
+            <div style="font-size:10px;color:var(--text-muted);margin-top:2px">📋 Total</div>
+          </div>
+        </div>
+
+        <!-- Sub-view toggle -->
+        <div style="display:flex;gap:8px;margin-bottom:14px;align-items:center;flex-wrap:wrap">
+          <span style="font-size:11px;color:var(--text-muted);font-family:var(--font-mono)">VIEW:</span>
+          <button id="ta-view-calendar-btn" onclick="setTaView('calendar')" class="btn-sys btn-primary-sys btn-sm"><i class="fa-solid fa-calendar"></i> By Month</button>
+          <button id="ta-view-list-btn"     onclick="setTaView('list')"     class="btn-sys btn-outline btn-sm"><i class="fa-solid fa-list"></i> Full List</button>
+          <button id="ta-view-action-btn"   onclick="setTaView('action')"   class="btn-sys btn-outline btn-sm"><i class="fa-solid fa-circle-exclamation"></i> Action Required</button>
+          <div style="margin-left:auto;display:flex;gap:8px">
+            <input type="text" id="ta-search" placeholder="Search…" oninput="renderArrangement()"
+                   style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);color:var(--text-primary);font-size:12px;padding:6px 10px;outline:none;width:160px"/>
+            <select id="ta-type-filter" onchange="renderArrangement()"
+                    style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);color:var(--text-primary);font-size:12px;padding:6px 10px;outline:none">
+              <option value="">All Types</option>
+              <option>External Training</option>
+              <option>Internal Training</option>
+              <option>Internal Briefing</option>
+              <option>Meeting</option>
+              <option>Emergency Drill</option>
+              <option>Fire Drill</option>
+              <option>Campaign</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Render area -->
+        <div id="ta-calendar-view">
+          <div id="ta-month-groups"></div>
+        </div>
+        <div id="ta-list-view" style="display:none">
+          <div class="panel" style="padding:0">
+            <div class="tbl-wrapper">
+              <table class="sys-table" style="min-width:900px">
+                <thead><tr>
+                  <th>#</th><th>Month</th><th>Training / Event</th><th>Type</th><th>Participants</th><th>Trainer / PIC</th><th>Scheduled Date</th><th>Status</th><th>Record Found</th><th>Remarks</th>
+                </tr></thead>
+                <tbody id="ta-list-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <div id="ta-action-view" style="display:none">
+          <div id="ta-action-cards"></div>
+        </div>
+
+      </div><!-- /tr-panel-arrange -->
 
     </div><!-- /training -->
 
@@ -1326,6 +1550,263 @@
 </div>
 
 
+<!-- ═══════════════════════════════════════
+     NEW TASK / ASSIGN MODAL (tt-modal)
+     Admin-only: create & assign any task
+═══════════════════════════════════════ -->
+<div class="modal-overlay" id="tt-modal">
+  <div class="modal-box" style="max-width:540px">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title">➕ Assign Task</div>
+        <div style="font-size:11px;color:var(--text-muted);font-family:var(--font-mono);margin-top:2px" id="tt-modal-badge">New task</div>
+      </div>
+      <button class="modal-close" onclick="document.getElementById('tt-modal').classList.remove('show')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="tt-source-module"/>
+      <input type="hidden" id="tt-source-id"/>
+
+      <!-- Task description — biggest, most prominent -->
+      <div class="form-group">
+        <label class="form-label" style="font-size:12px;color:var(--accent)">What needs to be done? <span style="color:var(--danger)">*</span></label>
+        <textarea id="tt-task-title" class="form-control-sys" rows="3"
+                  placeholder="Describe the task clearly — what action is required…"
+                  style="font-size:13px;font-weight:600"></textarea>
+      </div>
+
+      <div class="form-grid-2">
+        <!-- Assign To -->
+        <div class="form-group">
+          <label class="form-label">👤 Assign To <span style="color:var(--danger)">*</span></label>
+          <select id="tt-assignto" class="form-control-sys">
+            <option value="Ahmad Fadzli">Ahmad Fadzli — OSH Coordinator</option>
+            <option value="Roland Riset">Roland Riset — S&H Coordinator</option>
+            <option value="Hellena Lina">Hellena Lina — S&H Officer</option>
+            <option value="Joshrin Jino">Joshrin Jino — OSH Coord (KKIP)</option>
+            <option value="Admin">Admin (Self)</option>
+          </select>
+        </div>
+
+        <!-- Priority -->
+        <div class="form-group">
+          <label class="form-label">🚦 Priority</label>
+          <select id="tt-priority" class="form-control-sys">
+            <option value="Low">🟢 Low</option>
+            <option value="Medium" selected>🟡 Medium</option>
+            <option value="High">🟠 High</option>
+            <option value="Critical">🔴 Critical</option>
+          </select>
+        </div>
+
+        <!-- Due Date -->
+        <div class="form-group">
+          <label class="form-label">📅 Due Date <span style="color:var(--danger)">*</span></label>
+          <input id="tt-duedate" type="date" class="form-control-sys"/>
+        </div>
+      </div>
+
+      <!-- Admin instruction note -->
+      <div class="form-group">
+        <label class="form-label">📌 Instruction / Note (optional)</label>
+        <textarea id="tt-task-note" class="form-control-sys" rows="2"
+                  placeholder="e.g. Please follow up with NIOSH by Thursday. Cc the Plant Manager."></textarea>
+      </div>
+
+      <div style="background:rgba(0,212,170,.08);border:1px solid rgba(0,212,170,.2);border-radius:var(--radius);padding:8px 12px;font-size:12px;color:var(--text-secondary)">
+        <i class="fa-solid fa-circle-info" style="color:var(--accent2)"></i>
+        Task appears in <strong>My Tasks</strong> for the coordinator and in the <strong>Task Board</strong> for Admin to monitor.
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-sys btn-outline" onclick="document.getElementById('tt-modal').classList.remove('show')">Cancel</button>
+      <button class="btn-sys btn-primary-sys" onclick="ttSaveNewTask()">
+        <i class="fa-solid fa-paper-plane"></i> Assign Task
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     UPDATE TASK STATUS MODAL (ttu-modal)
+     Coordinator: accept / update progress
+     Admin: verify & close
+═══════════════════════════════════════ -->
+<div class="modal-overlay" id="ttu-modal">
+  <div class="modal-box" style="max-width:480px">
+    <div class="modal-header">
+      <div class="modal-title">🔄 Update Task</div>
+      <button class="modal-close" onclick="document.getElementById('ttu-modal').classList.remove('show')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="ttu-id"/>
+      <div style="background:var(--bg-dark);border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px;margin-bottom:14px;font-size:13px;font-weight:600;line-height:1.4" id="ttu-title"></div>
+
+      <!-- Status -->
+      <div class="form-group">
+        <label class="form-label">Status</label>
+        <select id="ttu-status" class="form-control-sys"></select>
+      </div>
+
+      <!-- Progress update -->
+      <div class="form-group">
+        <label class="form-label">Progress Update / Note</label>
+        <textarea id="ttu-progress" class="form-control-sys" rows="2"
+                  placeholder="What did you do? What's the current situation? Any blockers?"></textarea>
+      </div>
+
+      <!-- Admin-only: verification on closing -->
+      <div id="ttu-verify-section" style="display:none">
+        <div class="divider"></div>
+        <div style="font-size:12px;font-weight:700;color:var(--success);margin-bottom:8px">
+          <i class="fa-solid fa-circle-check"></i> Admin Verification (required to mark Completed)
+        </div>
+        <div class="form-group">
+          <label class="form-label">Verification Evidence / Confirmation</label>
+          <textarea id="ttu-verification" class="form-control-sys" rows="2"
+                    placeholder="e.g. Training certificate sighted on 12/5/2026. Signed off by DGM-SHE."></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-sys btn-outline" onclick="document.getElementById('ttu-modal').classList.remove('show')">Cancel</button>
+      <button class="btn-sys btn-primary-sys" onclick="ttSaveUpdate()">
+        <i class="fa-solid fa-floppy-disk"></i> Save Update
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Training Arrangement Update Modal -->
+<div class="modal-overlay" id="ta-update-modal">
+  <div class="modal-box" style="max-width:460px">
+    <div class="modal-header">
+      <div class="modal-title">Update Training Status</div>
+      <button class="modal-close" onclick="document.getElementById('ta-update-modal').classList.remove('show')">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="ta-u-id"/>
+      <div class="form-group">
+        <label class="form-label">Training / Event</label>
+        <input id="ta-u-event" class="form-control-sys" readonly style="opacity:.7"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Status</label>
+        <select id="ta-u-status" class="form-control-sys">
+          <option>Done</option>
+          <option>In Progress</option>
+          <option>Pending Approval</option>
+          <option>Planned</option>
+          <option>TBD</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Remarks / Notes</label>
+        <textarea id="ta-u-remarks" class="form-control-sys" rows="2" placeholder="e.g. Postponed to next month, awaiting NIOSH confirmation…"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-sys btn-outline" onclick="document.getElementById('ta-update-modal').classList.remove('show')">Cancel</button>
+      <button class="btn-sys btn-primary-sys" onclick="saveTaUpdate()"><i class="fa-solid fa-floppy-disk"></i> Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     EMAIL SETTINGS MODAL (EmailJS)
+═══════════════════════════════════════ -->
+<div class="modal-overlay" id="ej-settings-modal">
+  <div class="modal-box" style="max-width:580px">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title"><i class="fa-solid fa-envelope" style="color:var(--accent)"></i> Email Settings — Morning Briefing</div>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:2px" id="ej-config-badge">⚠ Not configured</div>
+      </div>
+      <button class="modal-close" onclick="document.getElementById('ej-settings-modal').classList.remove('show')">✕</button>
+    </div>
+    <div class="modal-body">
+
+      <!-- Setup guide -->
+      <div style="background:rgba(0,170,255,.06);border:1px solid rgba(0,170,255,.2);border-radius:var(--radius);padding:12px 14px;margin-bottom:16px;font-size:12px;line-height:1.7">
+        <div style="font-weight:700;color:var(--accent);margin-bottom:6px"><i class="fa-solid fa-circle-info"></i> One-time setup — takes 5 minutes</div>
+        <div style="color:var(--text-secondary)">
+          <strong style="color:var(--text-primary)">1.</strong> Go to <a href="https://www.emailjs.com" target="_blank" style="color:var(--accent)">emailjs.com</a> → Sign up free (200 emails/month free)<br>
+          <strong style="color:var(--text-primary)">2.</strong> Add an <strong>Email Service</strong> (connect Gmail/Outlook/any SMTP) → copy the <strong>Service ID</strong><br>
+          <strong style="color:var(--text-primary)">3.</strong> Create an <strong>Email Template</strong> → use variables: <code style="background:var(--bg-dark);padding:1px 5px;border-radius:3px">{{subject}}</code> <code style="background:var(--bg-dark);padding:1px 5px;border-radius:3px">{{message_html}}</code> <code style="background:var(--bg-dark);padding:1px 5px;border-radius:3px">{{to_email}}</code> → copy the <strong>Template ID</strong><br>
+          <strong style="color:var(--text-primary)">4.</strong> Go to <strong>Account → Public Key</strong> → copy it<br>
+          <strong style="color:var(--text-primary)">5.</strong> Paste all three below and save
+        </div>
+      </div>
+
+      <!-- EmailJS credentials -->
+      <div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">EmailJS Credentials</div>
+      <div class="form-grid-2">
+        <div class="form-group">
+          <label class="form-label">Service ID <span style="color:var(--danger)">*</span></label>
+          <input id="ej-serviceId" class="form-control-sys" placeholder="e.g. service_abc123"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Template ID <span style="color:var(--danger)">*</span></label>
+          <input id="ej-templateId" class="form-control-sys" placeholder="e.g. template_xyz456"/>
+        </div>
+        <div class="form-group" style="grid-column:1/-1">
+          <label class="form-label">Public Key <span style="color:var(--danger)">*</span></label>
+          <input id="ej-publicKey" class="form-control-sys" placeholder="e.g. aBcDeFgHiJkLmNoP"/>
+        </div>
+      </div>
+
+      <!-- Per-person email addresses -->
+      <div style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.06em;margin:14px 0 10px">
+        📬 Team Member Email Addresses
+        <span style="font-size:10px;font-weight:400;text-transform:none;letter-spacing:0;color:var(--text-muted);margin-left:6px">Each person receives only their own tasks</span>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="font-size:12px;font-weight:600;min-width:160px;color:var(--text-primary)">Ahmad Fadzli</span>
+          <input id="ej-email-Ahmad Fadzli" class="form-control-sys" type="email" placeholder="ahmad.fadzli@jetamawater.com.my" style="flex:1"/>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="font-size:12px;font-weight:600;min-width:160px;color:var(--text-primary)">Roland Riset</span>
+          <input id="ej-email-Roland Riset" class="form-control-sys" type="email" placeholder="roland.riset@jetamawater.com.my" style="flex:1"/>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="font-size:12px;font-weight:600;min-width:160px;color:var(--text-primary)">Hellena Lina</span>
+          <input id="ej-email-Hellena Lina" class="form-control-sys" type="email" placeholder="hellena.lina@jetamawater.com.my" style="flex:1"/>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="font-size:12px;font-weight:600;min-width:160px;color:var(--text-primary)">Joshrin Jino</span>
+          <input id="ej-email-Joshrin Jino" class="form-control-sys" type="email" placeholder="joshrin.jino@jetamawater.com.my" style="flex:1"/>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="font-size:12px;font-weight:600;min-width:160px;color:var(--text-primary)">Admin (fallback)</span>
+          <input id="ej-toEmail" class="form-control-sys" type="email" placeholder="she@jetamawater.com.my" style="flex:1"/>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--text-muted);margin-top:6px">
+        Leave blank to skip that person. Admin fallback email is used if EmailJS fails.
+      </div>
+
+      <!-- Template guide -->
+      <div style="background:var(--bg-dark);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;font-size:11px;font-family:var(--font-mono);color:var(--text-muted);line-height:1.8;margin-top:4px">
+        <div style="color:var(--text-primary);font-weight:700;margin-bottom:6px;font-family:var(--font-body)">📋 Copy this into your EmailJS template body:</div>
+        Subject: <span style="color:var(--accent)">{{subject}}</span><br>
+        To: <span style="color:var(--accent)">{{to_email}}</span><br>
+        HTML Body: <span style="color:var(--accent)">{{message_html}}</span><br>
+        <span style="color:var(--text-muted);font-size:10px">(Also add: {{summary}} {{total_tasks}} {{date}} as needed)</span>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-sys btn-outline" onclick="document.getElementById('ej-settings-modal').classList.remove('show')">Cancel</button>
+      <button class="btn-sys btn-outline" onclick="_fallbackMailto(ttGetAll())" style="margin-right:auto">
+        <i class="fa-solid fa-envelope"></i> Test with Mail App
+      </button>
+      <button class="btn-sys btn-primary-sys" onclick="saveEmailSettings()">
+        <i class="fa-solid fa-floppy-disk"></i> Save Settings
+      </button>
+    </div>
+  </div>
+</div>
+
 <!-- CF Existing — Edit Modal -->
 <div class="modal-overlay" id="cfex-edit-modal">
   <div class="modal-box" style="max-width:520px">
@@ -1456,10 +1937,13 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script src="app.js"></script>
 <script src="modules.js"></script>
 <script src="report.js"></script>
 <script src="cf-tracker.js"></script>
+<script src="training-arrangement.js"></script>
+<script src="task-tracker.js"></script>
 
 <script>
 /* ── Bootstrap the application ── */
@@ -1506,6 +1990,8 @@
     if (nc) nc.textContent = alerts.length;
   }
   updateNavBadges();
+  // Update email config badge
+  if (typeof _ejUpdateButtons === 'function') _ejUpdateButtons();
 
   // Render notifications
   renderNotifPanel();
@@ -1649,6 +2135,33 @@
     if (window.innerWidth < 992) {
       document.getElementById('sidebar').classList.remove('open');
       document.getElementById('sidebar-overlay').classList.remove('active');
+    }
+  };
+
+
+  /* ================================================================
+     TRAINING ARRANGEMENT TAB WIRE-UP
+     Replaces switchTrainingTab to handle 5 tabs incl. 'arrange'
+     ================================================================ */
+  window.switchTrainingTab = function(tab) {
+    const allTabs = ['matrix','site','name','jwsb','arrange'];
+    allTabs.forEach(t => {
+      const p = document.getElementById('tr-panel-'+t);
+      const b = document.getElementById('tr-tab-'+t);
+      if (p) p.style.display = t===tab ? 'block' : 'none';
+      if (b) {
+        b.style.color        = t===tab ? 'var(--accent)'           : 'var(--text-muted)';
+        b.style.fontWeight   = t===tab ? '700'                     : '600';
+        b.style.borderBottom = t===tab ? '2px solid var(--accent)' : '2px solid transparent';
+      }
+    });
+    if (tab==='matrix')  renderTrainingTable();
+    if (tab==='site')    { if(typeof renderBySite==='function') renderBySite(); }
+    if (tab==='name')    { if(typeof renderByName==='function') renderByName(); }
+    if (tab==='jwsb')    { if(typeof jwsbInit==='function') { jwsbInit(); jwsbApplyFilters(); } }
+    if (tab==='arrange') {
+      if (typeof setTaView==='function')       setTaView('calendar');
+      if (typeof renderArrangement==='function') renderArrangement();
     }
   };
 
@@ -2107,37 +2620,6 @@
 
 })();
 
-/* ================================================================
-   TRAINING MODULE — TAB SWITCHER
-   ================================================================ */
-
-function switchTrainingTab(tab) {
-  // Hide all panels
-  document.querySelectorAll('.tr-panel').forEach(p => p.style.display = 'none');
-  // Reset all tab styles
-  ['matrix','site','name','jwsb'].forEach(t => {
-    const btn = document.getElementById('tr-tab-' + t);
-    if (btn) {
-      btn.style.color        = 'var(--text-muted)';
-      btn.style.fontWeight   = '600';
-      btn.style.borderBottom = '2px solid transparent';
-    }
-  });
-  // Show active panel + style active tab
-  const panel = document.getElementById('tr-panel-' + tab);
-  if (panel) panel.style.display = 'block';
-  const activeBtn = document.getElementById('tr-tab-' + tab);
-  if (activeBtn) {
-    activeBtn.style.color        = 'var(--accent)';
-    activeBtn.style.fontWeight   = '700';
-    activeBtn.style.borderBottom = '2px solid var(--accent)';
-  }
-  // Render the right view
-  if (tab === 'matrix') renderTrainingTable();
-  if (tab === 'site')   renderBySite();
-  if (tab === 'name')   renderByName();
-  if (tab === 'jwsb')   { jwsbInit(); jwsbApplyFilters(); }
-}
 
 /* ================================================================
    TAB 2 — BY SITE / WTP

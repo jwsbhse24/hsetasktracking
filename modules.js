@@ -206,8 +206,10 @@ function renderTrainingTable() {
       <td>${statusBadge(r.status)}</td>
       <td>${agingBadge(r.expiryDate)}</td>
       <td class="td-action">
-        ${canEdit(user) ? `<button class="btn-sys btn-outline btn-xs" onclick="editTraining('${r.id}')"><i class="fa-solid fa-pen"></i></button>
-        <button class="btn-sys btn-danger-outline btn-xs" onclick="deleteRecord(KEYS.training,'${r.id}',renderTraining)"><i class="fa-solid fa-trash"></i></button>` : '—'}
+        ${canEdit(user) ? `
+        <button class="btn-sys btn-outline btn-xs" onclick="editTraining('${r.id}')" title="Edit"><i class="fa-solid fa-pen"></i></button>
+        <button class="btn-sys btn-accent btn-xs" onclick="openAssignTask('training','${r.id}','${escHtml(r.trainingName)} — ${escHtml(r.employeeName)}','${escHtml(r.expiryDate)}')" title="Assign to OSH Coordinator" style="background:rgba(0,212,170,.15);color:var(--accent2);border-color:var(--accent2)"><i class="fa-solid fa-user-plus"></i></button>
+        <button class="btn-sys btn-danger-outline btn-xs" onclick="deleteRecord(KEYS.training,'${r.id}',renderTraining)" title="Delete"><i class="fa-solid fa-trash"></i></button>` : '—'}
       </td>
     </tr>`;
   }).join('') || `<tr><td colspan="10" style="text-align:center;color:var(--text-muted);padding:24px">No records found</td></tr>`;
@@ -235,7 +237,8 @@ function openTrainingModal(rec={}) {
 
 function saveTrainingRecord() {
   const user = getCurrentUser();
-  if (!canEdit(user)) { showToast('Insufficient permissions.','error'); return; }
+  if (!user) { showToast('Session expired. Please log in again.','error'); return; }
+  if (!canEdit(user)) { showToast('Your role cannot save records. Admin or OSH Coordinator required.','error'); return; }
   const data = getData(KEYS.training);
   const id   = document.getElementById('tr-f-id').value;
   const rec  = {};
@@ -304,8 +307,10 @@ function renderIssuesTable() {
     <td>${statusBadge(r.status)}</td>
     <td>${agingBadge(r.dueDate)}</td>
     <td class="td-action">
-      ${canEdit(user) ? `<button class="btn-sys btn-outline btn-xs" onclick="editIssue('${r.id}')"><i class="fa-solid fa-pen"></i></button>
-      <button class="btn-sys btn-danger-outline btn-xs" onclick="deleteRecord(KEYS.issues,'${r.id}',renderIssues)"><i class="fa-solid fa-trash"></i></button>` : '—'}
+      ${canEdit(user) ? `
+      <button class="btn-sys btn-outline btn-xs" onclick="editIssue('${r.id}')" title="Edit"><i class="fa-solid fa-pen"></i></button>
+      <button class="btn-sys btn-xs" onclick="openAssignTask('issues','${r.id}','${escHtml(r.category)}: ${escHtml((r.description||'').substring(0,50))}','${escHtml(r.dueDate)}')" title="Assign to OSH Coordinator" style="background:rgba(0,212,170,.15);color:var(--accent2);border:1px solid var(--accent2);border-radius:var(--radius);cursor:pointer;padding:2px 8px;font-size:11px;white-space:nowrap"><i class="fa-solid fa-user-plus"></i></button>
+      <button class="btn-sys btn-danger-outline btn-xs" onclick="deleteRecord(KEYS.issues,'${r.id}',renderIssues)" title="Delete"><i class="fa-solid fa-trash"></i></button>` : '—'}
     </td>
   </tr>`).join('') || `<tr><td colspan="10" style="text-align:center;color:var(--text-muted);padding:24px">No records found</td></tr>`;
 }
@@ -333,7 +338,8 @@ function openIssueModal(rec={}) {
 
 function saveIssueRecord() {
   const user = getCurrentUser();
-  if (!canEdit(user)) { showToast('Insufficient permissions.','error'); return; }
+  if (!user) { showToast('Session expired. Please log in again.','error'); return; }
+  if (!canEdit(user)) { showToast('Your role cannot save records. Admin or OSH Coordinator required.','error'); return; }
   const data = getData(KEYS.issues);
   const id   = document.getElementById('iss-f-id').value;
   const rec  = {};
@@ -398,8 +404,10 @@ function renderCapaTable() {
     <td>${statusBadge(r.status)}</td>
     <td>${agingBadge(r.dueDate)}</td>
     <td class="td-action">
-      ${canEdit(user) ? `<button class="btn-sys btn-outline btn-xs" onclick="editCapa('${r.id}')"><i class="fa-solid fa-pen"></i></button>
-      <button class="btn-sys btn-danger-outline btn-xs" onclick="deleteRecord(KEYS.capa,'${r.id}',renderCapa)"><i class="fa-solid fa-trash"></i></button>` : '—'}
+      ${canEdit(user) ? `
+      <button class="btn-sys btn-outline btn-xs" onclick="editCapa('${r.id}')" title="Edit"><i class="fa-solid fa-pen"></i></button>
+      <button class="btn-sys btn-xs" onclick="openAssignTask('capa','${r.id}','${escHtml(r.isoStandard)} ${escHtml(r.findingType)}: ${escHtml((r.description||'').substring(0,50))}','${escHtml(r.dueDate)}')" title="Assign to OSH Coordinator" style="background:rgba(0,212,170,.15);color:var(--accent2);border:1px solid var(--accent2);border-radius:var(--radius);cursor:pointer;padding:2px 8px;font-size:11px;white-space:nowrap"><i class="fa-solid fa-user-plus"></i></button>
+      <button class="btn-sys btn-danger-outline btn-xs" onclick="deleteRecord(KEYS.capa,'${r.id}',renderCapa)" title="Delete"><i class="fa-solid fa-trash"></i></button>` : '—'}
     </td>
   </tr>`).join('') || `<tr><td colspan="10" style="text-align:center;color:var(--text-muted);padding:24px">No records found</td></tr>`;
 }
@@ -426,7 +434,8 @@ function openCapaModal(rec={}) {
 
 function saveCapaRecord() {
   const user = getCurrentUser();
-  if (!canEdit(user)) { showToast('Insufficient permissions.','error'); return; }
+  if (!user) { showToast('Session expired. Please log in again.','error'); return; }
+  if (!canEdit(user)) { showToast('Your role cannot save records. Admin or OSH Coordinator required.','error'); return; }
   const data = getData(KEYS.capa);
   const id   = document.getElementById('capa-f-id').value;
   const rec  = {};
@@ -488,8 +497,10 @@ function renderComplianceTable() {
       <td>${agingBadge(r.expiryDate)}</td>
       <td class="td-muted">${escHtml(r.remarks)}</td>
       <td class="td-action">
-        ${canEdit(user) ? `<button class="btn-sys btn-outline btn-xs" onclick="editCompliance('${r.id}')"><i class="fa-solid fa-pen"></i></button>
-        <button class="btn-sys btn-danger-outline btn-xs" onclick="deleteRecord(KEYS.compliance,'${r.id}',renderCompliance)"><i class="fa-solid fa-trash"></i></button>` : '—'}
+        ${canEdit(user) ? `
+        <button class="btn-sys btn-outline btn-xs" onclick="editCompliance('${r.id}')" title="Edit"><i class="fa-solid fa-pen"></i></button>
+        <button class="btn-sys btn-xs" onclick="openAssignTask('compliance','${r.id}','${escHtml(r.item)} (${escHtml(r.authority)})','${escHtml(r.expiryDate)}')" title="Assign to OSH Coordinator" style="background:rgba(0,212,170,.15);color:var(--accent2);border:1px solid var(--accent2);border-radius:var(--radius);cursor:pointer;padding:2px 8px;font-size:11px;white-space:nowrap"><i class="fa-solid fa-user-plus"></i></button>
+        <button class="btn-sys btn-danger-outline btn-xs" onclick="deleteRecord(KEYS.compliance,'${r.id}',renderCompliance)" title="Delete"><i class="fa-solid fa-trash"></i></button>` : '—'}
       </td>
     </tr>`;
   }).join('') || `<tr><td colspan="10" style="text-align:center;color:var(--text-muted);padding:24px">No records found</td></tr>`;
@@ -517,7 +528,8 @@ function openCmpModal(rec={}) {
 
 function saveCmpRecord() {
   const user = getCurrentUser();
-  if (!canEdit(user)) { showToast('Insufficient permissions.','error'); return; }
+  if (!user) { showToast('Session expired. Please log in again.','error'); return; }
+  if (!canEdit(user)) { showToast('Your role cannot save records. Admin or OSH Coordinator required.','error'); return; }
   const data = getData(KEYS.compliance);
   const id   = document.getElementById('cmp-f-id').value;
   const rec  = {};
@@ -583,8 +595,10 @@ function renderShcTable() {
     <td>${statusBadge(r.status)}</td>
     <td>${agingBadge(r.dueDate)}</td>
     <td class="td-action">
-      ${canEdit(user) ? `<button class="btn-sys btn-outline btn-xs" onclick="editShc('${r.id}')"><i class="fa-solid fa-pen"></i></button>
-      <button class="btn-sys btn-danger-outline btn-xs" onclick="deleteRecord(KEYS.shc,'${r.id}',renderShc)"><i class="fa-solid fa-trash"></i></button>` : '—'}
+      ${canEdit(user) ? `
+      <button class="btn-sys btn-outline btn-xs" onclick="editShc('${r.id}')" title="Edit"><i class="fa-solid fa-pen"></i></button>
+      <button class="btn-sys btn-xs" onclick="openAssignTask('shc','${r.id}','SHC: ${escHtml((r.actionRequired||'').substring(0,50))}','${escHtml(r.dueDate)}')" title="Assign to OSH Coordinator" style="background:rgba(0,212,170,.15);color:var(--accent2);border:1px solid var(--accent2);border-radius:var(--radius);cursor:pointer;padding:2px 8px;font-size:11px;white-space:nowrap"><i class="fa-solid fa-user-plus"></i></button>
+      <button class="btn-sys btn-danger-outline btn-xs" onclick="deleteRecord(KEYS.shc,'${r.id}',renderShc)" title="Delete"><i class="fa-solid fa-trash"></i></button>` : '—'}
     </td>
   </tr>`).join('') || `<tr><td colspan="9" style="text-align:center;color:var(--text-muted);padding:24px">No records found</td></tr>`;
 }
@@ -612,7 +626,8 @@ function openShcModal(rec={}) {
 
 function saveShcRecord() {
   const user = getCurrentUser();
-  if (!canEdit(user)) { showToast('Insufficient permissions.','error'); return; }
+  if (!user) { showToast('Session expired. Please log in again.','error'); return; }
+  if (!canEdit(user)) { showToast('Your role cannot save records. Admin or OSH Coordinator required.','error'); return; }
   const data = getData(KEYS.shc);
   const id   = document.getElementById('shc-f-id').value;
   const rec  = {};

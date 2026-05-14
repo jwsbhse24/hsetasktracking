@@ -47,8 +47,22 @@ const KEYS = {
 async function seedData() {
   const already = localStorage.getItem('hse_seeded');
   if (already) return;
+
+  // Always initialise empty arrays first so saves never fail
+  const initEmpty = () => {
+    if (!localStorage.getItem(KEYS.training))   saveData(KEYS.training,   []);
+    if (!localStorage.getItem(KEYS.issues))     saveData(KEYS.issues,     []);
+    if (!localStorage.getItem(KEYS.capa))       saveData(KEYS.capa,       []);
+    if (!localStorage.getItem(KEYS.compliance)) saveData(KEYS.compliance, []);
+    if (!localStorage.getItem(KEYS.shc))        saveData(KEYS.shc,        []);
+    if (!localStorage.getItem(KEYS.users))      saveData(KEYS.users,      []);
+  };
+  initEmpty();
+
+  // Try to load sample data (works on GitHub Pages / local server)
   try {
     const resp = await fetch('sample-data.json');
+    if (!resp.ok) throw new Error('fetch failed');
     const data = await resp.json();
     localStorage.setItem(KEYS.training,   JSON.stringify(data.training));
     localStorage.setItem(KEYS.issues,     JSON.stringify(data.issues));
@@ -58,10 +72,14 @@ async function seedData() {
     localStorage.setItem(KEYS.users,      JSON.stringify(data.users));
     localStorage.setItem('hse_trend',     JSON.stringify(data.trendData));
     localStorage.setItem('hse_seeded', '1');
+    console.info('Sample data loaded successfully.');
   } catch(e) {
-    console.warn('Could not seed sample data:', e);
+    // On file:// or if JSON fetch fails — system still works, just starts empty
+    localStorage.setItem('hse_seeded', '1');
+    console.info('Sample data not loaded — system starts with empty records. You can add data manually.');
   }
 }
+
 
 function getData(key) {
   const d = localStorage.getItem(key);
