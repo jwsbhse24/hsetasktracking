@@ -7,18 +7,18 @@
 
 // ── Auth Guard ──────────────────────────────────────────────
 function requireAuth() {
-  const user = sessionStorage.getItem('hse_current_user');
+  const user = localStorage.getItem('hse_current_user');
   if (!user) { window.location.href = 'login.html'; return null; }
   return JSON.parse(user);
 }
 
 function getCurrentUser() {
-  const u = sessionStorage.getItem('hse_current_user');
+  const u = localStorage.getItem('hse_current_user');
   return u ? JSON.parse(u) : null;
 }
 
 function doLogout() {
-  sessionStorage.removeItem('hse_current_user');
+  localStorage.removeItem('hse_current_user');
   window.location.href = 'login.html';
 }
 

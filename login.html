@@ -85,7 +85,7 @@
     const users = getUsers();
     const match = users.find(u => u.username === uname && u.password === pass);
     if (match) {
-      sessionStorage.setItem('hse_current_user', JSON.stringify(match));
+      localStorage.setItem('hse_current_user', JSON.stringify(match));
       window.location.href = 'index.html';
     } else {
       document.getElementById('loginErr').style.display = 'block';
@@ -96,7 +96,7 @@
   document.addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
 
   // If already logged in, redirect
-  if (sessionStorage.getItem('hse_current_user')) {
+  if (localStorage.getItem('hse_current_user')) {
     window.location.href = 'index.html';
   }
 </script>

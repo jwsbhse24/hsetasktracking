@@ -7,6 +7,25 @@
 
 let currentReportType = 'two-weekly';
 
+// ── Period start date based on report type ───────────────────
+function reportPeriodStart() {
+  const now = new Date();
+  if (currentReportType === 'two-weekly') {
+    const d = new Date(now);
+    d.setDate(d.getDate() - 14);
+    return d.toISOString().split('T')[0];
+  }
+  if (currentReportType === 'monthly') {
+    return new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+  }
+  if (currentReportType === 'annual') {
+    return new Date(now.getFullYear(), 0, 1).toISOString().split('T')[0];
+  }
+  // default: 14 days
+  const d = new Date(now); d.setDate(d.getDate()-14);
+  return d.toISOString().split('T')[0];
+}
+
 // ── Build report preview HTML ────────────────────────────────
 function buildReportPreview(type) {
   currentReportType = type;
@@ -169,30 +188,115 @@ function buildReportPreview(type) {
     `)}
 
     <!-- Section F: Training -->
-    ${reportSection('F', 'TRAINING & COMPETENCY STATUS', `
-      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px">
-        ${miniStatCard('Total Records', training.length)}
-        ${miniStatCard('Valid', training.filter(r=>r.status==='Valid').length, 'success')}
-        ${miniStatCard('Expiring Soon', training.filter(r=>r.status==='Expiring Soon').length, 'warning')}
-        ${miniStatCard('Expired', training.filter(r=>r.status==='Expired').length, 'danger')}
+    ${reportSection('F', 'TRAINING & COMPETENCY', (() => {
+      const periodStart = reportPeriodStart();
+      const periodEnd   = new Date().toISOString().split('T')[0];
+
+      // ── Conducted in this period ──────────────────────────────
+      const conducted = training.filter(r => r.trainingDate >= periodStart && r.trainingDate <= periodEnd);
+
+      // Group by training session (same trainingName + same trainingDate)
+      const sessions = {};
+      conducted.forEach(r => {
+        const key = `${r.trainingName}||${r.trainingDate}`;
+        if (!sessions[key]) sessions[key] = { trainingName: r.trainingName, trainingDate: r.trainingDate, staff: [], totalHours: 0 };
+        sessions[key].staff.push(r.employeeName);
+        sessions[key].totalHours += parseInt(r.hours, 10) || 0;
+      });
+      const sessionList = Object.values(sessions).sort((a,b) => a.trainingDate.localeCompare(b.trainingDate));
+      const totalStaffTrained = [...new Set(conducted.map(r=>r.employeeName))].length;
+      const totalHours        = conducted.reduce((s,r)=>s+(parseInt(r.hours,10)||0), 0);
+
+      // ── Competency status (all records) ──────────────────────
+      const valid    = training.filter(r=>r.status==='Valid').length;
+      const expiring = training.filter(r=>r.status==='Expiring Soon').length;
+      const expired  = training.filter(r=>r.status==='Expired').length;
+
+      return `
+      <!-- Summary KPIs -->
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px">
+        ${miniStatCard('Trainings Conducted', sessionList.length, sessionList.length>0?'success':'warning')}
+        ${miniStatCard('Staff Trained', totalStaffTrained, totalStaffTrained>0?'success':'warning')}
+        ${miniStatCard('Total Training Hours', totalHours+' hrs', totalHours>0?'success':'warning')}
+        ${miniStatCard('Competency Compliance', kpi.trPct+'%', kpi.trPct>=85?'success':kpi.trPct>=70?'warning':'danger')}
       </div>
-      <table class="sys-table" style="margin-bottom:12px">
-        <thead><tr><th>ID</th><th>Employee</th><th>Department</th><th>Training</th><th>Expiry Date</th><th>Status</th><th>Hours</th></tr></thead>
+
+      <!-- Trainings Conducted This Period -->
+      <div style="font-size:12px;font-weight:700;color:var(--accent);margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid var(--border)">
+        📋 Trainings Conducted — ${periodStart} to ${periodEnd}
+      </div>
+      ${sessionList.length > 0 ? `
+      <table class="sys-table" style="margin-bottom:16px">
+        <thead><tr>
+          <th>#</th>
+          <th>Training Name</th>
+          <th>Date Conducted</th>
+          <th>No. of Staff</th>
+          <th>Staff Names</th>
+          <th>Total Hours</th>
+        </tr></thead>
         <tbody>
-          ${training.map(r=>`<tr>
-            <td class="td-id">${escHtml(r.id)}</td>
-            <td style="font-size:12px">${escHtml(r.employeeName)}</td>
-            <td style="font-size:12px">${escHtml(r.department)}</td>
-            <td style="font-size:12px">${escHtml(r.trainingName)}</td>
-            <td style="font-size:12px">${formatDate(r.expiryDate)}</td>
-            <td>${statusBadge(r.status)}</td>
-            <td style="font-size:12px;font-family:var(--font-mono)">${escHtml(r.hours)}</td>
+          ${sessionList.map((s,i) => `<tr>
+            <td class="td-id" style="text-align:center">${i+1}</td>
+            <td style="font-weight:600;font-size:12px">${escHtml(s.trainingName)}</td>
+            <td style="font-size:12px;font-family:var(--font-mono)">${formatDate(s.trainingDate)}</td>
+            <td style="text-align:center;font-weight:700;color:var(--accent)">${s.staff.length}</td>
+            <td style="font-size:11px;color:var(--text-secondary)">${s.staff.map(n=>escHtml(n)).join(', ')}</td>
+            <td style="font-size:12px;font-family:var(--font-mono);text-align:center">${s.totalHours} hrs</td>
           </tr>`).join('')}
+          <tr style="background:var(--bg-dark);font-weight:700">
+            <td colspan="2" style="font-size:12px;color:var(--text-primary)">TOTAL</td>
+            <td></td>
+            <td style="text-align:center;color:var(--accent)">${totalStaffTrained} staff</td>
+            <td></td>
+            <td style="text-align:center;font-family:var(--font-mono)">${totalHours} hrs</td>
+          </tr>
         </tbody>
-      </table>
-      <div class="stat-row"><span class="stat-row-label">Training Compliance %</span><span class="stat-row-value">${kpi.trPct}%</span></div>
-      <div class="stat-row"><span class="stat-row-label">Total Training Hours</span><span class="stat-row-value">${training.reduce((s,r)=>s+(parseInt(r.hours,10)||0),0)} hrs</span></div>
-    `)}
+      </table>` : `
+      <div style="background:rgba(245,166,35,.08);border:1px solid rgba(245,166,35,.2);border-radius:var(--radius);padding:12px;margin-bottom:16px;font-size:12px;color:var(--warning)">
+        No training records found for this reporting period (${periodStart} to ${periodEnd}).
+      </div>`}
+
+      <!-- Competency Status -->
+      <div style="font-size:12px;font-weight:700;color:var(--accent);margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid var(--border)">
+        🎓 Competency Status — All Staff
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px">
+        <div style="background:rgba(29,185,84,.08);border:1px solid rgba(29,185,84,.2);border-radius:var(--radius);padding:10px;text-align:center">
+          <div style="font-size:22px;font-weight:800;color:var(--success)">${valid}</div>
+          <div style="font-size:11px;color:var(--text-muted)">Valid / Current</div>
+        </div>
+        <div style="background:rgba(245,166,35,.08);border:1px solid rgba(245,166,35,.2);border-radius:var(--radius);padding:10px;text-align:center">
+          <div style="font-size:22px;font-weight:800;color:var(--warning)">${expiring}</div>
+          <div style="font-size:11px;color:var(--text-muted)">Expiring Soon</div>
+        </div>
+        <div style="background:rgba(224,60,49,.08);border:1px solid rgba(224,60,49,.2);border-radius:var(--radius);padding:10px;text-align:center">
+          <div style="font-size:22px;font-weight:800;color:var(--danger)">${expired}</div>
+          <div style="font-size:11px;color:var(--text-muted)">Expired — Action Needed</div>
+        </div>
+      </div>
+
+      ${expiring > 0 || expired > 0 ? `
+      <table class="sys-table">
+        <thead><tr><th>ID</th><th>Employee</th><th>Department</th><th>Training</th><th>Expiry Date</th><th>Status</th></tr></thead>
+        <tbody>
+          ${training.filter(r=>r.status==='Expired'||r.status==='Expiring Soon')
+            .sort((a,b)=>new Date(a.expiryDate)-new Date(b.expiryDate))
+            .map(r=>`<tr>
+              <td class="td-id">${escHtml(r.id)}</td>
+              <td style="font-size:12px">${escHtml(r.employeeName)}</td>
+              <td style="font-size:12px">${escHtml(r.department)}</td>
+              <td style="font-size:12px">${escHtml(r.trainingName)}</td>
+              <td style="font-size:12px;color:${r.status==='Expired'?'var(--danger)':'var(--warning)'};font-weight:600">${formatDate(r.expiryDate)}</td>
+              <td>${statusBadge(r.status)}</td>
+            </tr>`).join('')}
+        </tbody>
+      </table>` : `<div style="color:var(--success);font-size:12px;padding:8px">✓ All staff competencies are current.</div>`}
+
+      <div class="stat-row" style="margin-top:12px"><span class="stat-row-label">Compliance Rate</span><span class="stat-row-value" style="color:${kpi.trPct>=85?'var(--success)':kpi.trPct>=70?'var(--warning)':'var(--danger)'}">${kpi.trPct}%</span></div>
+      <div class="stat-row"><span class="stat-row-label">Total Training Hours (Period)</span><span class="stat-row-value">${totalHours} hrs</span></div>
+    `})())}
+
 
     <!-- Section G: Management Attention -->
     ${reportSection('G', 'MANAGEMENT ATTENTION ITEMS', `
@@ -382,8 +486,51 @@ function exportToPDF() {
 
   // ── Section F ──
   sectionHeader('F','TRAINING & COMPETENCY');
-  tableStart(['ID','Employee','Department','Training','Expiry','Status'],[18,30,25,45,22,24]);
-  training.forEach((r,i)=>tableRow([r.id,r.employeeName,r.department,(r.trainingName||'').substring(0,25),r.expiryDate,r.status],[18,30,25,45,22,24],i%2===0));
+
+  // Conducted this period
+  const periodStart = reportPeriodStart();
+  const periodEnd   = new Date().toISOString().split('T')[0];
+  const conducted   = training.filter(r => r.trainingDate >= periodStart && r.trainingDate <= periodEnd);
+  const sessions    = {};
+  conducted.forEach(r => {
+    const key = `${r.trainingName}||${r.trainingDate}`;
+    if (!sessions[key]) sessions[key] = { name: r.trainingName, date: r.trainingDate, staff: [], hrs: 0 };
+    sessions[key].staff.push(r.employeeName);
+    sessions[key].hrs += parseInt(r.hours,10)||0;
+  });
+  const sessionList  = Object.values(sessions).sort((a,b)=>a.date.localeCompare(b.date));
+  const staffTrained = [...new Set(conducted.map(r=>r.employeeName))].length;
+  const totalHrs     = conducted.reduce((s,r)=>s+(parseInt(r.hours,10)||0),0);
+
+  kpiRow('Trainings Conducted (Period)', sessionList.length, sessionList.length>0?[29,185,84]:null);
+  kpiRow('Total Staff Trained (Period)', staffTrained);
+  kpiRow('Total Training Hours (Period)', totalHrs+' hrs');
+  kpiRow('Competency Compliance %', kpi.trPct+'%', kpi.trPct>=85?[29,185,84]:kpi.trPct>=70?[245,166,35]:[224,60,49]);
+  y += 4;
+
+  // Training sessions conducted table
+  if (sessionList.length > 0) {
+    checkY(8);
+    doc.setFontSize(9); doc.setFont('helvetica','bold'); doc.setTextColor(0,170,255);
+    doc.text('Trainings Conducted This Period:', margin, y); y += 6;
+    tableStart(['#','Training Name','Date','No. of Staff','Total Hours'],[10,65,26,24,22]);
+    sessionList.forEach((s,i) => {
+      tableRow([String(i+1), s.name.substring(0,38), s.date, String(s.staff.length), String(s.hrs)+' hrs'],
+               [10,65,26,24,22], i%2===0);
+    });
+    y += 4;
+  }
+
+  // Expired / expiring
+  const needAction = training.filter(r=>r.status==='Expired'||r.status==='Expiring Soon')
+                              .sort((a,b)=>new Date(a.expiryDate)-new Date(b.expiryDate));
+  if (needAction.length > 0) {
+    checkY(8);
+    doc.setFontSize(9); doc.setFont('helvetica','bold'); doc.setTextColor(224,60,49);
+    doc.text('Competency Action Required:', margin, y); y += 6;
+    tableStart(['ID','Employee','Department','Training','Expiry','Status'],[18,30,25,45,22,24]);
+    needAction.forEach((r,i)=>tableRow([r.id,r.employeeName,r.department,(r.trainingName||'').substring(0,25),r.expiryDate,r.status],[18,30,25,45,22,24],i%2===0));
+  }
   y += 4;
 
   // ── Section G ──
@@ -442,11 +589,55 @@ function exportToExcel() {
   const cmpWS      = XLSX.utils.aoa_to_sheet([cmpHeaders,...cmpRows]);
   XLSX.utils.book_append_sheet(wb, cmpWS, 'Compliance');
 
-  // Training sheet
+  // Training — Conducted This Period sheet
+  const trPeriodStart = reportPeriodStart();
+  const trPeriodEnd   = now.toISOString().split('T')[0];
+  const trAll         = getData(KEYS.training);
+  const trConducted   = trAll.filter(r => r.trainingDate >= trPeriodStart && r.trainingDate <= trPeriodEnd);
+
+  // Group into sessions
+  const trSessions = {};
+  trConducted.forEach(r => {
+    const key = `${r.trainingName}||${r.trainingDate}`;
+    if (!trSessions[key]) trSessions[key] = { name: r.trainingName, date: r.trainingDate, staff: [], hrs: 0 };
+    trSessions[key].staff.push(r.employeeName);
+    trSessions[key].hrs += parseInt(r.hours,10)||0;
+  });
+  const trSessionList  = Object.values(trSessions).sort((a,b)=>a.date.localeCompare(b.date));
+  const trStaffTrained = [...new Set(trConducted.map(r=>r.employeeName))].length;
+  const trTotalHrs     = trConducted.reduce((s,r)=>s+(parseInt(r.hours,10)||0),0);
+
+  const tcHeaders = ['No.','Training Name','Date Conducted','No. of Staff Trained','Staff Names','Total Hours'];
+  const tcRows    = trSessionList.map((s,i) => [i+1, s.name, s.date, s.staff.length, s.staff.join(', '), s.hrs]);
+  const tcSummary = [
+    [`TRAINING CONDUCTED — ${trPeriodStart} to ${trPeriodEnd}`],
+    [`Jetama Water Sdn. Bhd. | SHE Division | Generated: ${now.toLocaleDateString('en-MY')}`],
+    [],
+    ['SUMMARY'],
+    ['Total Trainings Conducted', trSessionList.length],
+    ['Total Staff Trained', trStaffTrained],
+    ['Total Training Hours', trTotalHrs],
+    [],
+    tcHeaders,
+    ...tcRows,
+    [],
+    ['TOTAL', '', '', trStaffTrained, '', trTotalHrs],
+  ];
+  const tcWS = XLSX.utils.aoa_to_sheet(tcSummary);
+  tcWS['!cols'] = [{wch:5},{wch:40},{wch:16},{wch:18},{wch:60},{wch:14}];
+  XLSX.utils.book_append_sheet(wb, tcWS, 'Training Conducted');
+
+  // Full Training Records sheet
   const trHeaders = ['ID','Employee Name','Employee ID','Department','Training Name','Training Date','Expiry Date','Status','Hours','Remarks'];
-  const trRows    = getData(KEYS.training).map(r=>[r.id,r.employeeName,r.employeeId,r.department,r.trainingName,r.trainingDate,r.expiryDate,r.status,r.hours,r.remarks]);
-  const trWS      = XLSX.utils.aoa_to_sheet([trHeaders,...trRows]);
-  XLSX.utils.book_append_sheet(wb, trWS, 'Training');
+  const trRows    = trAll.map(r=>[r.id,r.employeeName,r.employeeId,r.department,r.trainingName,r.trainingDate,r.expiryDate,r.status,r.hours,r.remarks]);
+  const trWS      = XLSX.utils.aoa_to_sheet([
+    ['Full Training Records — All Staff'],
+    [`Competency Compliance: ${calcKPIs().trPct}% | Total Records: ${trAll.length}`],
+    [],
+    trHeaders, ...trRows
+  ]);
+  trWS['!cols'] = [{wch:10},{wch:22},{wch:12},{wch:18},{wch:35},{wch:14},{wch:14},{wch:14},{wch:8},{wch:30}];
+  XLSX.utils.book_append_sheet(wb, trWS, 'Training Records');
 
   // SHC sheet
   const shcHeaders = ['ID','Meeting Date','Issue Raised','Action Required','PIC','Due Date','Status','Verification'];
