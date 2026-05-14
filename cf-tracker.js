@@ -880,13 +880,18 @@ function renderCFExistingTable() {
 
   const user = getCurrentUser();
   tbody.innerHTML = filtered.map(r => {
-    const s    = cfExpiryStatus(r.cfExpiry, r.status);
-    const diff = cfExpiryDays(r.cfExpiry);
-    const isNotUse = r.status==='NOT IN USED';
+    const s       = cfExpiryStatus(r.cfExpiry, r.status);
+    const diff    = cfExpiryDays(r.cfExpiry);
+    const isNotUse= r.status === 'NOT IN USED';
+    const needsRenewal = !isNotUse && diff !== null && diff <= 90;
+
+    // Task description for assign modal
+    const taskDesc = `CF Renewal — ${r.noJentera} (${r.item}) at ${r.location}. CF Expiry: ${r.cfExpiry}. Schedule DOSH inspection for renewal.`;
+
     return `<tr style="${s.label==='CF Expired'?'border-left:3px solid var(--danger)':s.label==='Expiring Soon'?'border-left:3px solid var(--warning)':isNotUse?'opacity:0.6':''}">
       <td class="td-id" style="font-size:10px">${escHtml(r.id)}</td>
       <td>
-        <div style="font-size:10px;font-family:var(--font-mono);color:var(--accent);font-weight:700">${escHtml(r.location)}</div>
+        <div style="font-size:11px;font-family:var(--font-mono);color:var(--accent);font-weight:700">${escHtml(r.location)}</div>
         <div style="font-size:9px;color:var(--text-muted);font-family:var(--font-mono)">${escHtml(r.locationRef)}</div>
       </td>
       <td>
@@ -901,13 +906,20 @@ function renderCFExistingTable() {
       <td>${cfRenewalBadge(r.cfExpiry, r.status)}</td>
       <td>
         ${isNotUse
-          ? '<span style="font-size:10px;color:var(--text-muted)">Decommissioned</span>'
-          : diff!==null&&diff<=90
-            ? `<span style="font-size:10px;color:var(--warning);font-weight:600"><i class="fa-solid fa-calendar-xmark"></i> Schedule renewal inspection</span>`
+          ? '<span style="font-size:10px;color:var(--text-muted)">Decommissioned — no action</span>'
+          : needsRenewal
+            ? `<span style="font-size:10px;color:var(--warning);font-weight:600"><i class="fa-solid fa-rotate"></i> Schedule renewal inspection</span>`
             : '<span style="font-size:10px;color:var(--success)">No action required</span>'}
       </td>
       <td class="td-action">
-        ${canEdit(user) ? `<button class="btn-sys btn-outline btn-xs" onclick="editCFExisting('${r.id}')"><i class="fa-solid fa-pen"></i></button>` : '—'}
+        ${canEdit(user) ? `
+          <button class="btn-sys btn-outline btn-xs" onclick="editCFExisting('${r.id}')" title="Edit record"><i class="fa-solid fa-pen"></i></button>
+          ${!isNotUse ? `<button class="btn-sys btn-xs" onclick="openAssignTask('cf','${r.id}',${JSON.stringify(taskDesc).replace(/'/g,"\\'")},'${escHtml(r.cfExpiry)}')"
+            title="Assign renewal task to coordinator"
+            style="background:rgba(0,212,170,.15);color:var(--accent2);border:1px solid var(--accent2);border-radius:var(--radius);cursor:pointer;padding:2px 8px;font-size:11px;white-space:nowrap">
+            <i class="fa-solid fa-user-plus"></i>
+          </button>` : ''}
+        ` : '—'}
       </td>
     </tr>`;
   }).join('') || `<tr><td colspan="10" style="text-align:center;color:var(--text-muted);padding:24px">No records found</td></tr>`;

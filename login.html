@@ -19,19 +19,19 @@
     <div class="login-subtitle">INTEGRATED COMPLIANCE & SAFETY MONITORING SYSTEM</div>
 
     <!-- Quick role select -->
-    <p style="font-size:11px;color:var(--text-muted);text-align:center;margin-bottom:8px;font-family:var(--font-mono);">QUICK SELECT ROLE</p>
+    <p style="font-size:11px;color:var(--text-muted);text-align:center;margin-bottom:8px;font-family:var(--font-mono);">QUICK SELECT</p>
     <div class="role-cards">
-      <div class="role-card" onclick="quickLogin('admin','admin123','admin')">
+      <div class="role-card" onclick="quickLogin('admin','admin123')">
         <div class="role-card-icon">🔐</div>
         <div class="role-card-label">ADMIN</div>
       </div>
-      <div class="role-card" onclick="quickLogin('oshcoord','osh123','osh_coordinator')">
+      <div class="role-card" onclick="quickLogin('roland','roland123')">
         <div class="role-card-icon">🦺</div>
         <div class="role-card-label">OSH COORD</div>
       </div>
-      <div class="role-card" onclick="quickLogin('hseagm','agm123','hse_agm')">
+      <div class="role-card" onclick="quickLogin('hseagm','agm123')">
         <div class="role-card-icon">👔</div>
-        <div class="role-card-label">HSE AGM</div>
+        <div class="role-card-label">HSE DGM</div>
       </div>
     </div>
 
@@ -50,30 +50,43 @@
     </button>
     <div class="login-err" id="loginErr"><i class="fa-solid fa-circle-exclamation"></i> Invalid credentials. Please try again.</div>
 
-    <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border);font-size:11px;color:var(--text-muted);text-align:center;font-family:var(--font-mono);">
-      <div>Admin: admin / admin123</div>
-      <div>OSH Coordinator: oshcoord / osh123</div>
-      <div>HSE AGM: hseagm / agm123</div>
+    <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border);font-size:11px;color:var(--text-muted);text-align:center;font-family:var(--font-mono);line-height:1.8">
+      <div style="color:var(--text-primary);font-weight:600;margin-bottom:4px">Login Credentials</div>
+      <div>Hellena Lina (Admin): <strong>admin</strong> / admin123</div>
+      <div>Roland Riset (OSH Coord): <strong>roland</strong> / roland123</div>
+      <div>HSE DGM (View only): <strong>hseagm</strong> / agm123</div>
+      <div>OSH Coordinator 1: <strong>coord1</strong> / coord123</div>
+      <div>OSH Coordinator 2: <strong>coord2</strong> / coord456</div>
     </div>
   </div>
 </div>
 
 <script>
-  // Load users from localStorage or seed from sample
   function getUsers() {
     const stored = localStorage.getItem('hse_users');
-    if (stored) return JSON.parse(stored);
-    // Default users
+    if (stored) {
+      const users = JSON.parse(stored);
+      // Reseed if old/incomplete data
+      const hasHellena = users.some(u => u.name === 'Hellena Lina');
+      if (!hasHellena) { localStorage.removeItem('hse_users'); return seedUsers(); }
+      return users;
+    }
+    return seedUsers();
+  }
+
+  function seedUsers() {
     const defaults = [
-      { id:1, username:'admin', password:'admin123', role:'admin', name:'System Administrator', dept:'IT/Admin' },
-      { id:2, username:'oshcoord', password:'osh123', role:'osh_coordinator', name:'Ahmad Fadzli', dept:'HSE' },
-      { id:3, username:'hseagm', password:'agm123', role:'hse_agm', name:"Dato' Rashid Malik", dept:'HSE Management' }
+      { id:1, username:'admin',  password:'admin123',  role:'admin',           name:'Hellena Lina',       dept:'SHE Division' },
+      { id:2, username:'roland', password:'roland123', role:'osh_coordinator', name:'Roland Riset',       dept:'HSE' },
+      { id:3, username:'hseagm', password:'agm123',    role:'hse_agm',         name:'HSE DGM',            dept:'Management' },
+      { id:4, username:'coord1', password:'coord123',  role:'osh_coordinator', name:'OSH Coordinator 1',  dept:'HSE' },
+      { id:5, username:'coord2', password:'coord456',  role:'osh_coordinator', name:'OSH Coordinator 2',  dept:'HSE' },
     ];
     localStorage.setItem('hse_users', JSON.stringify(defaults));
     return defaults;
   }
 
-  function quickLogin(user, pass, role) {
+  function quickLogin(user, pass) {
     document.getElementById('loginUser').value = user;
     document.getElementById('loginPass').value = pass;
     doLogin();

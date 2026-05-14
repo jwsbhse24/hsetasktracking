@@ -16,11 +16,10 @@ function ttGenId()        { const tasks = ttGetAll(); const maxN = tasks.reduce(
 
 // ── HSE Team members (PIC options) ───────────────────────────
 const HSE_TEAM = [
-  { name: 'Ahmad Fadzli',      role: 'OSH Coordinator',        site: 'Moyog WTP'   },
-  { name: 'Roland Riset',      role: 'S&H Coordinator',        site: 'Moyog WTP'   },
-  { name: 'Hellena Lina',      role: 'S&H Officer',            site: 'Moyog WTP'   },
-  { name: 'Joshrin Jino',      role: 'OSH Coordinator (KKIP)', site: 'KKIP'        },
-  { name: "Dato' Rashid Malik",role: 'HSE AGM',                site: 'Head Office' },
+  { name: 'Roland Riset',        role: 'OSH Coordinator', site: 'Head Office' },
+  { name: 'OSH Coordinator 1',   role: 'OSH Coordinator', site: 'TBD'         },
+  { name: 'OSH Coordinator 2',   role: 'OSH Coordinator', site: 'TBD'         },
+  { name: 'Hellena Lina',        role: 'Admin (SHE Executive)', site: 'Head Office' },
 ];
 
 // ── Priority config ───────────────────────────────────────────
@@ -44,12 +43,13 @@ const STATUS_CONFIG = {
 
 // ── Module source labels ──────────────────────────────────────
 const MODULE_LABELS = {
-  training:   { label: 'Training',        icon: 'fa-graduation-cap',   color: 'var(--accent)'  },
+  training:   { label: 'Training',        icon: 'fa-graduation-cap',      color: 'var(--accent)'  },
   issues:     { label: 'Safety Issue',    icon: 'fa-triangle-exclamation', color: 'var(--warning)' },
-  capa:       { label: 'CAPA',           icon: 'fa-diagram-next',     color: 'var(--accent2)' },
-  compliance: { label: 'Compliance',      icon: 'fa-shield-halved',    color: 'var(--success)' },
-  shc:        { label: 'SHC',            icon: 'fa-people-group',     color: 'var(--purple)'  },
-  general:    { label: 'General',         icon: 'fa-list-check',       color: 'var(--accent)'  },
+  capa:       { label: 'CAPA',            icon: 'fa-diagram-next',         color: 'var(--accent2)' },
+  compliance: { label: 'Compliance',      icon: 'fa-shield-halved',        color: 'var(--success)' },
+  shc:        { label: 'SHC',             icon: 'fa-people-group',         color: 'var(--purple)'  },
+  cf:         { label: 'CF Renewal',      icon: 'fa-certificate',          color: '#f59e0b'        },
+  general:    { label: 'General',         icon: 'fa-list-check',           color: 'var(--accent)'  },
 };
 
 // ── Auto-flag overdue ─────────────────────────────────────────
@@ -84,7 +84,7 @@ window.openAssignTask = function(module, sourceId, description, dueDate) {
   if (el('tt-task-title'))     el('tt-task-title').value     = description || '';
   if (el('tt-task-note'))      el('tt-task-note').value      = '';
   if (el('tt-priority'))       el('tt-priority').value       = 'Medium';
-  if (el('tt-assignto'))       el('tt-assignto').value       = 'Ahmad Fadzli';
+  if (el('tt-assignto'))       el('tt-assignto').value       = 'Roland Riset';
 
   // Default due = supplied date or +7 days
   const def = (dueDate && dueDate.length > 4 && dueDate !== 'undefined')
@@ -145,13 +145,21 @@ window.ttSaveNewTask = function() {
   tasks.push(task);
   ttSave(tasks);
 
-  // Update PIC on source record if linked
+  // Update PIC/coordinator on source record if linked
   const keyMap = { training:KEYS.training, issues:KEYS.issues, capa:KEYS.capa, compliance:KEYS.compliance, shc:KEYS.shc };
   const key = keyMap[src];
   if (key && srcId) {
     const data = getData(key);
     const rec  = data.find(r => r.id === srcId);
     if (rec) { rec.pic = pic; saveData(key, data); }
+  }
+  // CF records live in cf-tracker.js localStorage
+  if (src === 'cf' && srcId) {
+    try {
+      const cfData = JSON.parse(localStorage.getItem('hse_cf_existing') || '[]');
+      const cfRec  = cfData.find(r => r.id === srcId);
+      if (cfRec) { cfRec.assignedCoordinator = pic; localStorage.setItem('hse_cf_existing', JSON.stringify(cfData)); }
+    } catch(e) { /* CF data not available */ }
   }
 
   el('tt-modal')?.classList.remove('show');
@@ -165,6 +173,7 @@ window.ttSaveNewTask = function() {
   if (src==='capa')       { if(currentPage==='capa')       renderCapa();       }
   if (src==='compliance') { if(currentPage==='compliance') renderCompliance(); }
   if (src==='shc')        { if(currentPage==='shc')        renderShc();        }
+  if (src==='cf')         { if(currentPage==='cf')         { if(typeof renderCFExisting==='function') renderCFExisting(); } }
 };
 
 // ── Accept task (OSH Coordinator) ────────────────────────────
@@ -209,6 +218,7 @@ window.ttOpenUpdate = function(id) {
     });
   }
   if (el('ttu-progress')) el('ttu-progress').value = '';
+  if (el('ttu-gdrive'))   el('ttu-gdrive').value   = task.gdriveLink || '';
 
   // Show verification field only for admin (closing the task)
   const verifySection = el('ttu-verify-section');
@@ -228,8 +238,16 @@ window.ttSaveUpdate = function() {
   const newStatus= el('ttu-status')?.value;
   const progress = el('ttu-progress')?.value.trim();
   const verify   = el('ttu-verification')?.value.trim();
+  const gdrive   = el('ttu-gdrive')?.value.trim();
 
   if (!newStatus) { showToast('Please select a status.', 'error'); return; }
+
+  // Require Google Drive link when submitting for verification or completing
+  if (['Pending Verification','Completed'].includes(newStatus) && !gdrive) {
+    showToast('Please paste a Google Drive link as evidence before submitting.', 'error');
+    el('ttu-gdrive')?.focus();
+    return;
+  }
 
   const tasks = ttGetAll();
   const task  = tasks.find(t => t.id === id);
@@ -238,7 +256,14 @@ window.ttSaveUpdate = function() {
   task.status    = newStatus;
   task.updatedAt = today();
   if (verify && isAdmin(user)) task.verification = verify;
-  if (progress) task.updates.push({ by: user.name, at: today(), msg: progress });
+  if (gdrive) task.gdriveLink = gdrive;
+
+  const updateMsg = [
+    progress,
+    gdrive ? `📎 Evidence: ${gdrive}` : ''
+  ].filter(Boolean).join(' | ');
+
+  if (updateMsg) task.updates.push({ by: user.name, at: today(), msg: updateMsg });
 
   ttSave(tasks);
   el('ttu-modal')?.classList.remove('show');
@@ -255,10 +280,6 @@ window.renderAllTasks = function() {
   ttAutoFlagOverdue();
   const user  = getCurrentUser();
   const tasks = ttGetAll();
-
-  // Also pull in records from all modules that don't have standalone tasks yet
-  // (so the board always shows all module records)
-  const allModuleTasks = collectAllTasks(); // from existing collectAllTasks()
 
   // KPIs
   const el = id => document.getElementById(id);
@@ -342,11 +363,19 @@ window.renderMyTasks = function() {
   const name  = user ? user.name : '';
   const tasks = ttGetAll();
 
-  // Match by name (first name match for flexibility)
+  // Match tasks: exact name OR first name match OR username match
   const firstName = name.toLowerCase().split(' ')[0];
-  const mine = tasks.filter(t =>
-    t.assignedTo && t.assignedTo.toLowerCase().includes(firstName)
-  );
+  const mine = tasks.filter(t => {
+    if (!t.assignedTo) return false;
+    const at = t.assignedTo.toLowerCase();
+    // Exact match
+    if (at === name.toLowerCase()) return true;
+    // First name match (e.g. "Roland" matches "Roland Riset")
+    if (at.startsWith(firstName) || at.includes(firstName)) return true;
+    // Username match for "Admin (Self)"
+    if (user && t.assignedTo === 'Admin' && user.role === 'admin') return true;
+    return false;
+  });
 
   const el = id => document.getElementById(id);
   const overdue = mine.filter(t=>t.status==='Overdue').length;
@@ -429,7 +458,12 @@ function ttTaskCard(task, user) {
 
   const isAdmin_  = user && isAdmin(user);
   const isCoord   = user && user.role === 'osh_coordinator';
-  const isMyTask  = user && task.assignedTo && task.assignedTo.toLowerCase().includes(user.name.toLowerCase().split(' ')[0]);
+  const userFirst = user ? user.name.toLowerCase().split(' ')[0] : '';
+  const isMyTask  = user && task.assignedTo && (
+    task.assignedTo.toLowerCase() === user.name.toLowerCase() ||
+    task.assignedTo.toLowerCase().includes(userFirst) ||
+    (task.assignedTo === 'Admin' && isAdmin_)
+  );
 
   // Action buttons — role-based
   let actionBtns = '';
@@ -484,6 +518,9 @@ function ttTaskCard(task, user) {
 
         <!-- Latest update -->
         ${lastUpdate ? `<div style="font-size:11px;color:var(--text-muted);margin-top:4px"><i class="fa-solid fa-clock-rotate-left" style="font-size:9px;margin-right:3px"></i>${escHtml(lastUpdate.by)} on ${escHtml(lastUpdate.at)}: ${escHtml(lastUpdate.msg)}</div>` : ''}
+
+        <!-- Google Drive evidence link -->
+        ${task.gdriveLink ? `<div style="margin-top:6px"><a href="${escHtml(task.gdriveLink)}" target="_blank" style="font-size:11px;color:#4285f4;text-decoration:none;display:inline-flex;align-items:center;gap:4px;background:rgba(66,133,244,.08);padding:3px 8px;border-radius:4px;border:1px solid rgba(66,133,244,.2)"><i class="fa-brands fa-google-drive"></i> View Evidence on Google Drive</a></div>` : ''}
 
         <!-- Verification (admin only, after completion) -->
         ${task.verification && isAdmin_ ? `<div style="font-size:11px;color:var(--success);margin-top:4px"><i class="fa-solid fa-circle-check" style="margin-right:3px"></i>Verified: ${escHtml(task.verification)}</div>` : ''}
@@ -584,7 +621,7 @@ function ejSaveTeamEmails(map) {
 
 // ── Build personalised HTML email for ONE person ──────────────
 function _buildPersonalEmailHTML(name, myTasks, allTasks, dateStr, todayStr) {
-  const moduleLabel   = { training:'Training', issues:'Safety Issue', capa:'CAPA', compliance:'Compliance', shc:'SHC', general:'General' };
+  const moduleLabel   = { training:'Training', issues:'Safety Issue', capa:'CAPA', compliance:'Compliance', shc:'SHC', cf:'CF Renewal', general:'General' };
   const priorityEmoji = { Critical:'🔴', High:'🟠', Medium:'🟡', Low:'🟢' };
 
   const myOverdue   = myTasks.filter(t => t.status === 'Overdue');
@@ -805,6 +842,7 @@ function _fallbackMailto(tasks) {
   const dateStr  = new Date().toLocaleDateString('en-MY', { weekday:'long', day:'2-digit', month:'long', year:'numeric' });
   const to       = cfg.toEmail || 'she@jetamawater.com.my';
   const taskLine = t => `[${t.priority}] ${t.id} — ${t.title} | ${t.assignedTo||'—'} | Due: ${t.dueDate||'—'}`;
+  const moduleLabel = { training:'Training', issues:'Safety Issue', capa:'CAPA', compliance:'Compliance', shc:'SHC', cf:'CF Renewal', general:'General' };
   const od = tasks.filter(t=>t.status==='Overdue');
   const dt = tasks.filter(t=>t.dueDate===todayStr&&!['Completed','Cancelled','Overdue'].includes(t.status));
   const ip = tasks.filter(t=>t.status==='In Progress');

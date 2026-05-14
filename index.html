@@ -355,7 +355,8 @@
           <option value="">All Areas</option>
           <option value="training">Training</option><option value="issues">Safety Issues</option>
           <option value="capa">CAPA</option><option value="compliance">Compliance</option>
-          <option value="shc">SHC</option><option value="general">General</option>
+          <option value="shc">SHC</option><option value="cf">CF Renewal</option>
+          <option value="general">General</option>
         </select>
         <select id="at-f-pic" onchange="atFilter.pic=this.value;renderAllTasks()"
                 style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);color:var(--text-primary);font-size:12.5px;padding:8px 12px;outline:none">
@@ -1390,6 +1391,11 @@
         </div>
       </div>
       <div class="form-group"><label class="form-label">Remarks</label><input id="tr-f-remarks" class="form-control-sys" placeholder="Optional remarks"/></div>
+      <div class="form-group">
+        <label class="form-label"><i class="fa-brands fa-google-drive" style="color:#4285f4;margin-right:4px"></i> Certificate — Google Drive Link <span style="font-size:10px;color:var(--text-muted)">(paste after training is completed)</span></label>
+        <input id="tr-f-evidence" class="form-control-sys" placeholder="https://drive.google.com/…" type="url"/>
+        <div style="font-size:10px;color:var(--text-muted);margin-top:3px">Upload training certificate to Google Drive and paste the share link here</div>
+      </div>
     </div>
     <div class="modal-footer">
       <button class="btn-sys btn-outline" onclick="document.getElementById('tr-modal').classList.remove('show')">Cancel</button>
@@ -1397,6 +1403,7 @@
     </div>
   </div>
 </div>
+
 
 <!-- Issue Modal -->
 <div class="modal-overlay" id="iss-modal">
@@ -1419,7 +1426,15 @@
           <select id="iss-f-riskLevel" class="form-control-sys"><option>Low</option><option>Medium</option><option>High</option><option>Critical</option></select>
         </div>
         <div class="form-group"><label class="form-label">Location</label><input id="iss-f-location" class="form-control-sys" placeholder="e.g. Pump Station P-03"/></div>
-        <div class="form-group"><label class="form-label">PIC</label><input id="iss-f-pic" class="form-control-sys" placeholder="Person in charge"/></div>
+        <div class="form-group"><label class="form-label">Assign To (PIC)</label>
+          <select id="iss-f-pic" class="form-control-sys">
+            <option value="">— Select coordinator —</option>
+            <option>Roland Riset</option>
+            <option>OSH Coordinator 1</option>
+            <option>OSH Coordinator 2</option>
+            <option>Hellena Lina</option>
+          </select>
+        </div>
         <div class="form-group"><label class="form-label">Date Reported</label><input id="iss-f-dateReported" type="date" class="form-control-sys"/></div>
         <div class="form-group"><label class="form-label">Due Date</label><input id="iss-f-dueDate" type="date" class="form-control-sys"/></div>
         <div class="form-group"><label class="form-label">Status</label>
@@ -1427,9 +1442,13 @@
             <option>Open</option><option>In Progress</option><option>Pending Verification</option><option>Closed</option><option>Overdue</option>
           </select>
         </div>
-        <div class="form-group"><label class="form-label">Verification</label><input id="iss-f-verification" class="form-control-sys" placeholder="Verification notes"/></div>
       </div>
       <div class="form-group"><label class="form-label">Description</label><textarea id="iss-f-description" class="form-control-sys" rows="3" placeholder="Describe the issue in detail…"></textarea></div>
+      <div class="form-group">
+        <label class="form-label"><i class="fa-brands fa-google-drive" style="color:#4285f4;margin-right:4px"></i> Verification — Google Drive Link <span style="font-size:10px;color:var(--text-muted)">(paste after task is completed)</span></label>
+        <input id="iss-f-verification" class="form-control-sys" placeholder="https://drive.google.com/…" type="url"/>
+        <div style="font-size:10px;color:var(--text-muted);margin-top:3px">Upload evidence/photo to Google Drive and paste the share link here</div>
+      </div>
     </div>
     <div class="modal-footer">
       <button class="btn-sys btn-outline" onclick="document.getElementById('iss-modal').classList.remove('show')">Cancel</button>
@@ -1437,6 +1456,7 @@
     </div>
   </div>
 </div>
+
 
 <!-- CAPA Modal -->
 <div class="modal-overlay" id="capa-modal">
@@ -1458,18 +1478,32 @@
             <option>NCR</option><option>OFI</option><option>MRM Action</option><option>Audit Finding</option><option>Risk Register</option><option>Objective</option>
           </select>
         </div>
-        <div class="form-group"><label class="form-label">PIC</label><input id="capa-f-pic" class="form-control-sys" placeholder="Person in charge"/></div>
+        <div class="form-group"><label class="form-label">Assign To (PIC)</label>
+          <select id="capa-f-pic" class="form-control-sys">
+            <option value="">— Select coordinator —</option>
+            <option>Roland Riset</option>
+            <option>OSH Coordinator 1</option>
+            <option>OSH Coordinator 2</option>
+            <option>Hellena Lina</option>
+          </select>
+        </div>
         <div class="form-group"><label class="form-label">Due Date</label><input id="capa-f-dueDate" type="date" class="form-control-sys"/></div>
         <div class="form-group"><label class="form-label">Status</label>
           <select id="capa-f-status" class="form-control-sys">
             <option>Open</option><option>In Progress</option><option>Pending Verification</option><option>Closed</option><option>Overdue</option>
           </select>
         </div>
-        <div class="form-group"><label class="form-label">Verification</label><input id="capa-f-verification" class="form-control-sys" placeholder="Verification notes"/></div>
       </div>
       <div class="form-group"><label class="form-label">Finding Description</label><textarea id="capa-f-description" class="form-control-sys" rows="2" placeholder="Describe the finding…"></textarea></div>
-      <div class="form-group"><label class="form-label">Root Cause</label><textarea id="capa-f-rootCause" class="form-control-sys" rows="2" placeholder="Root cause analysis…"></textarea></div>
-      <div class="form-group"><label class="form-label">Corrective Action</label><textarea id="capa-f-correctiveAction" class="form-control-sys" rows="2" placeholder="Corrective action plan…"></textarea></div>
+      <!-- Hidden fields kept for data compatibility -->
+      <input type="hidden" id="capa-f-rootCause" value=""/>
+      <input type="hidden" id="capa-f-correctiveAction" value=""/>
+      <!-- Verification — shown when task is done -->
+      <div class="form-group">
+        <label class="form-label"><i class="fa-brands fa-google-drive" style="color:#4285f4;margin-right:4px"></i> Verification — Google Drive Link <span style="font-size:10px;color:var(--text-muted)">(paste after task is completed)</span></label>
+        <input id="capa-f-verification" class="form-control-sys" placeholder="https://drive.google.com/…" type="url"/>
+        <div style="font-size:10px;color:var(--text-muted);margin-top:3px">Upload supporting document to Google Drive and paste the share link here</div>
+      </div>
     </div>
     <div class="modal-footer">
       <button class="btn-sys btn-outline" onclick="document.getElementById('capa-modal').classList.remove('show')">Cancel</button>
@@ -1500,7 +1534,15 @@
         <div class="form-group"><label class="form-label">Authority</label><input id="cmp-f-authority" class="form-control-sys" placeholder="e.g. DOSH"/></div>
         <div class="form-group"><label class="form-label">Reference Number</label><input id="cmp-f-referenceNo" class="form-control-sys" placeholder="e.g. JKKP6/2023/001"/></div>
         <div class="form-group"><label class="form-label">Expiry Date</label><input id="cmp-f-expiryDate" type="date" class="form-control-sys"/></div>
-        <div class="form-group"><label class="form-label">PIC</label><input id="cmp-f-pic" class="form-control-sys" placeholder="Person in charge"/></div>
+        <div class="form-group"><label class="form-label">Assign To (PIC)</label>
+          <select id="cmp-f-pic" class="form-control-sys">
+            <option value="">— Select coordinator —</option>
+            <option>Roland Riset</option>
+            <option>OSH Coordinator 1</option>
+            <option>OSH Coordinator 2</option>
+            <option>Hellena Lina</option>
+          </select>
+        </div>
         <div class="form-group"><label class="form-label">Reminder Alert</label>
           <select id="cmp-f-reminderAlert" class="form-control-sys"><option>30 days</option><option>60 days</option><option>90 days</option></select>
         </div>
@@ -1509,6 +1551,11 @@
         </div>
       </div>
       <div class="form-group"><label class="form-label">Remarks</label><input id="cmp-f-remarks" class="form-control-sys" placeholder="Optional remarks"/></div>
+      <div class="form-group">
+        <label class="form-label"><i class="fa-brands fa-google-drive" style="color:#4285f4;margin-right:4px"></i> Verification — Google Drive Link <span style="font-size:10px;color:var(--text-muted)">(paste after task is completed)</span></label>
+        <input id="cmp-f-verification" class="form-control-sys" placeholder="https://drive.google.com/…" type="url"/>
+        <div style="font-size:10px;color:var(--text-muted);margin-top:3px">Upload renewal certificate / approval letter to Google Drive and paste the share link here</div>
+      </div>
     </div>
     <div class="modal-footer">
       <button class="btn-sys btn-outline" onclick="document.getElementById('cmp-modal').classList.remove('show')">Cancel</button>
@@ -1529,18 +1576,30 @@
       <div class="form-grid-2">
         <div class="form-group"><label class="form-label">Meeting Date</label><input id="shc-f-meetingDate" type="date" class="form-control-sys"/></div>
         <div class="form-group"><label class="form-label">Attendance %</label><input id="shc-f-attendance" type="number" class="form-control-sys" placeholder="85"/></div>
-        <div class="form-group"><label class="form-label">PIC</label><input id="shc-f-pic" class="form-control-sys" placeholder="Person in charge"/></div>
+        <div class="form-group"><label class="form-label">Assign To (PIC)</label>
+          <select id="shc-f-pic" class="form-control-sys">
+            <option value="">— Select coordinator —</option>
+            <option>Roland Riset</option>
+            <option>OSH Coordinator 1</option>
+            <option>OSH Coordinator 2</option>
+            <option>Hellena Lina</option>
+          </select>
+        </div>
         <div class="form-group"><label class="form-label">Due Date</label><input id="shc-f-dueDate" type="date" class="form-control-sys"/></div>
         <div class="form-group"><label class="form-label">Status</label>
           <select id="shc-f-status" class="form-control-sys">
             <option>Open</option><option>In Progress</option><option>Pending Verification</option><option>Closed</option><option>Overdue</option>
           </select>
         </div>
-        <div class="form-group"><label class="form-label">Verification</label><input id="shc-f-verification" class="form-control-sys" placeholder="Verification notes"/></div>
       </div>
       <div class="form-group"><label class="form-label">Agenda</label><input id="shc-f-agenda" class="form-control-sys" placeholder="Meeting agenda items"/></div>
       <div class="form-group"><label class="form-label">Issue Raised</label><textarea id="shc-f-issueRaised" class="form-control-sys" rows="2" placeholder="Describe the issue raised…"></textarea></div>
       <div class="form-group"><label class="form-label">Action Required</label><textarea id="shc-f-actionRequired" class="form-control-sys" rows="2" placeholder="Describe the action required…"></textarea></div>
+      <div class="form-group">
+        <label class="form-label"><i class="fa-brands fa-google-drive" style="color:#4285f4;margin-right:4px"></i> Verification — Google Drive Link <span style="font-size:10px;color:var(--text-muted)">(paste after task is completed)</span></label>
+        <input id="shc-f-verification" class="form-control-sys" placeholder="https://drive.google.com/…" type="url"/>
+        <div style="font-size:10px;color:var(--text-muted);margin-top:3px">Upload minutes of meeting or action evidence to Google Drive and paste the share link here</div>
+      </div>
     </div>
     <div class="modal-footer">
       <button class="btn-sys btn-outline" onclick="document.getElementById('shc-modal').classList.remove('show')">Cancel</button>
@@ -1580,11 +1639,10 @@
         <div class="form-group">
           <label class="form-label">👤 Assign To <span style="color:var(--danger)">*</span></label>
           <select id="tt-assignto" class="form-control-sys">
-            <option value="Ahmad Fadzli">Ahmad Fadzli — OSH Coordinator</option>
-            <option value="Roland Riset">Roland Riset — S&H Coordinator</option>
-            <option value="Hellena Lina">Hellena Lina — S&H Officer</option>
-            <option value="Joshrin Jino">Joshrin Jino — OSH Coord (KKIP)</option>
-            <option value="Admin">Admin (Self)</option>
+            <option value="Roland Riset">Roland Riset — OSH Coordinator</option>
+            <option value="OSH Coordinator 1">OSH Coordinator 1</option>
+            <option value="OSH Coordinator 2">OSH Coordinator 2</option>
+            <option value="Hellena Lina">Hellena Lina — Admin (Self)</option>
           </select>
         </div>
 
@@ -1653,6 +1711,13 @@
         <label class="form-label">Progress Update / Note</label>
         <textarea id="ttu-progress" class="form-control-sys" rows="2"
                   placeholder="What did you do? What's the current situation? Any blockers?"></textarea>
+      </div>
+
+      <!-- Google Drive link — shown when marking as done -->
+      <div class="form-group">
+        <label class="form-label"><i class="fa-brands fa-google-drive" style="color:#4285f4;margin-right:4px"></i> Google Drive Link <span style="font-size:10px;color:var(--text-muted)">(required when marking as Pending Verification or Completed)</span></label>
+        <input id="ttu-gdrive" class="form-control-sys" placeholder="https://drive.google.com/…" type="url"/>
+        <div style="font-size:10px;color:var(--text-muted);margin-top:3px">Upload your evidence/document to Google Drive → Share → Copy link → Paste here</div>
       </div>
 
       <!-- Admin-only: verification on closing -->
@@ -1762,20 +1827,24 @@
       </div>
       <div style="display:flex;flex-direction:column;gap:8px">
         <div style="display:flex;align-items:center;gap:10px">
-          <span style="font-size:12px;font-weight:600;min-width:160px;color:var(--text-primary)">Ahmad Fadzli</span>
-          <input id="ej-email-Ahmad Fadzli" class="form-control-sys" type="email" placeholder="ahmad.fadzli@jetamawater.com.my" style="flex:1"/>
+          <span style="font-size:12px;font-weight:600;min-width:180px;color:var(--text-primary)">Roland Riset (OSH Coord)</span>
+          <input id="ej-email-Roland Riset" class="form-control-sys" type="email" placeholder="roland.riset@jetamawater.com.my" style="flex:1"/>
         </div>
         <div style="display:flex;align-items:center;gap:10px">
           <span style="font-size:12px;font-weight:600;min-width:160px;color:var(--text-primary)">Roland Riset</span>
           <input id="ej-email-Roland Riset" class="form-control-sys" type="email" placeholder="roland.riset@jetamawater.com.my" style="flex:1"/>
         </div>
         <div style="display:flex;align-items:center;gap:10px">
-          <span style="font-size:12px;font-weight:600;min-width:160px;color:var(--text-primary)">Hellena Lina</span>
+          <span style="font-size:12px;font-weight:600;min-width:180px;color:var(--text-primary)">Hellena Lina (Admin)</span>
           <input id="ej-email-Hellena Lina" class="form-control-sys" type="email" placeholder="hellena.lina@jetamawater.com.my" style="flex:1"/>
         </div>
         <div style="display:flex;align-items:center;gap:10px">
-          <span style="font-size:12px;font-weight:600;min-width:160px;color:var(--text-primary)">Joshrin Jino</span>
-          <input id="ej-email-Joshrin Jino" class="form-control-sys" type="email" placeholder="joshrin.jino@jetamawater.com.my" style="flex:1"/>
+          <span style="font-size:12px;font-weight:600;min-width:180px;color:var(--text-primary)">OSH Coordinator 1</span>
+          <input id="ej-email-OSH Coordinator 1" class="form-control-sys" type="email" placeholder="To be assigned" style="flex:1"/>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="font-size:12px;font-weight:600;min-width:180px;color:var(--text-primary)">OSH Coordinator 2</span>
+          <input id="ej-email-OSH Coordinator 2" class="form-control-sys" type="email" placeholder="To be assigned" style="flex:1"/>
         </div>
         <div style="display:flex;align-items:center;gap:10px">
           <span style="font-size:12px;font-weight:600;min-width:160px;color:var(--text-primary)">Admin (fallback)</span>
@@ -2165,411 +2234,6 @@
     }
   };
 
-  /* ================================================================
-     Aggregates tasks from: Issues, CAPA, SHC, Compliance, Training, CF
-     ================================================================ */
-
-  // Build unified task array from all modules
-  function collectAllTasks() {
-    const tasks = [];
-
-    // Issues
-    getData(KEYS.issues).forEach(r => tasks.push({
-      id: r.id, module: 'Issue',
-      moduleIcon: 'fa-triangle-exclamation', moduleColor: 'var(--warning)',
-      description: r.description,
-      priority: r.riskLevel || 'Medium',
-      pic: r.pic, dateRaised: r.dateReported,
-      dueDate: r.dueDate, status: r.status,
-      detail: r.category + ' · ' + (r.location||''),
-      page: 'issues'
-    }));
-
-    // CAPA
-    getData(KEYS.capa).forEach(r => tasks.push({
-      id: r.id, module: 'CAPA',
-      moduleIcon: 'fa-diagram-next', moduleColor: 'var(--accent2)',
-      description: r.description,
-      priority: r.findingType === 'NCR' ? 'High' : 'Medium',
-      pic: r.pic, dateRaised: r.dueDate,
-      dueDate: r.dueDate, status: r.status,
-      detail: r.isoStandard + ' · ' + r.findingType,
-      page: 'capa'
-    }));
-
-    // SHC
-    getData(KEYS.shc).forEach(r => tasks.push({
-      id: r.id, module: 'SHC',
-      moduleIcon: 'fa-people-group', moduleColor: 'var(--purple)',
-      description: r.actionRequired,
-      priority: 'Medium',
-      pic: r.pic, dateRaised: r.meetingDate,
-      dueDate: r.dueDate, status: r.status,
-      detail: 'Issue: ' + (r.issueRaised||'').substring(0,50),
-      page: 'shc'
-    }));
-
-    // Compliance
-    getData(KEYS.compliance).forEach(r => {
-      if (r.status === 'Valid') return; // only include items needing action
-      tasks.push({
-        id: r.id, module: 'Compliance',
-        moduleIcon: 'fa-shield-halved', moduleColor: 'var(--success)',
-        description: r.item,
-        priority: r.status === 'Expired' ? 'Critical' : 'High',
-        pic: r.pic, dateRaised: '',
-        dueDate: r.expiryDate, status: r.status === 'Expired' ? 'Overdue' : r.status === 'Expiring Soon' ? 'In Progress' : r.status,
-        detail: r.authority + ' · Ref: ' + r.referenceNo,
-        page: 'compliance'
-      });
-    });
-
-    // Training — expiring/expired only
-    getData(KEYS.training).forEach(r => {
-      if (r.status === 'Valid') return;
-      tasks.push({
-        id: r.id, module: 'Training',
-        moduleIcon: 'fa-graduation-cap', moduleColor: 'var(--accent)',
-        description: r.trainingName + ' — ' + r.employeeName,
-        priority: r.status === 'Expired' ? 'High' : 'Medium',
-        pic: r.employeeName, dateRaised: r.trainingDate,
-        dueDate: r.expiryDate, status: r.status === 'Expired' ? 'Overdue' : 'In Progress',
-        detail: r.department + ' · ' + r.employeeId,
-        page: 'training'
-      });
-    });
-
-    // CF — not registered items
-    const cfData = JSON.parse(localStorage.getItem('hse_cf_equipment') || '[]');
-    cfData.forEach(r => {
-      if (r.cfRegStatus === 'Registered') return;
-      const have = (typeof CF_DOCS !== 'undefined' ? CF_DOCS : []).filter(d => r.docs && r.docs[d.key]).length;
-      const total = (typeof CF_DOCS !== 'undefined' ? CF_DOCS : []).length || 6;
-      tasks.push({
-        id: r.id, module: 'CF',
-        moduleIcon: 'fa-certificate', moduleColor: 'var(--accent2)',
-        description: r.equipmentType + ' — ' + r.location,
-        priority: r.docStatus === 'missing' ? 'Critical' : 'High',
-        pic: r.pic, dateRaised: r.lastUpdated,
-        dueDate: '', status: r.cfRegStatus === 'Not Registered' ? 'Open' : 'In Progress',
-        detail: 'Docs: ' + have + '/' + total + ' · Form 27C: ' + r.form27c,
-        page: 'cf'
-      });
-    });
-
-    // Sort: Overdue first, then by due date ascending
-    const priority = { Critical:0, High:1, Medium:2, Low:3 };
-    tasks.sort((a, b) => {
-      if (a.status==='Overdue' && b.status!=='Overdue') return -1;
-      if (b.status==='Overdue' && a.status!=='Overdue') return 1;
-      if (!a.dueDate && !b.dueDate) return 0;
-      if (!a.dueDate) return 1;
-      if (!b.dueDate) return -1;
-      return new Date(a.dueDate) - new Date(b.dueDate);
-    });
-    return tasks;
-  }
-
-  // ── Task card — clean simple row card ──
-  function taskCard(t) {
-    const statusColor = {
-      'Overdue':              'var(--danger)',
-      'Open':                 'var(--accent)',
-      'In Progress':          'var(--warning)',
-      'Pending Verification': 'var(--warning)',
-      'Closed':               'var(--success)'
-    }[t.status] || 'var(--text-muted)';
-
-    const statusEmoji = {
-      'Overdue': '🔴', 'Open': '🔵', 'In Progress': '🟡',
-      'Pending Verification': '🟠', 'Closed': '🟢'
-    }[t.status] || '⚪';
-
-    const diff     = t.dueDate ? daysDiff(t.dueDate) : null;
-    const dueTxt   = !t.dueDate ? 'No due date'
-                   : diff < 0  ? `${Math.abs(diff)} days overdue`
-                   : diff === 0 ? 'Due today'
-                   : diff <= 7  ? `Due in ${diff} days`
-                   : formatDate(t.dueDate);
-    const dueColor = !t.dueDate ? 'var(--text-muted)'
-                   : diff < 0   ? 'var(--danger)'
-                   : diff <= 7  ? 'var(--warning)'
-                   : 'var(--text-secondary)';
-
-    const areaLabel = {
-      Issue:'Safety Issue', CAPA:'CAPA', SHC:'SHC Meeting',
-      Compliance:'Compliance', Training:'Training', CF:'CF Register'
-    }[t.module] || t.module;
-
-    return `<div style="background:var(--bg-card);border:1px solid var(--border);border-left:4px solid ${statusColor};border-radius:var(--radius);padding:14px 16px;margin-bottom:8px;display:flex;align-items:flex-start;gap:14px;transition:all .2s" onmouseover="this.style.background='var(--bg-card2)'" onmouseout="this.style.background='var(--bg-card)'">
-
-      <!-- Status dot -->
-      <div style="font-size:18px;flex-shrink:0;margin-top:2px">${statusEmoji}</div>
-
-      <!-- Main content -->
-      <div style="flex:1;min-width:0">
-        <div style="display:flex;align-items:flex-start;gap:8px;flex-wrap:wrap;margin-bottom:5px">
-          <span style="font-size:10px;font-family:var(--font-mono);background:var(--bg-dark);border:1px solid var(--border);border-radius:3px;padding:1px 6px;color:var(--text-muted);flex-shrink:0">${escHtml(t.id)}</span>
-          <span style="font-size:10px;background:var(--bg-dark);border:1px solid var(--border);border-radius:3px;padding:1px 8px;color:var(--text-secondary);flex-shrink:0">${escHtml(areaLabel)}</span>
-          ${t.status==='Overdue'?'<span style="font-size:10px;background:rgba(224,60,49,.15);color:var(--danger);border-radius:3px;padding:1px 8px;font-weight:700;flex-shrink:0">OVERDUE</span>':''}
-        </div>
-        <div style="font-size:13px;font-weight:600;margin-bottom:4px;line-height:1.4">${escHtml((t.description||'').substring(0,100))}${(t.description||'').length>100?'…':''}</div>
-        <div style="display:flex;gap:16px;flex-wrap:wrap;font-size:12px">
-          <span style="color:var(--text-secondary)"><i class="fa-solid fa-user" style="font-size:10px;margin-right:3px;color:var(--text-muted)"></i>${escHtml(t.pic||'Unassigned')}</span>
-          <span style="color:${dueColor};font-weight:${diff!==null&&diff<=7?'600':'400'}"><i class="fa-solid fa-calendar" style="font-size:10px;margin-right:3px;color:var(--text-muted)"></i>${dueTxt}</span>
-          ${t.detail?`<span style="color:var(--text-muted);font-size:11px">${escHtml(t.detail)}</span>`:''}
-        </div>
-      </div>
-
-      <!-- Right side: status + go button -->
-      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0">
-        <span style="font-size:11px;font-weight:600;color:${statusColor}">${escHtml(t.status)}</span>
-        <button class="btn-sys btn-outline btn-xs" onclick="navigate('${t.page}')" title="Go to ${escHtml(t.module)}">
-          Open <i class="fa-solid fa-arrow-right"></i>
-        </button>
-      </div>
-    </div>`;
-  }
-
-  // ── All Tasks ──
-  let atFilter = { module:'', status:'', pic:'', search:'' };
-
-  window.renderAllTasks = function() {
-    const tasks = collectAllTasks();
-
-    // Populate PIC dropdown (once)
-    const picSel = document.getElementById('at-f-pic');
-    if (picSel && picSel.options.length <= 1) {
-      const pics = [...new Set(tasks.map(t=>t.pic).filter(Boolean))].sort();
-      pics.forEach(p => { const o=document.createElement('option'); o.value=p; o.textContent=p; picSel.appendChild(o); });
-    }
-
-    // KPIs from full task list
-    const el = id => document.getElementById(id);
-    const overdue = tasks.filter(t=>t.status==='Overdue').length;
-    const open    = tasks.filter(t=>t.status==='Open').length;
-    const inprog  = tasks.filter(t=>t.status==='In Progress').length;
-    const closed  = tasks.filter(t=>t.status==='Closed').length;
-    if(el('at-kpi-overdue')) el('at-kpi-overdue').textContent = overdue;
-    if(el('at-kpi-open'))    el('at-kpi-open').textContent    = open;
-    if(el('at-kpi-inprog'))  el('at-kpi-inprog').textContent  = inprog;
-    if(el('at-kpi-closed'))  el('at-kpi-closed').textContent  = closed;
-    // still update hidden ones for JS compatibility
-    if(el('at-kpi-total'))    el('at-kpi-total').textContent    = tasks.length;
-    if(el('at-kpi-pending'))  el('at-kpi-pending').textContent  = tasks.filter(t=>t.status==='Pending Verification').length;
-    if(el('at-kpi-critical')) el('at-kpi-critical').textContent = tasks.filter(t=>t.priority==='Critical'||t.priority==='High').length;
-    if(el('at-kpi-week'))     el('at-kpi-week').textContent     = tasks.filter(t=>t.dueDate&&daysDiff(t.dueDate)>=0&&daysDiff(t.dueDate)<=7).length;
-
-    // Overdue banner
-    const alertBox = document.getElementById('at-overdue-alert');
-    if(alertBox) alertBox.style.display = overdue>0?'flex':'none';
-    const alertN = document.getElementById('at-overdue-n');
-    if(alertN) alertN.textContent = overdue;
-
-    // Nav badge
-    const nb = document.getElementById('nav-badge-alltasks');
-    if(nb) { nb.textContent=overdue; nb.style.display=overdue>0?'':'none'; }
-
-    // Filter
-    const { module, status, pic, search } = atFilter;
-    const filtered = tasks.filter(t => {
-      if (module && t.module !== module) return false;
-      if (status && t.status !== status) return false;
-      if (pic    && t.pic   !== pic)     return false;
-      if (search) {
-        const q = search.toLowerCase();
-        if (!(t.id+t.description+t.pic+t.module+t.detail).toLowerCase().includes(q)) return false;
-      }
-      return true;
-    });
-
-    const rcnt = document.getElementById('at-rcnt');
-    if(rcnt) rcnt.textContent = filtered.length + (filtered.length===1?' task':' tasks');
-
-    // Render task cards
-    const list = document.getElementById('at-task-list');
-    if(!list) return;
-
-    if(!filtered.length) {
-      list.innerHTML = `<div style="text-align:center;padding:48px 24px;color:var(--text-muted)">
-        <i class="fa-solid fa-circle-check" style="font-size:36px;color:var(--success);display:block;margin-bottom:12px"></i>
-        <div style="font-size:15px;font-weight:600;margin-bottom:6px">All clear!</div>
-        <div style="font-size:13px">No tasks match the selected filters.</div>
-      </div>`;
-      return;
-    }
-    list.innerHTML = filtered.map(t => taskCard(t)).join('');
-  };
-
-  // ── My Tasks ──
-  window.renderMyTasks = function() {
-    const user  = getCurrentUser();
-    const tasks = collectAllTasks();
-    const name  = user ? user.name : '';
-    const firstName = name.toLowerCase().split(' ')[0];
-
-    // Filter to logged-in user
-    const mine = tasks.filter(t => t.pic && t.pic.toLowerCase().includes(firstName));
-
-    const sub = document.getElementById('mytasks-subtitle');
-    if(sub) sub.textContent = `Showing tasks assigned to: ${name}`;
-
-    // KPIs
-    const el = id => document.getElementById(id);
-    const overdue = mine.filter(t=>t.status==='Overdue').length;
-    const open    = mine.filter(t=>t.status==='Open'||t.status==='In Progress').length;
-    const closed  = mine.filter(t=>t.status==='Closed').length;
-    if(el('mt-kpi-total'))   el('mt-kpi-total').textContent   = mine.length;
-    if(el('mt-kpi-overdue')) el('mt-kpi-overdue').textContent = overdue;
-    if(el('mt-kpi-open'))    el('mt-kpi-open').textContent    = open;
-    if(el('mt-kpi-inprog'))  el('mt-kpi-inprog').textContent  = mine.filter(t=>t.status==='In Progress').length;
-    if(el('mt-kpi-closed'))  el('mt-kpi-closed').textContent  = closed;
-    if(el('mt-kpi-week'))    el('mt-kpi-week').textContent    = mine.filter(t=>t.dueDate&&daysDiff(t.dueDate)>=0&&daysDiff(t.dueDate)<=7).length;
-
-    // Overdue alert
-    const alertBox = document.getElementById('mt-overdue-alert');
-    if(alertBox) alertBox.style.display = overdue>0?'flex':'none';
-    const alertN = document.getElementById('mt-overdue-n');
-    if(alertN) alertN.textContent = overdue;
-
-    // Nav badge
-    const nb = document.getElementById('nav-badge-mytasks');
-    if(nb) { nb.textContent=overdue; nb.style.display=overdue>0?'':'none'; }
-
-    const groups = document.getElementById('mt-groups');
-    if(!groups) return;
-
-    if(!mine.length) {
-      groups.innerHTML = `<div style="text-align:center;padding:48px 24px;color:var(--text-muted);background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg)">
-        <i class="fa-solid fa-circle-check" style="font-size:36px;color:var(--success);display:block;margin-bottom:12px"></i>
-        <div style="font-size:15px;font-weight:600;margin-bottom:6px">You have no tasks!</div>
-        <div style="font-size:13px">Tasks are matched to your name: <strong>${escHtml(name)}</strong></div>
-      </div>`;
-      return;
-    }
-
-    // Group by area with simple section headers
-    const areaOrder = ['Issue','CAPA','SHC','Compliance','Training','CF'];
-    const areaLabel = {
-      Issue:'Safety Issues', CAPA:'CAPA Actions', SHC:'SHC Meeting Actions',
-      Compliance:'Compliance Tasks', Training:'Training Renewals', CF:'CF Registration'
-    };
-
-    groups.innerHTML = areaOrder
-      .filter(mod => mine.some(t=>t.module===mod))
-      .map(mod => {
-        const modTasks = mine.filter(t=>t.module===mod);
-        const ov  = modTasks.filter(t=>t.status==='Overdue').length;
-        const col = modTasks[0]?.moduleColor || 'var(--accent)';
-        return `<div style="margin-bottom:20px">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;padding-bottom:8px;border-bottom:2px solid var(--border)">
-            <div style="font-family:var(--font-head);font-size:15px;font-weight:700;color:${col}">
-              <i class="fa-solid ${modTasks[0]?.moduleIcon||'fa-list'}" style="margin-right:6px"></i>${escHtml(areaLabel[mod]||mod)}
-            </div>
-            <div style="display:flex;align-items:center;gap:10px">
-              <span style="font-size:12px;color:var(--text-muted)">${modTasks.length} task${modTasks.length!==1?'s':''}</span>
-              ${ov>0?`<span style="font-size:11px;background:rgba(224,60,49,.15);color:var(--danger);padding:2px 8px;border-radius:4px;font-weight:700">${ov} overdue</span>`:`<span style="font-size:11px;color:var(--success)">✓ On track</span>`}
-            </div>
-          </div>
-          ${modTasks.map(t=>taskCard(t)).join('')}
-        </div>`;
-      }).join('');
-  };
-
-
-
-  // ── Export All Tasks Excel — clean daily report ──
-  window.exportAllTasksExcel = function() {
-    const XLSX  = window.XLSX;
-    const tasks = collectAllTasks();
-    const wb    = XLSX.utils.book_new();
-    const now   = new Date();
-    const dateStr = now.toLocaleDateString('en-MY',{day:'2-digit',month:'long',year:'numeric'});
-    const fileDate = now.toISOString().split('T')[0];
-
-    // Summary sheet
-    const overdue = tasks.filter(t=>t.status==='Overdue');
-    const open    = tasks.filter(t=>t.status==='Open');
-    const inprog  = tasks.filter(t=>t.status==='In Progress');
-    const pending = tasks.filter(t=>t.status==='Pending Verification');
-    const closed  = tasks.filter(t=>t.status==='Closed');
-
-    const sumWs = XLSX.utils.aoa_to_sheet([
-      [`HSE TEAM — DAILY TASK REPORT`],
-      [`Date: ${dateStr}`],
-      [],
-      ['STATUS','COUNT'],
-      ['🔴 Overdue',     overdue.length],
-      ['🔵 Not Started', open.length],
-      ['🟡 In Progress', inprog.length],
-      ['🟠 Pending Check', pending.length],
-      ['🟢 Done',        closed.length],
-      ['TOTAL',          tasks.length]
-    ]);
-    sumWs['!cols'] = [{wch:20},{wch:10}];
-    XLSX.utils.book_append_sheet(wb, sumWs, 'Summary');
-
-    // All tasks sheet — simple columns, no jargon
-    const h = ['#','Task ID','Area','What needs to be done','Assigned To','Due Date','Status','Days Late / Left'];
-    const rows = tasks.map((t,i) => {
-      const diff = t.dueDate ? daysDiff(t.dueDate) : null;
-      const agingTxt = diff===null ? '—' : diff<0 ? `${Math.abs(diff)} days late` : diff===0 ? 'Due today' : `${diff} days left`;
-      const areaLabel = {Issue:'Safety Issue',CAPA:'CAPA',SHC:'SHC',Compliance:'Compliance',Training:'Training',CF:'CF Register'}[t.module]||t.module;
-      return [i+1, t.id, areaLabel, t.description, t.pic, t.dueDate||'—', t.status, agingTxt];
-    });
-    const ws = XLSX.utils.aoa_to_sheet([
-      [`HSE TEAM TASK BOARD — ${dateStr}`],[],h,...rows
-    ]);
-    ws['!cols']=[{wch:4},{wch:12},{wch:16},{wch:55},{wch:22},{wch:14},{wch:20},{wch:16}];
-    XLSX.utils.book_append_sheet(wb, ws, 'All Tasks');
-
-    // Overdue only — action sheet
-    if(overdue.length) {
-      const ovRows = overdue.map((t,i) => {
-        const diff = t.dueDate ? Math.abs(daysDiff(t.dueDate)) : '—';
-        const areaLabel = {Issue:'Safety Issue',CAPA:'CAPA',SHC:'SHC',Compliance:'Compliance',Training:'Training',CF:'CF Register'}[t.module]||t.module;
-        return [i+1, t.id, areaLabel, t.description, t.pic, t.dueDate||'—', typeof diff==='number'?`${diff} days late`:'—'];
-      });
-      const ovWs = XLSX.utils.aoa_to_sheet([
-        [`⚠ OVERDUE TASKS — Action Required`],[`${overdue.length} tasks are past their due date`],[],
-        ['#','Task ID','Area','What needs to be done','Assigned To','Due Date','Days Late'],
-        ...ovRows
-      ]);
-      ovWs['!cols']=[{wch:4},{wch:12},{wch:16},{wch:55},{wch:22},{wch:14},{wch:14}];
-      XLSX.utils.book_append_sheet(wb, ovWs, 'Overdue — Action Now');
-    }
-
-    XLSX.writeFile(wb, `HSE_Tasks_${fileDate}.xlsx`);
-    showToast('Task report exported!','success');
-  };
-
-  // ── Export My Tasks Excel ──
-  window.exportMyTasksExcel = function() {
-    const XLSX     = window.XLSX;
-    const user     = getCurrentUser();
-    const name     = user ? user.name : '';
-    const firstName = name.toLowerCase().split(' ')[0];
-    const mine     = collectAllTasks().filter(t=>t.pic&&t.pic.toLowerCase().includes(firstName));
-    const wb       = XLSX.utils.book_new();
-    const now      = new Date();
-    const dateStr  = now.toLocaleDateString('en-MY',{day:'2-digit',month:'long',year:'numeric'});
-    const fileDate = now.toISOString().split('T')[0];
-
-    const h = ['#','Task ID','Area','What needs to be done','Due Date','Status','Days Late / Left'];
-    const rows = mine.map((t,i) => {
-      const diff = t.dueDate ? daysDiff(t.dueDate) : null;
-      const agingTxt = diff===null?'—':diff<0?`${Math.abs(diff)} days late`:diff===0?'Due today':`${diff} days left`;
-      const areaLabel = {Issue:'Safety Issue',CAPA:'CAPA',SHC:'SHC',Compliance:'Compliance',Training:'Training',CF:'CF Register'}[t.module]||t.module;
-      return [i+1, t.id, areaLabel, t.description, t.dueDate||'—', t.status, agingTxt];
-    });
-    const ws = XLSX.utils.aoa_to_sheet([
-      [`MY TASKS — ${name}`],[`Date: ${dateStr} | Total: ${mine.length} tasks`],[],h,...rows
-    ]);
-    ws['!cols']=[{wch:4},{wch:12},{wch:16},{wch:55},{wch:14},{wch:20},{wch:16}];
-    XLSX.utils.book_append_sheet(wb, ws, 'My Tasks');
-    XLSX.writeFile(wb, `MyTasks_${name.replace(/\s/g,'_')}_${fileDate}.xlsx`);
-    showToast('Your tasks exported!','success');
-  };
 
   // Quick export helpers for individual modules
   window.exportTrainingExcel = function() {

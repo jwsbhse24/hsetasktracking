@@ -224,7 +224,7 @@ function editTraining(id) {
 function openTrainingModal(rec={}) {
   const isNew = !rec.id;
   document.getElementById('tr-modal-title').textContent = isNew ? 'Add Training Record' : 'Edit Training Record';
-  ['id','employeeName','employeeId','department','trainingName','trainingDate','expiryDate','status','remarks','hours'].forEach(f => {
+  ['id','employeeName','employeeId','department','trainingName','trainingDate','expiryDate','status','remarks','hours','evidence'].forEach(f => {
     const el = document.getElementById('tr-f-'+f);
     if (el) el.value = rec[f] || '';
   });
@@ -242,7 +242,7 @@ function saveTrainingRecord() {
   const data = getData(KEYS.training);
   const id   = document.getElementById('tr-f-id').value;
   const rec  = {};
-  ['id','employeeName','employeeId','department','trainingName','trainingDate','expiryDate','status','remarks','hours'].forEach(f => {
+  ['id','employeeName','employeeId','department','trainingName','trainingDate','expiryDate','status','remarks','hours','evidence'].forEach(f => {
     const el = document.getElementById('tr-f-'+f);
     if (el) rec[f] = el.value.trim();
   });
@@ -515,7 +515,7 @@ function editCompliance(id) {
 function openCmpModal(rec={}) {
   const isNew = !rec.id;
   document.getElementById('cmp-modal-title').textContent = isNew ? 'Add Compliance Item' : 'Edit Compliance Item';
-  ['id','item','authority','referenceNo','expiryDate','pic','status','reminderAlert','remarks'].forEach(f => {
+  ['id','item','authority','referenceNo','expiryDate','pic','status','reminderAlert','remarks','verification'].forEach(f => {
     const el = document.getElementById('cmp-f-'+f);
     if (el) el.value = rec[f] || '';
   });
@@ -533,7 +533,7 @@ function saveCmpRecord() {
   const data = getData(KEYS.compliance);
   const id   = document.getElementById('cmp-f-id').value;
   const rec  = {};
-  ['id','item','authority','referenceNo','expiryDate','pic','status','reminderAlert','remarks'].forEach(f => {
+  ['id','item','authority','referenceNo','expiryDate','pic','status','reminderAlert','remarks','verification'].forEach(f => {
     const el = document.getElementById('cmp-f-'+f);
     if (el) rec[f] = el.value.trim();
   });
