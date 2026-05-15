@@ -908,5 +908,5 @@ select.form-control-sys { appearance: none; cursor: pointer; }
 
 /* Fade pages */
 .page-view { display: none; }
-.page-view.active { display: block; animation: fadeIn 0.25s ease; }
+.page-view.active { display: block; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }

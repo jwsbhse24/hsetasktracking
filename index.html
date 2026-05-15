@@ -290,6 +290,10 @@
     </div><!-- /dashboard -->
 
     <!-- ─────── TASK BOARD (All Tasks) ─────── -->
+
+    <!-- ─────── MY TASKS ─────── -->
+
+    <!-- ─────── TASK BOARD (All Tasks) ─────── -->
     <div id="page-alltasks" class="page-view">
       <div class="module-header">
         <div>
@@ -297,74 +301,65 @@
           <div class="module-subtitle">HSE team tasks — assign, track, verify and close</div>
         </div>
         <div class="module-actions">
-          <button class="btn-sys btn-outline" onclick="sendDailyEmailReport()" id="ej-send-btn-main" class="ej-send-btn"><i class="fa-solid fa-envelope"></i> Send Morning Briefing</button>
+          <button class="btn-sys btn-outline" onclick="sendDailyEmailReport()" id="ej-send-btn-main"><i class="fa-solid fa-envelope"></i> Send Morning Briefing</button>
           <button class="btn-sys btn-outline btn-xs" onclick="openEmailSettings()" title="Email settings"><i class="fa-solid fa-gear"></i></button>
           <button class="btn-sys btn-outline" onclick="exportAllTasksExcel()"><i class="fa-solid fa-file-excel"></i> Export</button>
-          <button class="btn-sys btn-outline" onclick="openTaskSync()" title="Share tasks with team"><i class="fa-solid fa-rotate"></i> Sync Tasks</button>
-          <button class="btn-sys btn-outline btn-sm" onclick="atFilter={module:'',status:'',pic:'',search:''};renderAllTasks()"><i class="fa-solid fa-xmark"></i> Clear</button>
+          <button class="btn-sys btn-outline" onclick="openTaskSync()" title="Share tasks with team"><i class="fa-solid fa-rotate"></i> Sync</button>
+          <button class="btn-sys btn-outline btn-sm" onclick="atFilter={module:\'\',status:\'\',pic:\'\',search:\'\'};renderAllTasks()"><i class="fa-solid fa-xmark"></i> Clear</button>
           <button class="btn-sys btn-primary-sys" id="btn-new-task" onclick="openNewTask()"><i class="fa-solid fa-plus"></i> New Task</button>
         </div>
       </div>
 
-      <!-- 4 status summary boxes — clickable to filter -->
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px">
-        <div style="background:var(--bg-card);border:1px solid var(--border);border-top:3px solid var(--danger);border-radius:var(--radius-lg);padding:16px;cursor:pointer;transition:all .2s" onclick="atFilter.status='Overdue';document.getElementById('at-f-status').value='Overdue';renderAllTasks()">
+        <div style="background:var(--bg-card);border:1px solid var(--border);border-top:3px solid var(--danger);border-radius:var(--radius-lg);padding:16px;cursor:pointer" onclick="atFilter.status=\'Overdue\';document.getElementById(\'at-f-status\').value=\'Overdue\';renderAllTasks()">
           <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em">🔴 Overdue</div>
           <div style="font-family:var(--font-head);font-size:40px;font-weight:800;color:var(--danger);line-height:1" id="at-kpi-overdue">—</div>
           <div style="font-size:11px;color:var(--text-muted);margin-top:4px">Act now</div>
         </div>
-        <div style="background:var(--bg-card);border:1px solid var(--border);border-top:3px solid var(--accent);border-radius:var(--radius-lg);padding:16px;cursor:pointer;transition:all .2s" onclick="atFilter.status='Open';document.getElementById('at-f-status').value='Open';renderAllTasks()">
+        <div style="background:var(--bg-card);border:1px solid var(--border);border-top:3px solid var(--accent);border-radius:var(--radius-lg);padding:16px;cursor:pointer" onclick="atFilter.status=\'Open\';document.getElementById(\'at-f-status\').value=\'Open\';renderAllTasks()">
           <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em">🔵 Open / Accepted</div>
           <div style="font-family:var(--font-head);font-size:40px;font-weight:800;color:var(--accent);line-height:1" id="at-kpi-open">—</div>
-          <div style="font-size:11px;color:var(--text-muted);margin-top:4px">Not started yet</div>
+          <div style="font-size:11px;color:var(--text-muted);margin-top:4px">Not started</div>
         </div>
-        <div style="background:var(--bg-card);border:1px solid var(--border);border-top:3px solid var(--warning);border-radius:var(--radius-lg);padding:16px;cursor:pointer;transition:all .2s" onclick="atFilter.status='In Progress';document.getElementById('at-f-status').value='In Progress';renderAllTasks()">
+        <div style="background:var(--bg-card);border:1px solid var(--border);border-top:3px solid var(--warning);border-radius:var(--radius-lg);padding:16px;cursor:pointer" onclick="atFilter.status=\'In Progress\';document.getElementById(\'at-f-status\').value=\'In Progress\';renderAllTasks()">
           <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em">🔄 In Progress</div>
           <div style="font-family:var(--font-head);font-size:40px;font-weight:800;color:var(--warning);line-height:1" id="at-kpi-inprog">—</div>
           <div style="font-size:11px;color:var(--text-muted);margin-top:4px">Being worked on</div>
         </div>
-        <div style="background:var(--bg-card);border:1px solid var(--border);border-top:3px solid var(--success);border-radius:var(--radius-lg);padding:16px;cursor:pointer;transition:all .2s" onclick="atFilter.status='Completed';document.getElementById('at-f-status').value='Completed';renderAllTasks()">
+        <div style="background:var(--bg-card);border:1px solid var(--border);border-top:3px solid var(--success);border-radius:var(--radius-lg);padding:16px;cursor:pointer" onclick="atFilter.status=\'Completed\';document.getElementById(\'at-f-status\').value=\'Completed\';renderAllTasks()">
           <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em">✅ Completed</div>
           <div style="font-family:var(--font-head);font-size:40px;font-weight:800;color:var(--success);line-height:1" id="at-kpi-closed">—</div>
           <div style="font-size:11px;color:var(--text-muted);margin-top:4px">Done & verified</div>
         </div>
       </div>
 
-      <!-- Hidden KPIs still needed by JS -->
       <span id="at-kpi-total" style="display:none"></span>
       <span id="at-kpi-pending" style="display:none"></span>
       <span id="at-kpi-critical" style="display:none"></span>
       <span id="at-kpi-week" style="display:none"></span>
 
-      <!-- Overdue alert -->
       <div id="at-overdue-alert" style="display:none;background:rgba(224,60,49,.08);border:1px solid rgba(224,60,49,.3);border-radius:var(--radius);padding:12px 16px;margin-bottom:14px;align-items:center;gap:12px">
         <i class="fa-solid fa-circle-exclamation" style="color:var(--danger);font-size:18px;flex-shrink:0"></i>
         <div style="flex:1;font-size:13px"><strong id="at-overdue-n" style="color:var(--danger)">0</strong> tasks are overdue and need immediate attention.</div>
-        <button class="btn-sys btn-danger-outline btn-sm" onclick="atFilter.status='Overdue';document.getElementById('at-f-status').value='Overdue';renderAllTasks()">Show overdue only</button>
+        <button class="btn-sys btn-danger-outline btn-sm" onclick="atFilter.status=\'Overdue\';document.getElementById(\'at-f-status\').value=\'Overdue\';renderAllTasks()">Show overdue only</button>
       </div>
 
-      <!-- Filter bar -->
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:center">
-        <input type="text" id="at-search" placeholder="🔍 Search task, person, keyword…"
-               oninput="atFilter.search=this.value;renderAllTasks()"
-               style="flex:1;min-width:180px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);color:var(--text-primary);font-family:var(--font-body);font-size:13px;padding:8px 12px;outline:none"/>
-        <select id="at-f-status" onchange="atFilter.status=this.value;renderAllTasks()"
-                style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);color:var(--text-primary);font-size:12.5px;padding:8px 12px;outline:none">
+        <input type="text" id="at-search" placeholder="Search task, person, keyword…" oninput="atFilter.search=this.value;renderAllTasks()" style="flex:1;min-width:180px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);color:var(--text-primary);font-family:var(--font-body);font-size:13px;padding:8px 12px;outline:none"/>
+        <select id="at-f-status" onchange="atFilter.status=this.value;renderAllTasks()" style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);color:var(--text-primary);font-size:12.5px;padding:8px 12px;outline:none">
           <option value="">All Status</option>
           <option>Overdue</option><option>Open</option><option>Accepted</option>
           <option>In Progress</option><option>Pending Verification</option>
           <option>Completed</option><option>Cancelled</option>
         </select>
-        <select id="at-f-module" onchange="atFilter.module=this.value;renderAllTasks()"
-                style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);color:var(--text-primary);font-size:12.5px;padding:8px 12px;outline:none">
+        <select id="at-f-module" onchange="atFilter.module=this.value;renderAllTasks()" style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);color:var(--text-primary);font-size:12.5px;padding:8px 12px;outline:none">
           <option value="">All Areas</option>
           <option value="training">Training</option><option value="issues">Safety Issues</option>
           <option value="capa">CAPA</option><option value="compliance">Compliance</option>
           <option value="shc">SHC</option><option value="cf">CF Renewal</option>
           <option value="general">General</option>
         </select>
-        <select id="at-f-pic" onchange="atFilter.pic=this.value;renderAllTasks()"
-                style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);color:var(--text-primary);font-size:12.5px;padding:8px 12px;outline:none">
+        <select id="at-f-pic" onchange="atFilter.pic=this.value;renderAllTasks()" style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);color:var(--text-primary);font-size:12.5px;padding:8px 12px;outline:none">
           <option value="">All People</option>
         </select>
         <span style="font-size:12px;color:var(--text-muted)" id="at-rcnt"></span>
@@ -381,13 +376,11 @@
           <div class="module-subtitle" id="mytasks-subtitle">Your personal task list — accept, update progress and mark complete</div>
         </div>
         <div class="module-actions">
-          <button class="btn-sys btn-outline" onclick="sendDailyEmailReport()" class="ej-send-btn"><i class="fa-solid fa-envelope"></i> Send Morning Briefing</button>
-          <button class="btn-sys btn-outline btn-xs" onclick="openEmailSettings()" title="Email settings"><i class="fa-solid fa-gear"></i></button>
+          <button class="btn-sys btn-outline" onclick="sendDailyEmailReport()"><i class="fa-solid fa-envelope"></i> Morning Briefing</button>
           <button class="btn-sys btn-outline" onclick="exportMyTasksExcel()"><i class="fa-solid fa-file-excel"></i> Export</button>
         </div>
       </div>
 
-      <!-- 3 summary boxes -->
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px">
         <div style="background:var(--bg-card);border:1px solid var(--border);border-top:3px solid var(--danger);border-radius:var(--radius-lg);padding:16px">
           <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:.06em">🔴 Overdue</div>
@@ -406,163 +399,18 @@
         </div>
       </div>
 
-      <!-- Hidden -->
       <span id="mt-kpi-total" style="display:none"></span>
       <span id="mt-kpi-inprog" style="display:none"></span>
       <span id="mt-kpi-week" style="display:none"></span>
 
-      <!-- Overdue alert -->
       <div id="mt-overdue-alert" style="display:none;background:rgba(224,60,49,.08);border:1px solid rgba(224,60,49,.3);border-radius:var(--radius);padding:12px 16px;margin-bottom:16px;align-items:center;gap:12px">
         <i class="fa-solid fa-circle-exclamation" style="color:var(--danger);font-size:18px;flex-shrink:0"></i>
-        <div style="font-size:13px">You have <strong id="mt-overdue-n" style="color:var(--danger)">0</strong> overdue tasks. Please update your progress or inform Admin.</div>
+        <div style="font-size:13px">You have <strong id="mt-overdue-n" style="color:var(--danger)">0</strong> overdue tasks. Please update or inform Admin.</div>
       </div>
 
       <div id="mt-groups"></div>
     </div><!-- /mytasks -->
 
-
-      <div class="module-header">
-        <div>
-          <div class="module-title"><i class="fa-solid fa-list-check" style="color:var(--accent)"></i> Task Board</div>
-          <div class="module-subtitle">All open tasks across the HSE team — updated live from every module</div>
-        </div>
-        <div class="module-actions">
-          <button class="btn-sys btn-outline" onclick="exportAllTasksExcel()"><i class="fa-solid fa-file-excel"></i> Export</button>
-          <button class="btn-sys btn-outline" onclick="atFilter={module:'',status:'',pic:'',search:''};document.getElementById('at-search').value='';document.getElementById('at-f-module').value='';document.getElementById('at-f-status').value='';document.getElementById('at-f-pic').value='';renderAllTasks()"><i class="fa-solid fa-xmark"></i> Clear</button>
-        </div>
-      </div>
-
-      <!-- 4 simple summary boxes -->
-      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px">
-
-        <div style="background:var(--bg-card);border:1px solid var(--border);border-top:3px solid var(--danger);border-radius:var(--radius-lg);padding:16px;cursor:pointer;transition:all .2s"
-             onclick="atFilter.status='Overdue';document.getElementById('at-f-status').value='Overdue';renderAllTasks()">
-          <div style="font-size:11px;color:var(--text-muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em">Overdue</div>
-          <div style="font-family:var(--font-head);font-size:36px;font-weight:800;color:var(--danger);line-height:1" id="at-kpi-overdue">—</div>
-          <div style="font-size:11px;color:var(--text-muted);margin-top:4px">Need attention now</div>
-        </div>
-
-        <div style="background:var(--bg-card);border:1px solid var(--border);border-top:3px solid var(--accent);border-radius:var(--radius-lg);padding:16px;cursor:pointer;transition:all .2s"
-             onclick="atFilter.status='Open';document.getElementById('at-f-status').value='Open';renderAllTasks()">
-          <div style="font-size:11px;color:var(--text-muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em">Not Started</div>
-          <div style="font-family:var(--font-head);font-size:36px;font-weight:800;color:var(--accent);line-height:1" id="at-kpi-open">—</div>
-          <div style="font-size:11px;color:var(--text-muted);margin-top:4px">Waiting to begin</div>
-        </div>
-
-        <div style="background:var(--bg-card);border:1px solid var(--border);border-top:3px solid var(--warning);border-radius:var(--radius-lg);padding:16px;cursor:pointer;transition:all .2s"
-             onclick="atFilter.status='In Progress';document.getElementById('at-f-status').value='In Progress';renderAllTasks()">
-          <div style="font-size:11px;color:var(--text-muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em">In Progress</div>
-          <div style="font-family:var(--font-head);font-size:36px;font-weight:800;color:var(--warning);line-height:1" id="at-kpi-inprog">—</div>
-          <div style="font-size:11px;color:var(--text-muted);margin-top:4px">Being worked on</div>
-        </div>
-
-        <div style="background:var(--bg-card);border:1px solid var(--border);border-top:3px solid var(--success);border-radius:var(--radius-lg);padding:16px;cursor:pointer;transition:all .2s"
-             onclick="atFilter.status='Closed';document.getElementById('at-f-status').value='Closed';renderAllTasks()">
-          <div style="font-size:11px;color:var(--text-muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em">Done</div>
-          <div style="font-family:var(--font-head);font-size:36px;font-weight:800;color:var(--success);line-height:1" id="at-kpi-closed">—</div>
-          <div style="font-size:11px;color:var(--text-muted);margin-top:4px">Completed</div>
-        </div>
-      </div>
-
-      <!-- Hidden KPI elements (still needed by JS) -->
-      <span id="at-kpi-total" style="display:none"></span>
-      <span id="at-kpi-pending" style="display:none"></span>
-      <span id="at-kpi-critical" style="display:none"></span>
-      <span id="at-kpi-week" style="display:none"></span>
-
-      <!-- Overdue banner -->
-      <div id="at-overdue-alert" style="display:none;background:rgba(224,60,49,.08);border:1px solid rgba(224,60,49,.3);border-radius:var(--radius);padding:12px 16px;margin-bottom:14px;align-items:center;gap:12px">
-        <i class="fa-solid fa-circle-exclamation" style="color:var(--danger);font-size:18px;flex-shrink:0"></i>
-        <div style="flex:1;font-size:13px"><strong id="at-overdue-n" style="color:var(--danger)">0</strong> tasks are past their due date. Please update or close them.</div>
-        <button class="btn-sys btn-danger-outline btn-sm" onclick="atFilter.status='Overdue';document.getElementById('at-f-status').value='Overdue';renderAllTasks()">Show overdue only</button>
-      </div>
-
-      <!-- Simple filters -->
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:center">
-        <input type="text" id="at-search" placeholder="🔍  Search by task, person, keyword…"
-               oninput="atFilter.search=this.value;renderAllTasks()"
-               style="flex:1;min-width:200px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);color:var(--text-primary);font-family:var(--font-body);font-size:13px;padding:8px 12px;outline:none"/>
-
-        <select id="at-f-status" onchange="atFilter.status=this.value;renderAllTasks()"
-                style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);color:var(--text-primary);font-size:12.5px;padding:8px 12px;outline:none">
-          <option value="">All Status</option>
-          <option>Overdue</option>
-          <option>Open</option>
-          <option>In Progress</option>
-          <option>Pending Verification</option>
-          <option>Closed</option>
-        </select>
-
-        <select id="at-f-module" onchange="atFilter.module=this.value;renderAllTasks()"
-                style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);color:var(--text-primary);font-size:12.5px;padding:8px 12px;outline:none">
-          <option value="">All Areas</option>
-          <option value="Issue">Safety Issues</option>
-          <option value="CAPA">CAPA</option>
-          <option value="SHC">SHC</option>
-          <option value="Compliance">Compliance</option>
-          <option value="Training">Training</option>
-          <option value="CF">CF Register</option>
-        </select>
-
-        <select id="at-f-pic" onchange="atFilter.pic=this.value;renderAllTasks()"
-                style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);color:var(--text-primary);font-size:12.5px;padding:8px 12px;outline:none">
-          <option value="">All People</option>
-        </select>
-
-        <span style="font-size:12px;color:var(--text-muted)" id="at-rcnt"></span>
-      </div>
-
-      <!-- Task list — clean card-style rows -->
-      <div id="at-task-list"></div>
-
-    </div><!-- /alltasks -->
-
-    <!-- ─────── MY TASKS ─────── -->
-    <div id="page-mytasks" class="page-view">
-      <div class="module-header">
-        <div>
-          <div class="module-title"><i class="fa-solid fa-user-check" style="color:var(--accent2)"></i> My Tasks</div>
-          <div class="module-subtitle" id="mytasks-subtitle">Your personal task list — everything assigned to you</div>
-        </div>
-        <div class="module-actions">
-          <button class="btn-sys btn-outline" onclick="exportMyTasksExcel()"><i class="fa-solid fa-file-excel"></i> Export</button>
-        </div>
-      </div>
-
-      <!-- 3 simple summary boxes -->
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px">
-        <div style="background:var(--bg-card);border:1px solid var(--border);border-top:3px solid var(--danger);border-radius:var(--radius-lg);padding:16px">
-          <div style="font-size:11px;color:var(--text-muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em">Overdue</div>
-          <div style="font-family:var(--font-head);font-size:36px;font-weight:800;color:var(--danger);line-height:1" id="mt-kpi-overdue">—</div>
-          <div style="font-size:11px;color:var(--text-muted);margin-top:4px">Past due date</div>
-        </div>
-        <div style="background:var(--bg-card);border:1px solid var(--border);border-top:3px solid var(--warning);border-radius:var(--radius-lg);padding:16px">
-          <div style="font-size:11px;color:var(--text-muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em">Still Open</div>
-          <div style="font-family:var(--font-head);font-size:36px;font-weight:800;color:var(--warning);line-height:1" id="mt-kpi-open">—</div>
-          <div style="font-size:11px;color:var(--text-muted);margin-top:4px">To do</div>
-        </div>
-        <div style="background:var(--bg-card);border:1px solid var(--border);border-top:3px solid var(--success);border-radius:var(--radius-lg);padding:16px">
-          <div style="font-size:11px;color:var(--text-muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em">Done</div>
-          <div style="font-family:var(--font-head);font-size:36px;font-weight:800;color:var(--success);line-height:1" id="mt-kpi-closed">—</div>
-          <div style="font-size:11px;color:var(--text-muted);margin-top:4px">Completed</div>
-        </div>
-      </div>
-
-      <!-- Hidden elements still needed by JS -->
-      <span id="mt-kpi-total" style="display:none"></span>
-      <span id="mt-kpi-inprog" style="display:none"></span>
-      <span id="mt-kpi-week" style="display:none"></span>
-
-      <!-- Overdue alert -->
-      <div id="mt-overdue-alert" style="display:none;background:rgba(224,60,49,.08);border:1px solid rgba(224,60,49,.3);border-radius:var(--radius);padding:12px 16px;margin-bottom:16px;align-items:center;gap:12px">
-        <i class="fa-solid fa-circle-exclamation" style="color:var(--danger);font-size:18px;flex-shrink:0"></i>
-        <div style="font-size:13px">You have <strong id="mt-overdue-n" style="color:var(--danger)">0</strong> overdue tasks. Please update or close them.</div>
-      </div>
-
-      <!-- My task cards grouped by area -->
-      <div id="mt-groups"></div>
-
-    </div><!-- /mytasks -->
 
 
 
@@ -2000,10 +1848,7 @@
           <span style="font-size:12px;font-weight:600;min-width:180px;color:var(--text-primary)">Roland Riset (OSH Coord)</span>
           <input id="ej-email-Roland Riset" class="form-control-sys" type="email" placeholder="roland.riset@jetamawater.com.my" style="flex:1"/>
         </div>
-        <div style="display:flex;align-items:center;gap:10px">
-          <span style="font-size:12px;font-weight:600;min-width:160px;color:var(--text-primary)">Roland Riset</span>
-          <input id="ej-email-Roland Riset" class="form-control-sys" type="email" placeholder="roland.riset@jetamawater.com.my" style="flex:1"/>
-        </div>
+        
         <div style="display:flex;align-items:center;gap:10px">
           <span style="font-size:12px;font-weight:600;min-width:180px;color:var(--text-primary)">Hellena Lina (Admin)</span>
           <input id="ej-email-Hellena Lina" class="form-control-sys" type="email" placeholder="hellena.lina@jetamawater.com.my" style="flex:1"/>
@@ -2191,15 +2036,25 @@
   const user = requireAuth();
   if (!user) return;
 
-  // Seed data
+  // Show loading state while cloud syncs
+  const mainContent = document.getElementById('main-content');
+  if (mainContent) mainContent.style.opacity = '0';
+
+  // Seed data first
   await seedData();
 
-  // Pull latest data from cloud (works for all users automatically)
+  // Pull latest data from cloud BEFORE rendering anything
   await cloudSync.pullAll();
 
-  // Auto-flag overdue records on every page load
+  // Auto-flag overdue
   autoFlagModuleOverdue();
   if (typeof ttAutoFlagOverdue === 'function') ttAutoFlagOverdue();
+
+  // Now render — data is ready
+  if (mainContent) {
+    mainContent.style.transition = 'opacity 0.2s';
+    mainContent.style.opacity = '1';
+  }
 
   // Apply theme preference
   if (localStorage.getItem('hse_lightmode') === '1') {
